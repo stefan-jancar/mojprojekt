@@ -1,5 +1,5 @@
 
-from django.http import HttpResponse
+from django.shortcuts import render
 
 def home(request):
-    return HttpResponse("<h1>Vitaj na mojej stránke!</h1>")
+    return render(request, 'home.html')

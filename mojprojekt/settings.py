@@ -2,15 +2,12 @@
 import os
 from pathlib import Path
 
-# BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'super-secret-key')  # nastav v Render ako Environment Variable
-DEBUG = False  # Pre produkciu musí byť False
-ALLOWED_HOSTS = ['.onrender.com']  # pridaj aj vlastnú doménu, ak ju budeš používať
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'super-secret-key')
+DEBUG = False
+ALLOWED_HOSTS = ['.onrender.com']
 
-# INSTALLED_APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -18,10 +15,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # tvoje aplikácie
 ]
 
-# MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -37,7 +32,7 @@ ROOT_URLCONF = 'mojprojekt.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -52,7 +47,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mojprojekt.wsgi.application'
 
-# DATABASE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -60,23 +54,12 @@ DATABASES = {
     }
 }
 
-# PASSWORD VALIDATION
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-# LANGUAGE & TIMEZONE
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# STATIC FILES
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # dôležité pre Render
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# DEFAULT AUTO FIELD
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
