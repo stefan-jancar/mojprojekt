@@ -7,83 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moja Moderná Stránka</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #6a0dad, #f1c40f);
-            color: #fff;
-        }
-
-        header {
-            background-color: rgba(106, 13, 173, 0.9);
-            padding: 20px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        nav {
-            display: flex;
-            justify-content: center;
-            background-color: #f1c40f;
-            padding: 10px;
-        }
-
-        nav a {
-            color: #6a0dad;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .hero img {
-            max-width: 300px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero h1 {
-            font-size: 48px;
-            margin: 20px 0;
-        }
-
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            background-color: #6a0dad;
-            color: #fff;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #4b0082;
-        }
-
-        footer {
-            background-color: rgba(106, 13, 173, 0.9);
-            text-align: center;
-            padding: 15px;
-            font-size: 14px;
-        }
-    </style>
 </head>
 
 <body>
@@ -91,14 +14,13 @@
         Moja Moderná Stránka
     </header>
     <nav>
-        <a href="#">Domov</a>
-        <a href="#">Blog</a>
+        <a href="/">Domov</a>
+        <a href="/blog/">Blog</a>
         <a href="#">Kontakt</a>
     </nav>
     <section class="hero">
-        <img src="https://via.placeholder.com/300x200.png?text=Obrazok" alt="Obrázok">
         <h1>Vitaj na mojej stránke!</h1>
-        <p>Toto je moderná úvodná stránka s fialovo-žltým dizajnom.</p>
+        <p>Moderný dizajn, fialovo-žlté farby, responzívny layout.</p>
         <button class="btn">Začať</button>
     </section>
     <footer>
