@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-container">
+    <h1>Prehľad financií</h1>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Príjmy</h3>
+            <p id="incomeValue">{{ total_income }} €</p>
+        </div>
+        <div class="stat-card">
+            <h3>Výdavky</h3>
+            <p id="expenseValue">{{ total_expense }} €</p>
+        </div>
+        <div class="stat-card">
+            <h3>Zostatok</h3>
+            <p>{{ balance }} €</p>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <h2>Graf príjmov a výdavkov</h2>
+        <canvas id="financeChart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/chart.js' %}"></script>
+{% endblock %}

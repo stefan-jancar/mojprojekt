@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="sk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance App</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body class="{{ request.user.userprofile.theme|default:'light' }}">
+    <div class="sidebar">
+        <h2>Finance App</h2>
+        <nav>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'add_income' %}">Pridať príjem</a>
+            <a href="{% url 'add_expense' %}">Pridať výdavok</a>
+            <a href="{% url 'change_theme' %}">Zmena témy</a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Odhlásiť sa</button>
+            </form>
+
+        </nav>
+    </div>
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

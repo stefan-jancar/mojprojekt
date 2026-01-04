@@ -1,1 +1,1 @@
-web: gunicorn mojprojekt.wsgi
+web: gunicorn finance_app.wsgi
