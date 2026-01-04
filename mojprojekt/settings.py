@@ -62,9 +62,11 @@ USE_TZ = True
 
 
 
+
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # priečinok pre tvoje vlastné CSS
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # priečinok, kam sa skopírujú všetky statické súbory
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 
 
