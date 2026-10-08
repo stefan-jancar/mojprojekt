@@ -20,7 +20,7 @@ const state = {
   overview: store.get('cache:overview', null),
   items: {},
   chat: store.get('chat', []),
-  settings: store.get('cache:settings', { horoscope: true, zodiac: 'ryby' }),
+  settings: store.get('cache:settings', { horoscope: true, zodiac: 'ryby', horo_source: 'auto' }),
   horoscope: null,
   filter: {},
   query: '',
@@ -307,15 +307,15 @@ async function loadHoroscope() {
     state.settings = await api('/settings');
     store.set('cache:settings', state.settings);
   } catch { /* použijú sa uložené nastavenia */ }
-  const { horoscope: on, zodiac } = state.settings;
+  const { horoscope: on, zodiac, horo_source: source = 'auto' } = state.settings;
   if (!on) { state.horoscope = null; paintHoroscope(); return; }
-  const key = `horo3:${todayKey()}:${zodiac}`;
+  const key = `horo4:${todayKey()}:${zodiac}:${source}`;
   const cached = store.get(key, null);
   if (cached) { state.horoscope = cached; paintHoroscope(); return; }
   state.horoscope = { loading: true };
   paintHoroscope();
   try {
-    state.horoscope = await api('/horoscope?sign=' + encodeURIComponent(zodiac));
+    state.horoscope = await api(`/horoscope?sign=${encodeURIComponent(zodiac)}&source=${encodeURIComponent(source)}`);
     store.set(key, state.horoscope);
   } catch (e) {
     state.horoscope = { error: e.message };
@@ -343,7 +343,7 @@ function horoHTML() {
       </div>
       <div class="horo-foot">
         <button class="chip" id="horo-more">Čítať celý</button>
-        <a href="${esc(hs.source)}" target="_blank" rel="noopener">zdroj: noviny.sk</a>
+        <a href="${esc(hs.source)}" target="_blank" rel="noopener">zdroj: ${esc(hs.source_name || 'web')}</a>
       </div>
     </div>`;
 }
@@ -356,7 +356,7 @@ async function showHoroDiag() {
   sheet.querySelector('[data-close]').onclick = closeSheet;
   const pre = sheet.querySelector('#diag');
   try {
-    const d = await api('/horoscope?debug=1&sign=' + encodeURIComponent(state.settings.zodiac || 'ryby'));
+    const d = await api('/horoscope?debug=1&source=auto&sign=' + encodeURIComponent(state.settings.zodiac || 'ryby'));
     pre.textContent = JSON.stringify(d, null, 2);
   } catch (e) { pre.textContent = 'Chyba: ' + e.message; }
   sheet.querySelector('#diag-copy').onclick = async () => {
@@ -774,6 +774,10 @@ async function openFile(f) {
 /* =========================================================
    Asistent
    ========================================================= */
+const HORO_SOURCES = [
+  ['auto', 'Automaticky'], ['sita', 'SITA.sk'], ['sibyla', 'Sibyla – Zoznam.sk'], ['moneo', 'Moneo.sk'], ['vsevedko', 'Vševedko.sk'],
+];
+
 const ZODIAC = [
   ['baran', 'Baran', '♈'], ['byk', 'Býk', '♉'], ['blizenci', 'Blíženci', '♊'], ['rak', 'Rak', '♋'],
   ['lev', 'Lev', '♌'], ['panna', 'Panna', '♍'], ['vahy', 'Váhy', '♎'], ['skorpion', 'Škorpión', '♏'],
@@ -878,13 +882,16 @@ function renderSettings() {
       <div class="field" style="margin:0"><select id="horo-sign" class="input">
         ${ZODIAC.map(([k, n, sym]) => `<option value="${k}" ${k === state.settings.zodiac ? 'selected' : ''}>${sym}\uFE0E ${n}</option>`).join('')}
       </select></div>
+      <div class="field" style="margin:0"><select id="horo-src" class="input">
+        ${HORO_SOURCES.map(([k, n]) => `<option value="${k}" ${k === (state.settings.horo_source || 'auto') ? 'selected' : ''}>Zdroj: ${n}</option>`).join('')}
+      </select></div>
       <button class="btn ghost block" id="horo-diag">Diagnostika horoskopu</button>
     </div>
     <div class="section-title">Systém</div>
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.1</span></div>
+      <div class="r"><span>Verzia</span><span>1.2</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
@@ -907,6 +914,7 @@ function renderSettings() {
   };
   document.getElementById('horo-on').onchange = (e) => saveHoro({ horoscope: e.target.checked });
   document.getElementById('horo-diag').onclick = showHoroDiag;
+  document.getElementById('horo-src').onchange = (e) => saveHoro({ horo_source: e.target.value });
   document.getElementById('horo-sign').onchange = (e) => saveHoro({ zodiac: e.target.value });
   document.getElementById('theme').onclick = () => {
     const t = theme === 'light' ? 'dark' : 'light';

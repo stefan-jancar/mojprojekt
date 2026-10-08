@@ -1,8 +1,8 @@
-"""Denný horoskop z noviny.sk.
+"""Denný horoskop zo slovenských webov.
 
-noviny.sk nemá API ani RSS, preto sa text vyberá priamo z HTML stránky znamenia.
-Ak noviny.sk zmenia vzhľad stránky, treba upraviť funkciu _extract().
-Horoskop sa drží v pamäti do konca dňa, aby sme ich zbytočne nezaťažovali.
+Weby nemajú API ani RSS, preto sa text vyberá priamo z HTML stránky znamenia.
+Zdrojov je viac – v režime „auto“ sa použije prvý, z ktorého sa text podarí načítať.
+Horoskop sa drží v pamäti do konca dňa, aby sme weby zbytočne nezaťažovali.
 """
 import json
 import re
@@ -12,23 +12,30 @@ from zoneinfo import ZoneInfo
 import httpx
 from bs4 import BeautifulSoup
 
-BASE = "https://www.noviny.sk"
 TZ = ZoneInfo("Europe/Bratislava")
 
-# kľúč: (názov, symbol, overená cesta na noviny.sk alebo None → dohľadá sa z prehľadu)
+# kľúč: (názov, symbol, poradie vo zverokruhu)
 SIGNS = {
-    "baran": ("Baran", "♈", None),
-    "byk": ("Býk", "♉", "10-byk"),
-    "blizenci": ("Blíženci", "♊", None),
-    "rak": ("Rak", "♋", "6-rak"),
-    "lev": ("Lev", "♌", "8-lev"),
-    "panna": ("Panna", "♍", "7-panna"),
-    "vahy": ("Váhy", "♎", "2-vahy"),
-    "skorpion": ("Škorpión", "♏", "4-skorpion"),
-    "strelec": ("Strelec", "♐", None),
-    "kozorozec": ("Kozorožec", "♑", "9-kozorozec"),
-    "vodnar": ("Vodnár", "♒", "1-vodnar"),
-    "ryby": ("Ryby", "♓", "5-ryby"),
+    "baran": ("Baran", "♈", 1),
+    "byk": ("Býk", "♉", 2),
+    "blizenci": ("Blíženci", "♊", 3),
+    "rak": ("Rak", "♋", 4),
+    "lev": ("Lev", "♌", 5),
+    "panna": ("Panna", "♍", 6),
+    "vahy": ("Váhy", "♎", 7),
+    "skorpion": ("Škorpión", "♏", 8),
+    "strelec": ("Strelec", "♐", 9),
+    "kozorozec": ("Kozorožec", "♑", 10),
+    "vodnar": ("Vodnár", "♒", 11),
+    "ryby": ("Ryby", "♓", 12),
+}
+
+# id: (názov, funkcia sign -> URL). Overené sú adresy pre Ryby, ostatné majú rovnaký tvar.
+SOURCES = {
+    "sita": ("SITA.sk", lambda s: f"https://sita.sk/horoskop/dnesny-horoskop/{s}/"),
+    "sibyla": ("Sibyla – Zoznam.sk", lambda s: f"https://sibyla.zoznam.sk/horoskop/horoskop-denny/{SIGNS[s][2]}/{s}.php"),
+    "moneo": ("Moneo.sk", lambda s: f"https://www.moneo.sk/horoskopy/denny-horoskop/{s}/"),
+    "vsevedko": ("Vševedko.sk", lambda s: f"https://horoskop.vsevedko.sk/{s}/"),
 }
 
 # texty, ktoré nie sú samotný horoskop (reklamy, cookies, všeobecný úvod …)
@@ -41,7 +48,6 @@ _SKIP = re.compile(
 _HEADINGS = re.compile(r"^(láska|vzťahy|práca|kariéra|zdravie|peniaze|financie|rodina|tip dňa)\b", re.I)
 
 _cache: dict = {}
-_paths: dict = {}
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129 Mobile Safari/537.36",
@@ -54,26 +60,14 @@ class HoroscopeError(Exception):
 
 
 def _get(url: str) -> str:
+    host = url.split("/")[2]
     try:
-        r = httpx.get(url, headers=HEADERS, timeout=12, follow_redirects=True)
+        r = httpx.get(url, headers=HEADERS, timeout=10, follow_redirects=True)
     except httpx.HTTPError as e:
-        raise HoroscopeError(f"noviny.sk sú nedostupné: {e}") from e
+        raise HoroscopeError(f"{host} je nedostupný: {e}") from e
     if r.status_code != 200:
-        raise HoroscopeError(f"noviny.sk vrátili chybu {r.status_code}")
+        raise HoroscopeError(f"{host} vrátil chybu {r.status_code}")
     return r.text
-
-
-def _path_for(sign: str) -> str:
-    known = SIGNS[sign][2]
-    if known:
-        return known
-    if sign not in _paths:
-        html = _get(f"{BASE}/horoskopy")
-        for m in re.finditer(r"/horoskopy/(?:denny/)?(\d+-[a-z]+)", html):
-            _paths[m.group(1).split("-", 1)[1]] = m.group(1)
-    if sign not in _paths:
-        raise HoroscopeError(f"Na noviny.sk sa nenašla stránka pre znamenie {SIGNS[sign][0]}")
-    return _paths[sign]
 
 
 def _clean(text: str) -> str:
@@ -89,19 +83,56 @@ def _to_section(text: str, title):
     m = re.match(r"^([A-ZÁČĎÉÍĽĹŇÓÔŔŠŤÚÝŽ][a-záäčďéíľĺňóôŕšťúýž ]+?)\s*:\s*(.+)$", text)
     if m and _HEADINGS.match(m.group(1)):
         return {"title": m.group(1), "text": m.group(2)}
+    # „Láska Úprimnosť…“ – nadpis bez dvojbodky (napr. dva spany vedľa seba)
+    m = re.match(r"^(Láska|Vzťahy|Práca|Kariéra|Zdravie|Peniaze|Financie|Rodina|Tip dňa)\s+([A-ZÁČĎÉÍĽĹŇÓÔŔŠŤÚÝŽ].+)$", text)
+    if m:
+        return {"title": m.group(1), "text": m.group(2)}
     return {"title": title, "text": text}
 
 
+_SIGN_WORDS = re.compile(r"\b(baran|býk|blíženci|rak|lev|panna|váhy|škorpión|strelec|kozorožec|vodnár|ryby)\b", re.I)
+
+
 def _good(text: str) -> bool:
-    return len(text) >= 50 and not _SKIP.search(text) and bool(_SLOVAK.search(text))
+    return (
+        len(text) >= 50
+        and not _SKIP.search(text)
+        and bool(_SLOVAK.search(text))
+        and len(_SIGN_WORDS.findall(text)) < 4  # menu so zoznamom znamení
+    )
+
+
+_HEAD_TAGS = ["h2", "h3", "h4", "h5", "strong", "b"]
 
 
 def _from_html(root, tags):
+    return _collect(root.find_all(_HEAD_TAGS + tags), tags)
+
+
+def _from_anchor(body, sign_name: str, tags):
+    """Nájde nadpis s názvom znamenia a zoberie text, ktorý nasleduje hneď za ním."""
+    for h in body.find_all(["h1", "h2", "h3"]):
+        if sign_name.lower() not in _clean(h.get_text(" ")).lower():
+            continue
+        sections = _collect(h.find_all_next(["h1"] + _HEAD_TAGS + tags, limit=300), tags, sign_name)
+        if sections:
+            return sections
+    return []
+
+
+def _collect(elements, tags, stop_sign=None):
     """Prejde prvky v poradí, nadpisy (Láska, Práca…) priradí k nasledujúcemu textu."""
     sections, seen, title = [], set(), None
-    for el in root.find_all(["h2", "h3", "h4", "h5", "strong", "b"] + tags):
+    for el in elements:
         text = _clean(el.get_text(" "))
         if not text:
+            continue
+        # pri hľadaní od nadpisu skonči na ďalšom veľkom nadpise (iné znamenie, iný článok)
+        if stop_sign and el.name in ("h1", "h2") and not _HEADINGS.match(text) and (
+            sections or stop_sign.lower() not in text.lower()
+        ):
+            break
+        if el.name == "h1":
             continue
         if el.name in ("h2", "h3", "h4", "h5", "strong", "b") and len(text) < 40:
             title = text.rstrip(":") if _HEADINGS.match(text) else None
@@ -158,42 +189,23 @@ def _from_scripts(scripts):
     return out[:6]
 
 
-def _extract(html: str):
+def _extract(html: str, sign_name: str):
     """Vráti (časti horoskopu, použitá metóda, diagnostika)."""
     soup = BeautifulSoup(html, "html.parser")
     scripts = [s.string or s.get_text() for s in soup.find_all("script")]
-    script_src = [s.get("src") for s in soup.find_all("script") if s.get("src")]
-    hints = []
-    for raw in scripts:
-        for m in re.finditer(r"horosk|ajax|fetch\(|/api/|XMLHttpRequest|axios", raw or "", re.I):
-            snip = _clean(raw[max(0, m.start() - 150): m.end() + 250])
-            if not any(snip[:80] in h for h in hints):
-                hints.append(snip)
-            if len(hints) >= 15:
-                break
-    attrs = []
-    for el in soup.find_all(True):
-        a = {k: (" ".join(v) if isinstance(v, list) else v) for k, v in el.attrs.items()}
-        if any(re.search(r"horo|sign|znamen|zodiac", f"{k}={v}", re.I) for k, v in a.items()):
-            attrs.append(f"<{el.name} " + " ".join(f'{k}="{str(v)[:120]}"' for k, v in a.items()) + ">")
-        if len(attrs) >= 25:
-            break
-    urls = sorted(set(re.findall(r"""(?:https?://[^\s"'<>]+|/[^\s"'<>]*)(?:horosk|ajax|api)[^\s"'<>]*""", html, re.I)))[:40]
-    pos = html.lower().find("horoskop na dnes")
-    around = html[max(0, pos - 300): pos + 3000] if pos >= 0 else None
     ld = [s.string or s.get_text() for s in soup.find_all("script", type="application/ld+json")]
-    meta = soup.find("meta", attrs={"property": "og:description"}) or soup.find("meta", attrs={"name": "description"})
     page_title = _clean(soup.title.get_text()) if soup.title else ""
     for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "aside", "form", "iframe", "svg"]):
         tag.decompose()
     body = soup.body or soup
     root = soup.find("article") or soup.find("main") or body
+    blocks = ["p", "li", "div", "span", "section"]
 
     attempts = [
+        ("za-nadpisom", lambda: _from_anchor(body, sign_name, ["p", "li"])),
+        ("za-nadpisom-bloky", lambda: _from_anchor(body, sign_name, blocks)),
         ("odseky", lambda: _from_html(root, ["p"])),
-        ("odseky-celá-stránka", lambda: _from_html(body, ["p", "li"])),
-        ("bloky", lambda: _from_html(root, ["p", "li", "div", "span", "section"])),
-        ("bloky-celá-stránka", lambda: _from_html(body, ["p", "li", "div", "span", "section"])),
+        ("bloky", lambda: _from_html(root, blocks)),
         ("json-ld", lambda: _from_scripts(ld)),
         ("skripty", lambda: _from_scripts(scripts)),
     ]
@@ -208,39 +220,56 @@ def _extract(html: str):
         "title": page_title,
         "html_length": len(html),
         "method": method,
-        "meta_description": meta.get("content") if meta else None,
-        "paragraphs": [_clean(p.get_text(" "))[:200] for p in body.find_all("p")][:30],
-        "body_text_start": _clean(body.get_text(" "))[:1500],
-        "script_texts": [x["text"][:200] for x in _from_scripts(scripts)][:10],
-        "script_src": script_src[:40],
-        "script_hints": hints,
-        "attrs": attrs,
-        "urls": urls,
-        "html_around_title": around,
+        "paragraphs": [_clean(p.get_text(" "))[:150] for p in body.find_all("p")][:12],
+        "body_text_start": _clean(body.get_text(" "))[:600],
     }
     return sections, method, diag
 
 
-def today(sign: str, debug: bool = False) -> dict:
+def _from_source(src: str, sign: str):
+    url = SOURCES[src][1](sign)
+    sections, method, diag = _extract(_get(url), SIGNS[sign][0])
+    return url, sections, diag
+
+
+def today(sign: str, source: str = "auto", debug: bool = False) -> dict:
     sign = (sign or "").lower()
     if sign not in SIGNS:
         raise ValueError("Neznáme znamenie")
+    if source != "auto" and source not in SOURCES:
+        raise ValueError("Neznámy zdroj horoskopu")
+    order = list(SOURCES) if source == "auto" else [source]
+
+    if debug:  # diagnostika: výsledok zo všetkých zdrojov
+        out = {}
+        for src in SOURCES:
+            try:
+                url, sections, diag = _from_source(src, sign)
+                out[src] = {"url": url, "sections": [{**x, "text": x["text"][:300]} for x in sections[:3]], **diag}
+            except HoroscopeError as e:
+                out[src] = {"error": str(e)}
+        return out
+
     day = datetime.now(TZ).date().isoformat()
-    key = (sign, day)
-    if key in _cache and not debug:
+    key = (sign, source, day)
+    if key in _cache:
         return _cache[key]
 
-    url = f"{BASE}/horoskopy/denny/{_path_for(sign)}"
-    html = _get(url)
-    sections, method, diag = _extract(html)
-    name, symbol, _ = SIGNS[sign]
-    if debug:
-        return {"url": url, "sections": sections, **diag}
-    if not sections:
-        raise HoroscopeError("Na stránke sa nenašiel text horoskopu (noviny.sk asi zmenili vzhľad).")
-
-    result = {"sign": sign, "name": name, "symbol": symbol, "date": day, "sections": sections, "source": url}
-    if len(_cache) > 50:
-        _cache.clear()
-    _cache[key] = result
-    return result
+    errors = []
+    for src in order:
+        try:
+            url, sections, _ = _from_source(src, sign)
+        except HoroscopeError as e:
+            errors.append(str(e))
+            continue
+        if not sections:
+            errors.append(f"{SOURCES[src][0]}: text sa nenašiel")
+            continue
+        name, symbol, _ = SIGNS[sign]
+        result = {"sign": sign, "name": name, "symbol": symbol, "date": day, "sections": sections,
+                  "source": url, "source_name": SOURCES[src][0]}
+        if len(_cache) > 100:
+            _cache.clear()
+        _cache[key] = result
+        return result
+    raise HoroscopeError("Horoskop sa nepodarilo načítať – " + "; ".join(errors))
