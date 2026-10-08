@@ -4,6 +4,7 @@ noviny.sk nemá API ani RSS, preto sa text vyberá priamo z HTML stránky znamen
 Ak noviny.sk zmenia vzhľad stránky, treba upraviť funkciu _extract().
 Horoskop sa drží v pamäti do konca dňa, aby sme ich zbytočne nezaťažovali.
 """
+import json
 import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -78,36 +79,121 @@ def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _extract(html: str):
-    """Vráti zoznam častí [{"title": str|None, "text": str}] a kandidátov na ladenie."""
-    soup = BeautifulSoup(html, "html.parser")
-    for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "aside", "form", "iframe"]):
-        tag.decompose()
-    root = soup.find("article") or soup.find("main") or soup.body or soup
+_BLOCKS = {"div", "section", "article", "p", "ul", "ol", "li", "table", "h1", "h2", "h3", "h4", "h5", "h6"}
+_SLOVAK = re.compile(r"[áäčďéíľĺňóôŕšťúýž]", re.I)
 
-    sections, candidates, title = [], [], None
-    for el in root.find_all(["h2", "h3", "h4", "strong", "b", "p"]):
+
+def _to_section(text: str, title):
+    # nadpis v tvare „Láska: text…“ priamo v odseku
+    m = re.match(r"^([A-ZÁČĎÉÍĽĹŇÓÔŔŠŤÚÝŽ][a-záäčďéíľĺňóôŕšťúýž ]+?)\s*:\s*(.+)$", text)
+    if m and _HEADINGS.match(m.group(1)):
+        return {"title": m.group(1), "text": m.group(2)}
+    return {"title": title, "text": text}
+
+
+def _good(text: str) -> bool:
+    return len(text) >= 50 and not _SKIP.search(text) and bool(_SLOVAK.search(text))
+
+
+def _from_html(root, tags):
+    """Prejde prvky v poradí, nadpisy (Láska, Práca…) priradí k nasledujúcemu textu."""
+    sections, seen, title = [], set(), None
+    for el in root.find_all(["h2", "h3", "h4", "h5", "strong", "b"] + tags):
         text = _clean(el.get_text(" "))
         if not text:
             continue
-        if el.name in ("h2", "h3", "h4", "strong", "b") and len(text) < 40:
+        if el.name in ("h2", "h3", "h4", "h5", "strong", "b") and len(text) < 40:
             title = text.rstrip(":") if _HEADINGS.match(text) else None
             continue
-        if el.name != "p":
+        if el.name not in tags:
             continue
-        candidates.append(text[:200])
-        if len(text) < 50 or _SKIP.search(text):
+        if len(text) < 40 and _HEADINGS.match(text):
+            title = text.rstrip(":")
             continue
-        # nadpis v tvare „Láska: text…“ priamo v odseku
-        m = re.match(r"^([A-ZÁČĎÉÍĽĹŇÓÔŔŠŤÚÝŽ][a-záäčďéíľĺňóôŕšťúýž]+)\s*:\s*(.+)$", text)
-        if m and _HEADINGS.match(m.group(1)):
-            sections.append({"title": m.group(1), "text": m.group(2)})
-        else:
-            sections.append({"title": title, "text": text})
+        if el.name in ("div", "span", "section"):
+            # len „listové“ bloky bez ďalších blokov vo vnútri, inak by sa text opakoval
+            if el.find(lambda t: t.name in _BLOCKS) or (el.parent and el.parent.name in ("p", "li")):
+                continue
+        if not _good(text) or text in seen or any(text in x for x in seen):
+            continue
+        seen.add(text)
+        sections.append(_to_section(text, title))
         title = None
         if len(sections) >= 6:
             break
-    return sections, candidates
+    return sections
+
+
+def _walk_json(obj, keys=("articleBody", "description", "text")):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k in keys and isinstance(v, str):
+                yield v
+            else:
+                yield from _walk_json(v, keys)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _walk_json(v, keys)
+
+
+def _from_scripts(scripts):
+    """Text horoskopu môže byť aj v JSON dátach vložených do stránky (JSON-LD, Next.js, …)."""
+    out = []
+    for raw in scripts:
+        texts = []
+        try:
+            texts = list(_walk_json(json.loads(raw)))
+        except (ValueError, TypeError):
+            for m in re.finditer(r'"(?:text|content|body|description|perex|horoscope|articleBody)"\s*:\s*"((?:[^"\\]|\\.){80,})"', raw):
+                try:
+                    texts.append(json.loads('"' + m.group(1) + '"'))
+                except ValueError:
+                    pass
+        for t in texts:
+            t = _clean(BeautifulSoup(t, "html.parser").get_text(" "))
+            for part in re.split(r"(?<=[.!?])\s+(?=(?:Láska|Práca|Zdravie|Peniaze|Financie|Vzťahy|Kariéra)\s*:)", t):
+                if _good(part) and part not in [o["text"] for o in out]:
+                    out.append(_to_section(part, None))
+    return out[:6]
+
+
+def _extract(html: str):
+    """Vráti (časti horoskopu, použitá metóda, diagnostika)."""
+    soup = BeautifulSoup(html, "html.parser")
+    scripts = [s.string or s.get_text() for s in soup.find_all("script")]
+    ld = [s.string or s.get_text() for s in soup.find_all("script", type="application/ld+json")]
+    meta = soup.find("meta", attrs={"property": "og:description"}) or soup.find("meta", attrs={"name": "description"})
+    page_title = _clean(soup.title.get_text()) if soup.title else ""
+    for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "aside", "form", "iframe", "svg"]):
+        tag.decompose()
+    body = soup.body or soup
+    root = soup.find("article") or soup.find("main") or body
+
+    attempts = [
+        ("odseky", lambda: _from_html(root, ["p"])),
+        ("odseky-celá-stránka", lambda: _from_html(body, ["p", "li"])),
+        ("bloky", lambda: _from_html(root, ["p", "li", "div", "span", "section"])),
+        ("bloky-celá-stránka", lambda: _from_html(body, ["p", "li", "div", "span", "section"])),
+        ("json-ld", lambda: _from_scripts(ld)),
+        ("skripty", lambda: _from_scripts(scripts)),
+    ]
+    sections, method = [], None
+    for name, fn in attempts:
+        sections = fn()
+        if sections:
+            method = name
+            break
+
+    diag = {
+        "title": page_title,
+        "html_length": len(html),
+        "method": method,
+        "meta_description": meta.get("content") if meta else None,
+        "paragraphs": [_clean(p.get_text(" "))[:200] for p in body.find_all("p")][:30],
+        "body_text_start": _clean(body.get_text(" "))[:1500],
+        "script_texts": [x["text"][:200] for x in _from_scripts(scripts)][:10],
+    }
+    return sections, method, diag
 
 
 def today(sign: str, debug: bool = False) -> dict:
@@ -121,10 +207,10 @@ def today(sign: str, debug: bool = False) -> dict:
 
     url = f"{BASE}/horoskopy/denny/{_path_for(sign)}"
     html = _get(url)
-    sections, candidates = _extract(html)
+    sections, method, diag = _extract(html)
     name, symbol, _ = SIGNS[sign]
     if debug:
-        return {"url": url, "sections": sections, "candidates": candidates[:40]}
+        return {"url": url, "sections": sections, **diag}
     if not sections:
         raise HoroscopeError("Na stránke sa nenašiel text horoskopu (noviny.sk asi zmenili vzhľad).")
 
