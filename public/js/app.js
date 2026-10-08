@@ -20,6 +20,8 @@ const state = {
   overview: store.get('cache:overview', null),
   items: {},
   chat: store.get('chat', []),
+  settings: store.get('cache:settings', { horoscope: true, zodiac: 'ryby' }),
+  horoscope: null,
   filter: {},
   query: '',
 };
@@ -262,6 +264,7 @@ function homeHTML() {
   const ov = state.overview || {};
   return h`
     <div class="hello"><small>${esc(dateStr)}</small><h1>${greet}<span class="grad-text">.</span></h1></div>
+    <div id="horo">${horoHTML()}</div>
     ${state.status?.storage === 'missing' ? `<div class="summary-bar glass" style="border-color:var(--danger);color:var(--danger);display:block;font-size:14px">⚠️ Ukladanie nie je nastavené. Na Verceli pridaj premenné <b>GITHUB_TOKEN</b> a <b>GITHUB_DATA_REPO</b> a sprav Redeploy.</div>` : ''}
     ${stats.length ? `<div class="stats">${stats.map((s) => `
       <div class="stat glass" data-go="${esc(s.sec.id)}">
@@ -284,6 +287,7 @@ async function renderHome() {
   if (state.sections) $app.innerHTML = homeHTML();
   else $app.innerHTML = '<div class="spinner"></div>';
   bindHome();
+  loadHoroscope();
   try {
     const [secs, ov] = await Promise.all([loadSections(), api('/overview')]);
     state.overview = ov;
@@ -295,7 +299,71 @@ async function renderHome() {
     toast(e.message, true);
   }
 }
+/* ---------- horoskop ---------- */
+const todayKey = () => new Date().toLocaleDateString('sv-SE');
+
+async function loadHoroscope() {
+  try {
+    state.settings = await api('/settings');
+    store.set('cache:settings', state.settings);
+  } catch { /* použijú sa uložené nastavenia */ }
+  const { horoscope: on, zodiac } = state.settings;
+  if (!on) { state.horoscope = null; paintHoroscope(); return; }
+  const key = `horo:${todayKey()}:${zodiac}`;
+  const cached = store.get(key, null);
+  if (cached) { state.horoscope = cached; paintHoroscope(); return; }
+  state.horoscope = { loading: true };
+  paintHoroscope();
+  try {
+    state.horoscope = await api('/horoscope?sign=' + encodeURIComponent(zodiac));
+    store.set(key, state.horoscope);
+  } catch (e) {
+    state.horoscope = { error: e.message };
+  }
+  paintHoroscope();
+}
+
+function horoHTML() {
+  const hs = state.horoscope;
+  if (!state.settings?.horoscope || !hs) return '';
+  if (hs.loading) return '<div class="skeleton" style="height:120px;margin-bottom:22px"></div>';
+  if (hs.error) {
+    return `<div class="horo glass"><div class="horo-head"><div class="horo-sym">✦</div><div><b>Horoskop</b><small>${esc(hs.error)}</small></div></div></div>`;
+  }
+  const date = new Date(hs.date + 'T00:00:00').toLocaleDateString('sk-SK', { day: 'numeric', month: 'long' });
+  return h`
+    <div class="horo glass" id="horo-card">
+      <div class="horo-head">
+        <div class="horo-sym">${esc(hs.symbol)}\uFE0E</div>
+        <div><b>${esc(hs.name)}</b><small>Horoskop na ${esc(date)}</small></div>
+      </div>
+      <div class="horo-body">
+        ${hs.sections.map((p) => `<p>${p.title ? `<b>${esc(p.title)}:</b> ` : ''}${esc(p.text)}</p>`).join('')}
+      </div>
+      <div class="horo-foot">
+        <button class="chip" id="horo-more">Čítať celý</button>
+        <a href="${esc(hs.source)}" target="_blank" rel="noopener">zdroj: noviny.sk</a>
+      </div>
+    </div>`;
+}
+
+function paintHoroscope() {
+  const el = document.getElementById('horo');
+  if (!el) return;
+  el.innerHTML = horoHTML();
+  const card = document.getElementById('horo-card');
+  const more = document.getElementById('horo-more');
+  if (!card || !more) return;
+  const body = card.querySelector('.horo-body');
+  if (body.scrollHeight <= body.clientHeight + 4) more.hidden = true;
+  more.onclick = () => {
+    card.classList.toggle('open');
+    more.textContent = card.classList.contains('open') ? 'Skryť' : 'Čítať celý';
+  };
+}
+
 function bindHome() {
+  paintHoroscope();
   $app.querySelectorAll('[data-go]').forEach((el) => { el.onclick = () => { location.hash = '#/s/' + encodeURIComponent(el.dataset.go); }; });
 }
 
@@ -687,6 +755,12 @@ async function openFile(f) {
 /* =========================================================
    Asistent
    ========================================================= */
+const ZODIAC = [
+  ['baran', 'Baran', '♈'], ['byk', 'Býk', '♉'], ['blizenci', 'Blíženci', '♊'], ['rak', 'Rak', '♋'],
+  ['lev', 'Lev', '♌'], ['panna', 'Panna', '♍'], ['vahy', 'Váhy', '♎'], ['skorpion', 'Škorpión', '♏'],
+  ['strelec', 'Strelec', '♐'], ['kozorozec', 'Kozorožec', '♑'], ['vodnar', 'Vodnár', '♒'], ['ryby', 'Ryby', '♓'],
+];
+
 const SUGGESTIONS = [
   'Čo treba zajtra do školy?',
   'Ktoré účty ešte nie sú zaplatené?',
@@ -778,6 +852,14 @@ function renderSettings() {
         <div class="nm">${theme === 'light' ? 'Svetlý režim' : 'Tmavý režim'}<small>Ťukni pre zmenu</small></div>
       </button>
     </div>
+    <div class="section-title">Horoskop</div>
+    <div class="set-list">
+      <label class="switch glass" style="margin:0"><span>Zobrazovať denný horoskop</span>
+        <input type="checkbox" id="horo-on" ${state.settings.horoscope ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>
+      <div class="field" style="margin:0"><select id="horo-sign" class="input">
+        ${ZODIAC.map(([k, n, sym]) => `<option value="${k}" ${k === state.settings.zodiac ? 'selected' : ''}>${sym}\uFE0E ${n}</option>`).join('')}
+      </select></div>
+    </div>
     <div class="section-title">Systém</div>
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
@@ -796,6 +878,15 @@ function renderSettings() {
   });
   $app.querySelectorAll('[data-ed]').forEach((b) => { b.onclick = () => editSection(Number(b.dataset.ed)); });
   document.getElementById('addsec').onclick = () => editSection(-1);
+  const saveHoro = async (changes) => {
+    try {
+      state.settings = await api('/settings', { method: 'PATCH', json: changes });
+      store.set('cache:settings', state.settings);
+      toast('Uložené');
+    } catch (e) { toast(e.message, true); }
+  };
+  document.getElementById('horo-on').onchange = (e) => saveHoro({ horoscope: e.target.checked });
+  document.getElementById('horo-sign').onchange = (e) => saveHoro({ zodiac: e.target.value });
   document.getElementById('theme').onclick = () => {
     const t = theme === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = t;

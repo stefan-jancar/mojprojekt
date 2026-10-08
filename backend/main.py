@@ -12,7 +12,7 @@ import anthropic
 from fastapi import Body, Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 
-from . import assistant
+from . import assistant, horoscope
 from .data import SECTION_TYPES, Repo
 from .storage import StorageError, make_store
 
@@ -167,6 +167,35 @@ def get_file(path: str):
     data = repo.store.read_bytes(path)
     ctype = mimetypes.guess_type(path)[0] or "application/octet-stream"
     return Response(data, media_type=ctype, headers={"Cache-Control": "private, max-age=3600"})
+
+
+# ---------- nastavenia a horoskop ----------
+
+@app.get("/api/settings", dependencies=[Depends(auth)])
+def get_settings():
+    return repo.settings()
+
+
+@app.patch("/api/settings", dependencies=[Depends(auth)])
+def patch_settings(body: dict = Body(...)):
+    if "zodiac" in body and body["zodiac"] not in horoscope.SIGNS:
+        raise ValueError("Neznáme znamenie")
+    if "horoscope" in body:
+        body["horoscope"] = bool(body["horoscope"])
+    return repo.save_settings(body)
+
+
+@app.get("/api/horoscope", dependencies=[Depends(auth)])
+def get_horoscope(sign: str = "", debug: bool = False):
+    try:
+        return horoscope.today(sign or repo.settings()["zodiac"], debug=debug)
+    except horoscope.HoroscopeError as e:
+        raise HTTPException(502, str(e))
+
+
+@app.get("/api/zodiac")
+def zodiac_signs():
+    return [{"id": k, "name": v[0], "symbol": v[1]} for k, v in horoscope.SIGNS.items()]
 
 
 # ---------- asistent ----------

@@ -63,6 +63,28 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -.02em; margin: 0
 .btn.danger { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); box-shadow: none; }
 .btn.block { width: 100%; }
 
+/* ---------- horoskop ---------- */
+.horo { padding: 18px; margin-bottom: 22px; position: relative; overflow: hidden; }
+.horo::after {
+  content: ""; position: absolute; width: 220px; height: 220px; right: -80px; top: -90px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%);
+}
+.horo-head { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+.horo-head b { display: block; font-family: var(--font-display); font-size: 18px; }
+.horo-head small { color: var(--muted); font-size: 13px; }
+.horo-sym {
+  width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; flex: none; font-size: 26px; color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.horo-body { margin-top: 12px; max-height: 6.2em; overflow: hidden; line-height: 1.55; font-size: 14.5px; position: relative; z-index: 1;
+  -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+.horo.open .horo-body { max-height: none; -webkit-mask-image: none; mask-image: none; }
+.horo-body p { margin: 0 0 8px; }
+.horo-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; position: relative; z-index: 1; }
+.horo-foot a { color: var(--muted); font-size: 12.5px; }
+.horo-foot .chip { padding: 6px 12px; font-size: 13px; }
+
 /* ---------- prehľad ---------- */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
 .stat { padding: 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; position: relative; overflow: hidden; }
