@@ -34,7 +34,8 @@ SIGNS = {
 # texty, ktoré nie sú samotný horoskop (reklamy, cookies, všeobecný úvod …)
 _SKIP = re.compile(
     r"cookie|©|všetky práva|reklam|newsletter|prihlás|odoberajte|súhlas|čítajte aj|"
-    r"čo dnes .* čaká|dnešný horoskop pre znamenie|charakteristika znamenia|zdroj:",
+    r"čo dnes .* čaká|dnešný horoskop pre znamenie|charakteristika znamenia|zdroj:|"
+    r"copyright|webdesign|s\.r\.o\.|naše horoskopy|horoskopy môžu byť|astrologickej interpretácii",
     re.I,
 )
 _HEADINGS = re.compile(r"^(láska|vzťahy|práca|kariéra|zdravie|peniaze|financie|rodina|tip dňa)\b", re.I)
@@ -161,6 +162,25 @@ def _extract(html: str):
     """Vráti (časti horoskopu, použitá metóda, diagnostika)."""
     soup = BeautifulSoup(html, "html.parser")
     scripts = [s.string or s.get_text() for s in soup.find_all("script")]
+    script_src = [s.get("src") for s in soup.find_all("script") if s.get("src")]
+    hints = []
+    for raw in scripts:
+        for m in re.finditer(r"horosk|ajax|fetch\(|/api/|XMLHttpRequest|axios", raw or "", re.I):
+            snip = _clean(raw[max(0, m.start() - 150): m.end() + 250])
+            if not any(snip[:80] in h for h in hints):
+                hints.append(snip)
+            if len(hints) >= 15:
+                break
+    attrs = []
+    for el in soup.find_all(True):
+        a = {k: (" ".join(v) if isinstance(v, list) else v) for k, v in el.attrs.items()}
+        if any(re.search(r"horo|sign|znamen|zodiac", f"{k}={v}", re.I) for k, v in a.items()):
+            attrs.append(f"<{el.name} " + " ".join(f'{k}="{str(v)[:120]}"' for k, v in a.items()) + ">")
+        if len(attrs) >= 25:
+            break
+    urls = sorted(set(re.findall(r"""(?:https?://[^\s"'<>]+|/[^\s"'<>]*)(?:horosk|ajax|api)[^\s"'<>]*""", html, re.I)))[:40]
+    pos = html.lower().find("horoskop na dnes")
+    around = html[max(0, pos - 300): pos + 3000] if pos >= 0 else None
     ld = [s.string or s.get_text() for s in soup.find_all("script", type="application/ld+json")]
     meta = soup.find("meta", attrs={"property": "og:description"}) or soup.find("meta", attrs={"name": "description"})
     page_title = _clean(soup.title.get_text()) if soup.title else ""
@@ -192,6 +212,11 @@ def _extract(html: str):
         "paragraphs": [_clean(p.get_text(" "))[:200] for p in body.find_all("p")][:30],
         "body_text_start": _clean(body.get_text(" "))[:1500],
         "script_texts": [x["text"][:200] for x in _from_scripts(scripts)][:10],
+        "script_src": script_src[:40],
+        "script_hints": hints,
+        "attrs": attrs,
+        "urls": urls,
+        "html_around_title": around,
     }
     return sections, method, diag
 

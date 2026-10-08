@@ -309,7 +309,7 @@ async function loadHoroscope() {
   } catch { /* použijú sa uložené nastavenia */ }
   const { horoscope: on, zodiac } = state.settings;
   if (!on) { state.horoscope = null; paintHoroscope(); return; }
-  const key = `horo:${todayKey()}:${zodiac}`;
+  const key = `horo3:${todayKey()}:${zodiac}`;
   const cached = store.get(key, null);
   if (cached) { state.horoscope = cached; paintHoroscope(); return; }
   state.horoscope = { loading: true };
@@ -884,7 +884,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.0</span></div>
+      <div class="r"><span>Verzia</span><span>1.1</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
