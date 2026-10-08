@@ -1,0 +1,52 @@
+/* ============================================================
+   TÉMA – tu si upravíš vzhľad celej aplikácie.
+   Farby, písmo, zaoblenie, pozadie. Vlastné obrázky daj do
+   /public/assets/custom/ a odkáž sa na ne cez url(...).
+   ============================================================ */
+
+:root {
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", var(--font);
+
+  --accent: #8b5cf6;          /* hlavná farba */
+  --accent-2: #22d3ee;        /* druhá farba prechodu */
+  --danger: #f43f5e;
+  --success: #10b981;
+  --warning: #f59e0b;
+
+  --radius: 20px;
+  --radius-sm: 12px;
+
+  /* Vlastné pozadie, napr.: url("/assets/custom/pozadie.jpg") */
+  --bg-image: none;
+}
+
+/* Tmavá téma (predvolená) */
+:root, :root[data-theme="dark"] {
+  --bg: #07070d;
+  --bg-glow-1: rgba(139, 92, 246, .28);
+  --bg-glow-2: rgba(34, 211, 238, .16);
+  --surface: rgba(255, 255, 255, .045);
+  --surface-2: rgba(255, 255, 255, .08);
+  --surface-solid: #13131d;
+  --border: rgba(255, 255, 255, .09);
+  --text: #f4f4f8;
+  --muted: #9a9ab0;
+  --shadow: 0 10px 40px rgba(0, 0, 0, .45);
+  color-scheme: dark;
+}
+
+/* Svetlá téma */
+:root[data-theme="light"] {
+  --bg: #f4f3fa;
+  --bg-glow-1: rgba(139, 92, 246, .18);
+  --bg-glow-2: rgba(34, 211, 238, .14);
+  --surface: rgba(255, 255, 255, .72);
+  --surface-2: rgba(255, 255, 255, .95);
+  --surface-solid: #ffffff;
+  --border: rgba(20, 20, 50, .09);
+  --text: #15151f;
+  --muted: #6b6b80;
+  --shadow: 0 10px 30px rgba(40, 30, 90, .12);
+  color-scheme: light;
+}

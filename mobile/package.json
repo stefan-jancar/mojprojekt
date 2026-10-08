@@ -1,0 +1,18 @@
+{
+  "name": "moj-priestor-android",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Android obal (Capacitor) pre webovú aplikáciu Môj priestor",
+  "scripts": {
+    "configure": "node configure.mjs",
+    "build:apk": "node configure.mjs && npx cap add android && npx capacitor-assets generate --android && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0"
+  }
+}
