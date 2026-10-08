@@ -98,7 +98,15 @@ const FIELDS = {
   recurring: { label: 'Opakovanie', type: 'select', options: ['Jednorazovo', 'Mesačne', 'Štvrťročne', 'Ročne'] },
   note: { label: 'Poznámka', type: 'textarea' },
   done: { label: 'Hotové', type: 'switch' },
+  kind: { label: 'Typ', type: 'kind' },
+  category: { label: 'Kategória', type: 'category' },
 };
+
+const CATEGORIES = {
+  expense: ['Bývanie', 'Energie', 'Telefón a internet', 'Jedlo a nákupy', 'Doprava', 'Deti a škola', 'Zdravie', 'Poistenie', 'Zábava', 'Iné'],
+  income: ['Výplata', 'Brigáda', 'Predaj', 'Prídavky a dávky', 'Dary', 'Úroky', 'Iné'],
+};
+const isIncome = (it) => it.kind === 'income';
 
 const TYPES = {
   projects: {
@@ -118,9 +126,10 @@ const TYPES = {
     defaults: { priority: 'Stredná' },
   },
   bills: {
-    fields: ['title', 'amount', 'currency', 'due', 'recurring', 'note', 'done'], add: 'Nový účet', checkable: true,
-    filters: [['open', 'Nezaplatené'], ['done', 'Zaplatené'], ['all', 'Všetko']], defaultFilter: 'open',
-    labels: { done: 'Zaplatené', due: 'Splatnosť' }, defaults: { currency: 'EUR', recurring: 'Jednorazovo' },
+    fields: ['kind', 'title', 'amount', 'currency', 'category', 'due', 'recurring', 'note', 'done'], add: 'Nový záznam', checkable: true,
+    filters: [['open', 'Na zaplatenie'], ['expense', 'Výdavky'], ['income', 'Príjmy'], ['all', 'Všetko']], defaultFilter: 'open',
+    match: (it, f) => (f === 'income' ? isIncome(it) : f === 'expense' ? !isIncome(it) : !isIncome(it) && !it.done),
+    labels: { done: 'Zaplatené', due: 'Splatnosť' }, defaults: { kind: 'expense', currency: 'EUR', recurring: 'Jednorazovo' },
   },
   progress: { fields: ['title', 'date', 'progress', 'tags', 'note'], add: 'Nový pokrok', labels: { title: 'Čo sa mi podarilo', progress: 'Hodnotenie / posun' } },
   notes: { fields: ['title', 'tags', 'note'], add: 'Nová poznámka' },
@@ -222,7 +231,7 @@ function countLabel(sec, items) {
   if (!items) return '…';
   const t = sec.type;
   if (t === 'checklist' || t === 'tasks') { const o = items.filter((i) => !i.done).length; return o ? `${o} otvorených` : 'Všetko hotové'; }
-  if (t === 'bills') { const o = items.filter((i) => !i.done); return o.length ? `${o.length} nezaplatených` : 'Všetko zaplatené'; }
+  if (t === 'bills') { const o = items.filter((i) => !i.done && !isIncome(i)); return o.length ? `${o.length} nezaplatených` : 'Všetko zaplatené'; }
   const n = items.length;
   return n === 1 ? '1 položka' : n >= 2 && n <= 4 ? `${n} položky` : `${n} položiek`;
 }
@@ -238,7 +247,7 @@ function buildStats() {
     stats.push({ sec: s, label: s.name, val: open.length ? `${open.length}` : '✓', sub: open.length ? open.slice(0, 3).map((i) => i.title).join(', ') : 'Na zajtra nič netreba' });
   });
   of('bills').forEach((s) => {
-    const open = (ov[s.id] || []).filter((i) => !i.done);
+    const open = (ov[s.id] || []).filter((i) => !i.done && !isIncome(i));
     const sum = open.reduce((a, i) => a + (Number(i.amount) || 0), 0);
     const next = open.filter((i) => i.due).sort((a, b) => a.due.localeCompare(b.due))[0];
     stats.push({ sec: s, label: s.name, val: money(sum), sub: next ? `Najbližšie: ${next.title} · ${fmtDate(next.due)}` : open.length ? 'Bez termínu splatnosti' : 'Všetko zaplatené' });
@@ -423,8 +432,11 @@ function cardHTML(sec, it) {
     const pc = it.priority === 'Vysoká' ? 'danger' : it.priority === 'Nízka' ? '' : 'accent';
     meta = `${it.priority ? `<span class="badge ${pc}">${esc(it.priority)}</span>` : ''}${dueBadge(it.due)}${fileBadge}`;
   } else if (t === 'bills') {
-    meta = `${dueBadge(it.due, 'do ')}${it.recurring && it.recurring !== 'Jednorazovo' ? `<span class="badge">↻ ${esc(it.recurring)}</span>` : ''}${fileBadge}`;
-    right = `<div class="amount">${money(it.amount, it.currency)}</div>`;
+    const inc = isIncome(it);
+    const kindBadge = `<span class="badge"><i class="fin-dot ${inc ? 'inc' : 'exp'}"></i>${inc ? (it.done ? 'Prijaté' : 'Príjem') : 'Výdavok'}</span>`;
+    const dateBadge = inc ? (it.due ? `<span class="badge">${icon('calendar')}${esc(fmtDate(it.due))}</span>` : '') : dueBadge(it.due, 'do ');
+    meta = `${kindBadge}${it.category ? `<span class="badge">${esc(it.category)}</span>` : ''}${dateBadge}${it.recurring && it.recurring !== 'Jednorazovo' ? `<span class="badge">↻ ${esc(it.recurring)}</span>` : ''}${fileBadge}`;
+    right = `<div class="amount">${inc ? '+' : ''}${money(it.amount, it.currency)}</div>`;
   } else if (t === 'progress') {
     const d = it.date ? new Date(it.date + 'T00:00:00') : new Date(it.created);
     lead = `<div class="date-col"><b>${d.getDate()}</b><span>${d.toLocaleDateString('sk-SK', { month: 'short' })}</span></div>`;
@@ -435,7 +447,7 @@ function cardHTML(sec, it) {
   }
 
   return h`
-    <div class="card glass ${it.done ? 'done' : ''}" data-open="${it.id}">
+    <div class="card glass ${it.done && !isIncome(it) ? 'done' : ''}" data-open="${it.id}">
       ${lead}
       <div class="body">
         <div class="title">${esc(it.title)}</div>
@@ -446,25 +458,135 @@ function cardHTML(sec, it) {
     </div>`;
 }
 
+/* ---------- prehľad príjmov a výdavkov ---------- */
+const ymOf = (d) => d.toLocaleDateString('sv-SE').slice(0, 7);
+const monthName = (ym, opts = { month: 'long', year: 'numeric' }) => new Date(ym + '-01T00:00:00').toLocaleDateString('sk-SK', opts);
+function shiftYm(ym, n) {
+  const d = new Date(ym + '-01T00:00:00');
+  d.setMonth(d.getMonth() + n);
+  return ymOf(d);
+}
+const itemYm = (it) => (it.due || it.created || '').slice(0, 7);
+const compact = (n) => (n >= 1000 ? (n / 1000).toLocaleString('sk-SK', { maximumFractionDigits: 1 }) + ' tis.' : Math.round(n).toLocaleString('sk-SK'));
+
+function barPath(x, base, w, h, r = 4) {
+  // stĺpec ukotvený na základnej čiare, zaoblený len na vrchu
+  if (h <= 0) return '';
+  r = Math.min(r, w / 2, h);
+  const y = base - h;
+  return `M${x},${base}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${base}Z`;
+}
+
+function financeData(all, ym) {
+  const eur = all.filter((i) => (i.currency || 'EUR') === 'EUR' && Number(i.amount));
+  const months = Array.from({ length: 6 }, (_, k) => shiftYm(ym, k - 5));
+  const sums = Object.fromEntries(months.map((m) => [m, { inc: 0, exp: 0 }]));
+  const cats = {};
+  for (const it of eur) {
+    const m = itemYm(it);
+    if (!sums[m]) continue;
+    const v = Number(it.amount);
+    if (isIncome(it)) sums[m].inc += v;
+    else {
+      sums[m].exp += v;
+      if (m === ym) { const c = it.category || 'Bez kategórie'; cats[c] = (cats[c] || 0) + v; }
+    }
+  }
+  return { months, sums, cats, otherCurrency: all.some((i) => (i.currency || 'EUR') !== 'EUR') };
+}
+
+function financeHTML(sec, all) {
+  const ym = (state.finMonth ||= {})[sec.id] || ymOf(new Date());
+  const { months, sums, cats, otherCurrency } = financeData(all, ym);
+  const cur = sums[ym];
+  const bal = cur.inc - cur.exp;
+  const toPay = all.filter((i) => !i.done && !isIncome(i)).reduce((a, i) => a + ((i.currency || 'EUR') === 'EUR' ? Number(i.amount) || 0 : 0), 0);
+
+  // stĺpcový graf – 6 mesiacov, príjmy vedľa výdavkov
+  const W = 320, L = 38, base = 118, top = 12, gw = (W - L) / months.length, bw = 14, gap = 2;
+  const max = Math.max(1, ...months.flatMap((m) => [sums[m].inc, sums[m].exp]));
+  const sc = (v) => (v / max) * (base - top);
+  const bars = months.map((m, i) => {
+    const x = L + i * gw + (gw - (bw * 2 + gap)) / 2;
+    const sel = m === ym;
+    return `<g class="fin-g${sel ? ' sel' : ''}" data-ym="${m}">
+      <rect class="fin-hit" x="${L + i * gw + 2}" y="0" width="${gw - 4}" height="${base + 24}" rx="8"></rect>
+      <path class="fin-bar inc" d="${barPath(x, base, bw, sc(sums[m].inc))}"></path>
+      <path class="fin-bar exp" d="${barPath(x + bw + gap, base, bw, sc(sums[m].exp))}"></path>
+      <text x="${L + i * gw + gw / 2}" y="${base + 17}" text-anchor="middle" class="fin-x">${monthName(m, { month: 'short' })}</text>
+    </g>`;
+  }).join('');
+  const grid = [0.5, 1].map((f) => `<line x1="${L}" x2="${W}" y1="${base - (base - top) * f}" y2="${base - (base - top) * f}" class="fin-grid"></line>
+    <text x="${L - 6}" y="${base - (base - top) * f + 3}" text-anchor="end" class="fin-ytick">${compact(max * f)}</text>`).join('');
+
+  const catList = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const shown = catList.slice(0, 6);
+  if (catList.length > 6) shown.push(['Ostatné', catList.slice(6).reduce((a, [, v]) => a + v, 0)]);
+  const cmax = Math.max(1, ...shown.map(([, v]) => v));
+
+  return h`
+    <div class="fin glass">
+      <div class="fin-head">
+        <button class="icon-btn" data-fin-move="-1" aria-label="Predchádzajúci mesiac">${icon('back')}</button>
+        <b>${esc(monthName(ym))}</b>
+        <button class="icon-btn" data-fin-move="1" aria-label="Ďalší mesiac">${icon('chevron')}</button>
+      </div>
+      <div class="fin-kpi">
+        <div><span><i class="fin-dot inc"></i>Príjmy</span><b>${money(cur.inc)}</b></div>
+        <div><span><i class="fin-dot exp"></i>Výdavky</span><b>${money(cur.exp)}</b></div>
+        <div><span>Bilancia</span><b>${bal > 0 ? '+' : ''}${money(bal)}</b></div>
+      </div>
+      <div class="fin-chart">
+        <svg viewBox="0 -4 ${W} ${base + 26}" role="img" aria-label="Príjmy a výdavky za posledných 6 mesiacov">${grid}<text x="${L - 6}" y="${base + 3}" text-anchor="end" class="fin-ytick">0 €</text><line x1="${L}" x2="${W}" y1="${base}" y2="${base}" class="fin-axis"></line>${bars}</svg>
+        <div class="fin-tip" hidden></div>
+      </div>
+      ${shown.length ? `<div class="fin-cats"><div class="fin-sub">Výdavky podľa kategórií</div>
+        ${shown.map(([c, v]) => `<div class="fin-cat"><div class="fin-cat-row"><span>${esc(c)}</span><b>${money(v)}</b></div>
+          <div class="fin-track"><i style="width:${Math.max(2, (v / cmax) * 100)}%"></i></div></div>`).join('')}</div>` : ''}
+      <details class="fin-table"><summary>Zobraziť ako tabuľku</summary>
+        <table><thead><tr><th>Mesiac</th><th>Príjmy</th><th>Výdavky</th><th>Bilancia</th></tr></thead><tbody>
+        ${months.map((m) => `<tr><td>${esc(monthName(m, { month: 'short', year: 'numeric' }))}</td><td>${money(sums[m].inc)}</td><td>${money(sums[m].exp)}</td><td>${money(sums[m].inc - sums[m].exp)}</td></tr>`).join('')}
+        </tbody></table></details>
+      <div class="fin-foot"><span>Na zaplatenie</span><b>${money(toPay)}</b></div>
+      ${otherCurrency ? '<div class="fin-note">Grafy rátajú len sumy v eurách.</div>' : ''}
+    </div>`;
+}
+
+function bindFinance(sec) {
+  const box = $app.querySelector('.fin');
+  if (!box) return;
+  const cur = state.finMonth[sec.id] || ymOf(new Date());
+  box.querySelectorAll('[data-fin-move]').forEach((b) => {
+    b.onclick = () => { state.finMonth[sec.id] = shiftYm(cur, Number(b.dataset.finMove)); sec._paint(); };
+  });
+  const tip = box.querySelector('.fin-tip');
+  const { sums } = financeData(state.items[sec.id] || [], cur);
+  box.querySelectorAll('.fin-g').forEach((g) => {
+    g.onclick = () => { state.finMonth[sec.id] = g.dataset.ym; sec._paint(); };
+    g.onpointerenter = () => {
+      const s = sums[g.dataset.ym];
+      tip.innerHTML = `<b>${esc(monthName(g.dataset.ym))}</b><span><i class="fin-dot inc"></i>Príjmy ${money(s.inc)}</span><span><i class="fin-dot exp"></i>Výdavky ${money(s.exp)}</span>`;
+      const r = g.getBoundingClientRect(), pr = box.querySelector('.fin-chart').getBoundingClientRect();
+      tip.style.left = Math.min(Math.max(0, r.left - pr.left + r.width / 2 - 80), pr.width - 160) + 'px';
+      tip.hidden = false;
+    };
+    g.onpointerleave = () => { tip.hidden = true; };
+  });
+}
+
 function sectionHTML(sec) {
   const T = typeOf(sec);
   const all = state.items[sec.id];
   const f = state.filter[sec.id] || T.defaultFilter || 'all';
   let list = all ? sortItems(sec, all) : null;
   if (list && f !== 'all') {
-    list = list.filter((it) => (f === 'open' ? !it.done : f === 'done' ? it.done : T.match ? T.match(it, f) : true));
+    list = list.filter((it) => (T.match ? T.match(it, f) : f === 'open' ? !it.done : f === 'done' ? it.done : true));
   }
   const q = state.query.trim().toLowerCase();
   if (list && q) list = list.filter((it) => [it.title, it.note, ...(it.tags || []), it.person].join(' ').toLowerCase().includes(q));
 
   let summary = '';
-  if (sec.type === 'bills' && all) {
-    const open = all.filter((i) => !i.done);
-    const byCur = {};
-    open.forEach((i) => { byCur[i.currency || 'EUR'] = (byCur[i.currency || 'EUR'] || 0) + (Number(i.amount) || 0); });
-    const s = Object.entries(byCur).map(([c, v]) => money(v, c)).join(' + ') || money(0);
-    summary = `<div class="summary-bar glass"><span>Na zaplatenie</span><b class="grad-text">${s}</b></div>`;
-  }
+  if (sec.type === 'bills' && all) summary = financeHTML(sec, all);
 
   return h`
     <div class="topbar">
@@ -515,6 +637,7 @@ function bindSection(sec) {
     c.onclick = () => openEditor(sec, (state.items[sec.id] || []).find((i) => i.id === c.dataset.open));
   });
   document.getElementById('fab').onclick = () => openEditor(sec, null);
+  if (sec.type === 'bills') bindFinance(sec);
 }
 
 function nextDue(iso, rec) {
@@ -534,10 +657,11 @@ async function toggleDone(sec, id) {
   try {
     Object.assign(it, await api(`/sections/${sec.id}/items/${id}`, { method: 'PATCH', json: { done: it.done } }));
     if (it.done && sec.type === 'bills' && nextDue(it.due, it.recurring)) {
-      const copy = { title: it.title, amount: it.amount, currency: it.currency, recurring: it.recurring, note: it.note, due: nextDue(it.due, it.recurring) };
+      const copy = { title: it.title, amount: it.amount, currency: it.currency, recurring: it.recurring, note: it.note,
+        kind: it.kind, category: it.category, due: nextDue(it.due, it.recurring) };
       const created = await api(`/sections/${sec.id}/items`, { method: 'POST', json: copy });
       list.unshift(created);
-      toast(`Ďalšia platba pridaná na ${fmtDate(created.due)}`);
+      toast(`${isIncome(it) ? 'Ďalší príjem' : 'Ďalšia platba'} pridaná na ${fmtDate(created.due)}`);
     }
     sec._paint();
   } catch (e) {
@@ -562,16 +686,36 @@ function fieldHTML(key, sec, val) {
   const label = (T.labels && T.labels[key]) || F.label;
   const v = val ?? '';
   switch (F.type) {
+    case 'kind': return `<div class="seg" role="radiogroup" aria-label="Typ">
+        <label><input type="radio" name="kind" value="expense" ${v !== 'income' ? 'checked' : ''}><span><i class="fin-dot exp"></i>Výdavok</span></label>
+        <label><input type="radio" name="kind" value="income" ${v === 'income' ? 'checked' : ''}><span><i class="fin-dot inc"></i>Príjem</span></label></div>`;
+    case 'category': return `<div class="field"><label>${label}</label><input name="${key}" value="${esc(v)}" list="cat-list" autocomplete="off" placeholder="napr. Energie, Výplata"><datalist id="cat-list"></datalist></div>`;
     case 'textarea': return `<div class="field"><label>${label}</label><textarea name="${key}">${esc(v)}</textarea></div>`;
     case 'select': return `<div class="field"><label>${label}</label><select name="${key}">${F.options.map((o) => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
     case 'range': return `<div class="field"><label>${label}: <b id="rv-${key}">${Number(v) || 0} %</b></label><input type="range" name="${key}" min="0" max="100" step="5" value="${Number(v) || 0}" oninput="document.getElementById('rv-${key}').textContent=this.value+' %'"></div>`;
     case 'tags': return `<div class="field"><label>${label}</label><input name="${key}" value="${esc((val || []).join(', '))}"></div>`;
     case 'lines': return `<div class="field"><label>${label}</label><textarea name="${key}" style="min-height:70px">${esc((val || []).join('\n'))}</textarea></div>`;
-    case 'switch': return `<label class="switch"><span>${label}</span><input type="checkbox" name="${key}" ${val ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>`;
+    case 'switch': return `<label class="switch"><span id="lbl-${key}">${label}</span><input type="checkbox" name="${key}" ${val ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>`;
     case 'number': return `<div class="field"><label>${label}</label><input type="number" inputmode="decimal" step="0.01" name="${key}" value="${esc(v)}"></div>`;
-    case 'date': return `<div class="field"><label>${label}</label><input type="date" name="${key}" value="${esc(v)}"></div>`;
+    case 'date': return `<div class="field"><label id="lbl-${key}">${label}</label><input type="date" name="${key}" value="${esc(v)}"></div>`;
     default: return `<div class="field"><label>${label}</label><input name="${key}" value="${esc(v)}" ${key === 'title' ? 'required autocomplete="off"' : ''}></div>`;
   }
+}
+
+function bindKind(sheet, form, sec) {
+  const update = () => {
+    const inc = form.elements.kind.value === 'income';
+    const due = document.getElementById('lbl-due');
+    if (due) due.textContent = inc ? 'Dátum' : 'Splatnosť';
+    const done = document.getElementById('lbl-done');
+    if (done) done.textContent = inc ? 'Prijaté' : 'Zaplatené';
+    const used = (state.items[sec.id] || []).filter((i) => isIncome(i) === inc).map((i) => i.category).filter(Boolean);
+    const cats = [...new Set([...used, ...CATEGORIES[inc ? 'income' : 'expense']])];
+    sheet.querySelector('#cat-list').innerHTML = cats.map((c) => `<option value="${esc(c)}"></option>`).join('');
+    if (inc && !form.elements.due.value) form.elements.due.value = new Date().toLocaleDateString('sv-SE');
+  };
+  form.querySelectorAll('input[name=kind]').forEach((r) => { r.onchange = update; });
+  update();
 }
 
 function readForm(form, sec) {
@@ -626,6 +770,7 @@ function openEditor(sec, item) {
 
   sheet.querySelector('[data-close]').onclick = closeSheet;
   const form = sheet.querySelector('#ef');
+  if (sec.type === 'bills') bindKind(sheet, form, sec);
   if (isNew) setTimeout(() => form.elements.title?.focus(), 250);
 
   const bindFiles = () => {
@@ -891,7 +1036,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.2</span></div>
+      <div class="r"><span>Verzia</span><span>1.3</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
