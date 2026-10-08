@@ -77,11 +77,17 @@ class GitHubStore:
             timeout=30,
         )
 
+    def _req(self, method, url, **kw):
+        try:
+            return self.http.request(method, url, **kw)
+        except httpx.HTTPError as e:
+            raise StorageError(f"GitHub je nedostupný: {e}") from e
+
     def _url(self, path: str) -> str:
         return f"/repos/{self.repo}/contents/{quote(path)}"
 
     def _meta(self, path):
-        r = self.http.get(self._url(path), params={"ref": self.branch})
+        r = self._req("GET", self._url(path), params={"ref": self.branch})
         if r.status_code == 404:
             return None
         self._check(r)
@@ -91,6 +97,13 @@ class GitHubStore:
     def _check(r: httpx.Response):
         if r.status_code in (409, 422) or (r.status_code == 400 and "sha" in r.text):
             raise Conflict(r.text)
+        if r.status_code == 401:
+            raise StorageError("GitHub token je neplatný alebo expirovaný (GITHUB_TOKEN).")
+        if r.status_code in (403, 404):
+            raise StorageError(
+                f"GitHub {r.status_code}: token nemá prístup k repozitáru – skontroluj GITHUB_DATA_REPO "
+                "a či má token právo Contents: Read and write."
+            )
         if r.status_code >= 400:
             raise StorageError(f"GitHub {r.status_code}: {r.text[:300]}")
 
@@ -116,11 +129,12 @@ class GitHubStore:
         }
         if sha:
             payload["sha"] = sha
-        r = self.http.put(self._url(path), json=payload)
+        r = self._req("PUT", self._url(path), json=payload)
         self._check(r)
 
     def read_bytes(self, path) -> bytes:
-        r = self.http.get(
+        r = self._req(
+            "GET",
             self._url(path),
             params={"ref": self.branch},
             headers={"Accept": "application/vnd.github.raw"},
@@ -138,7 +152,7 @@ class GitHubStore:
         meta = self._meta(path)
         if not meta:
             return
-        r = self.http.request(
+        r = self._req(
             "DELETE",
             self._url(path),
             json={"message": message, "sha": meta["sha"], "branch": self.branch},
@@ -159,10 +173,26 @@ def mutate(store, path, default, fn, message):
     raise StorageError("Nepodarilo sa uložiť (konflikt), skús znova.")
 
 
+class MissingStore:
+    """Na Verceli bez nastaveného GitHubu – disk je len na čítanie, tak radšej jasná chyba."""
+    kind = "missing"
+    MSG = ("Ukladanie nie je nastavené: na Verceli pridaj premenné GITHUB_TOKEN a GITHUB_DATA_REPO "
+           "(Settings → Environment Variables) a sprav Redeploy.")
+
+    def _fail(self, *a, **k):
+        raise StorageError(self.MSG)
+
+    read_json = write_json = read_bytes = write_bytes = delete = _fail
+
+
 def make_store():
-    token = os.environ.get("GITHUB_TOKEN")
-    repo = os.environ.get("GITHUB_DATA_REPO")
+    token = (os.environ.get("GITHUB_TOKEN") or "").strip()
+    repo = (os.environ.get("GITHUB_DATA_REPO") or "").strip().strip("/")
+    if repo.startswith("https://github.com/"):
+        repo = repo[len("https://github.com/"):]
     if token and repo:
-        return GitHubStore(token, repo, os.environ.get("GITHUB_DATA_BRANCH", "main"))
+        return GitHubStore(token, repo, (os.environ.get("GITHUB_DATA_BRANCH") or "main").strip())
+    if os.environ.get("VERCEL"):
+        return MissingStore()
     root = os.environ.get("LOCAL_DATA_DIR") or str(Path(__file__).resolve().parent.parent / ".data")
     return LocalStore(root)

@@ -262,6 +262,7 @@ function homeHTML() {
   const ov = state.overview || {};
   return h`
     <div class="hello"><small>${esc(dateStr)}</small><h1>${greet}<span class="grad-text">.</span></h1></div>
+    ${state.status?.storage === 'missing' ? `<div class="summary-bar glass" style="border-color:var(--danger);color:var(--danger);display:block;font-size:14px">⚠️ Ukladanie nie je nastavené. Na Verceli pridaj premenné <b>GITHUB_TOKEN</b> a <b>GITHUB_DATA_REPO</b> a sprav Redeploy.</div>` : ''}
     ${stats.length ? `<div class="stats">${stats.map((s) => `
       <div class="stat glass" data-go="${esc(s.sec.id)}">
         <div class="lbl" style="color:${esc(s.sec.color)}">${icon(s.icon || s.sec.icon)}<span style="color:var(--muted)">${esc(s.label)}</span></div>
@@ -779,7 +780,7 @@ function renderSettings() {
     </div>
     <div class="section-title">Systém</div>
     <div class="info-card glass">
-      <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
+      <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
       <div class="r"><span>Verzia</span><span>1.0</span></div>
     </div>

@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import logging
 import mimetypes
 import os
 import time
@@ -18,6 +19,7 @@ from .storage import StorageError, make_store
 MAX_UPLOAD = 4 * 1024 * 1024  # Vercel povoľuje telo požiadavky max ~4,5 MB
 TOKEN_DAYS = 180
 
+log = logging.getLogger("moj-priestor")
 app = FastAPI(title="Môj priestor")
 repo = Repo(make_store())
 
@@ -67,6 +69,12 @@ async def _bad(_, exc):
 @app.exception_handler(StorageError)
 async def _storage(_, exc):
     return JSONResponse({"detail": f"Chyba úložiska: {exc}"}, 502)
+
+
+@app.exception_handler(Exception)
+async def _unexpected(_, exc):
+    log.exception("Neočakávaná chyba")
+    return JSONResponse({"detail": f"Neočakávaná chyba servera: {type(exc).__name__}: {exc}"}, 500)
 
 
 # ---------- verejné ----------
