@@ -1,0 +1,874 @@
+import { icon, PICKABLE } from './icons.js';
+
+/* =========================================================
+   Stav a pomocné funkcie
+   ========================================================= */
+const $app = document.getElementById('app');
+const $nav = document.getElementById('nav');
+const $layer = document.getElementById('layer');
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* bez úložiska */ } },
+  del(k) { try { localStorage.removeItem(k); } catch { /* bez úložiska */ } },
+};
+
+const state = {
+  token: store.get('token', null),
+  status: null,
+  sections: store.get('cache:sections', null),
+  overview: store.get('cache:overview', null),
+  items: {},
+  chat: store.get('chat', []),
+  filter: {},
+  query: '',
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const h = (strings, ...vals) => strings.reduce((a, s, i) => a + s + (i < vals.length ? vals[i] : ''), '');
+
+function toast(msg, err = false) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (err ? ' err' : '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2800);
+}
+
+const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+function daysUntil(iso) {
+  if (!iso) return null;
+  const d = new Date(iso + 'T00:00:00');
+  return Math.round((d - today()) / 86400000);
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  const n = daysUntil(iso);
+  if (n === 0) return 'Dnes';
+  if (n === 1) return 'Zajtra';
+  if (n === -1) return 'Včera';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
+}
+const money = (n, cur = 'EUR') => (Number(n) || 0).toLocaleString('sk-SK', { style: 'currency', currency: cur || 'EUR' });
+const fileSize = (b) => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' kB';
+
+/* =========================================================
+   API
+   ========================================================= */
+async function api(path, { method = 'GET', json, form, raw } = {}) {
+  const headers = {};
+  if (state.token) headers.Authorization = 'Bearer ' + state.token;
+  let body;
+  if (json !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(json); }
+  if (form) body = form;
+  const r = await fetch('/api' + path, { method, headers, body });
+  if (r.status === 401 && path !== '/login') { logout(); throw new Error('Prihlás sa znova'); }
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(typeof e.detail === 'string' ? e.detail : `Chyba ${r.status}`);
+  }
+  return raw ? r.blob() : r.json();
+}
+
+function logout() {
+  state.token = null;
+  store.del('token');
+  location.hash = '#/';
+  render();
+}
+
+/* =========================================================
+   Typy sekcií – aké polia majú položky
+   ========================================================= */
+const FIELDS = {
+  title: { label: 'Názov', type: 'text' },
+  status: { label: 'Stav', type: 'select', options: ['Nápad', 'Rozpracované', 'Pozastavené', 'Hotové'] },
+  progress: { label: 'Hotovo', type: 'range' },
+  tags: { label: 'Štítky (oddeľ čiarkou)', type: 'tags' },
+  links: { label: 'Odkazy (každý na nový riadok)', type: 'lines' },
+  date: { label: 'Dátum', type: 'date' },
+  due: { label: 'Termín', type: 'date' },
+  person: { label: 'Pre koho', type: 'text' },
+  priority: { label: 'Priorita', type: 'select', options: ['Nízka', 'Stredná', 'Vysoká'] },
+  amount: { label: 'Suma', type: 'number' },
+  currency: { label: 'Mena', type: 'select', options: ['EUR', 'CZK', 'USD'] },
+  recurring: { label: 'Opakovanie', type: 'select', options: ['Jednorazovo', 'Mesačne', 'Štvrťročne', 'Ročne'] },
+  note: { label: 'Poznámka', type: 'textarea' },
+  done: { label: 'Hotové', type: 'switch' },
+};
+
+const TYPES = {
+  projects: {
+    fields: ['title', 'status', 'progress', 'tags', 'links', 'note'], add: 'Nový projekt',
+    filters: [['all', 'Všetko'], ['Nápad', 'Nápady'], ['Rozpracované', 'Rozpracované'], ['Pozastavené', 'Pozastavené'], ['Hotové', 'Hotové']],
+    match: (it, f) => (it.status || 'Nápad') === f, defaults: { status: 'Nápad', progress: 0 },
+  },
+  documents: { fields: ['title', 'date', 'tags', 'note'], add: 'Nový dokument', filesFirst: true },
+  checklist: {
+    fields: ['title', 'date', 'person', 'note', 'done'], add: 'Pridať', checkable: true,
+    filters: [['open', 'Treba pripraviť'], ['done', 'Pripravené'], ['all', 'Všetko']], defaultFilter: 'open',
+    labels: { title: 'Čo treba', date: 'Na kedy', done: 'Pripravené' },
+  },
+  tasks: {
+    fields: ['title', 'priority', 'due', 'note', 'done'], add: 'Nová úloha', checkable: true,
+    filters: [['open', 'Otvorené'], ['done', 'Hotové'], ['all', 'Všetko']], defaultFilter: 'open',
+    defaults: { priority: 'Stredná' },
+  },
+  bills: {
+    fields: ['title', 'amount', 'currency', 'due', 'recurring', 'note', 'done'], add: 'Nový účet', checkable: true,
+    filters: [['open', 'Nezaplatené'], ['done', 'Zaplatené'], ['all', 'Všetko']], defaultFilter: 'open',
+    labels: { done: 'Zaplatené', due: 'Splatnosť' }, defaults: { currency: 'EUR', recurring: 'Jednorazovo' },
+  },
+  progress: { fields: ['title', 'date', 'progress', 'tags', 'note'], add: 'Nový pokrok', labels: { title: 'Čo sa mi podarilo', progress: 'Hodnotenie / posun' } },
+  notes: { fields: ['title', 'tags', 'note'], add: 'Nová poznámka' },
+};
+const typeOf = (sec) => TYPES[sec.type] || TYPES.notes;
+
+function sortItems(sec, items) {
+  const t = sec.type;
+  const arr = [...items];
+  if (t === 'checklist' || t === 'tasks' || t === 'bills') {
+    const key = t === 'checklist' ? 'date' : 'due';
+    arr.sort((a, b) => (a.done - b.done) || ((a[key] || '9999') < (b[key] || '9999') ? -1 : (a[key] || '9999') > (b[key] || '9999') ? 1 : 0));
+  } else if (t === 'progress') {
+    arr.sort((a, b) => (b.date || b.created || '').localeCompare(a.date || a.created || ''));
+  } else {
+    arr.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.updated || '').localeCompare(a.updated || ''));
+  }
+  return arr;
+}
+
+/* =========================================================
+   Router
+   ========================================================= */
+window.addEventListener('hashchange', render);
+
+function route() {
+  const p = location.hash.replace(/^#\/?/, '').split('/');
+  if (p[0] === 's' && p[1]) return { view: 'section', id: decodeURIComponent(p[1]) };
+  if (p[0] === 'asistent') return { view: 'assistant' };
+  if (p[0] === 'nastavenia') return { view: 'settings' };
+  return { view: 'home' };
+}
+
+function renderNav(active) {
+  const links = [['#/', 'home', 'Domov', 'home'], ['#/asistent', 'sparkles', 'Asistent', 'assistant'], ['#/nastavenia', 'settings', 'Nastavenia', 'settings']];
+  $nav.hidden = false;
+  $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${active === v || (active === 'section' && v === 'home') ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('');
+}
+
+async function render() {
+  closeSheet();
+  if (!state.status) {
+    try { state.status = await api('/status'); } catch { state.status = { auth_required: false, offline: true }; }
+  }
+  if (state.status.auth_required && !state.token) return renderLogin();
+  const r = route();
+  renderNav(r.view);
+  window.scrollTo(0, 0);
+  if (r.view === 'section') return renderSection(r.id);
+  if (r.view === 'assistant') return renderAssistant();
+  if (r.view === 'settings') return renderSettings();
+  return renderHome();
+}
+
+/* =========================================================
+   Prihlásenie
+   ========================================================= */
+function renderLogin() {
+  $nav.hidden = true;
+  $app.innerHTML = h`
+    <div class="login"><form class="box glass" id="lf">
+      <div class="orb">${icon('lock')}</div>
+      <h1>Môj priestor</h1>
+      <p>Zadaj heslo na odomknutie</p>
+      <div class="field"><input type="password" name="pw" placeholder="Heslo" autocomplete="current-password" required></div>
+      <button class="btn block">Odomknúť</button>
+    </form></div>`;
+  const f = document.getElementById('lf');
+  f.pw.focus();
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    f.querySelector('button').disabled = true;
+    try {
+      const { token } = await api('/login', { method: 'POST', json: { password: f.pw.value } });
+      state.token = token;
+      store.set('token', token);
+      render();
+    } catch (err) {
+      toast(err.message, true);
+      f.querySelector('button').disabled = false;
+    }
+  };
+}
+
+/* =========================================================
+   Domov
+   ========================================================= */
+async function loadSections() {
+  state.sections = await api('/sections');
+  store.set('cache:sections', state.sections);
+  return state.sections;
+}
+
+function secIcon(sec, cls = '') {
+  return `<div class="sec-ic ${cls}" style="--c:${esc(sec.color)}">${icon(sec.icon)}</div>`;
+}
+
+function countLabel(sec, items) {
+  if (!items) return '…';
+  const t = sec.type;
+  if (t === 'checklist' || t === 'tasks') { const o = items.filter((i) => !i.done).length; return o ? `${o} otvorených` : 'Všetko hotové'; }
+  if (t === 'bills') { const o = items.filter((i) => !i.done); return o.length ? `${o.length} nezaplatených` : 'Všetko zaplatené'; }
+  const n = items.length;
+  return n === 1 ? '1 položka' : n >= 2 && n <= 4 ? `${n} položky` : `${n} položiek`;
+}
+
+function buildStats() {
+  const ov = state.overview || {};
+  const secs = state.sections || [];
+  const stats = [];
+  const of = (type) => secs.filter((s) => s.type === type);
+
+  of('checklist').forEach((s) => {
+    const open = (ov[s.id] || []).filter((i) => !i.done && (i.date == null || i.date === '' || daysUntil(i.date) <= 1));
+    stats.push({ sec: s, label: s.name, val: open.length ? `${open.length}` : '✓', sub: open.length ? open.slice(0, 3).map((i) => i.title).join(', ') : 'Na zajtra nič netreba' });
+  });
+  of('bills').forEach((s) => {
+    const open = (ov[s.id] || []).filter((i) => !i.done);
+    const sum = open.reduce((a, i) => a + (Number(i.amount) || 0), 0);
+    const next = open.filter((i) => i.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+    stats.push({ sec: s, label: s.name, val: money(sum), sub: next ? `Najbližšie: ${next.title} · ${fmtDate(next.due)}` : open.length ? 'Bez termínu splatnosti' : 'Všetko zaplatené' });
+  });
+  of('tasks').forEach((s) => {
+    const open = (ov[s.id] || []).filter((i) => !i.done);
+    const urgent = open.filter((i) => i.due && daysUntil(i.due) <= 2).length;
+    stats.push({ sec: s, label: s.name, val: open.length, sub: urgent ? `${urgent} s blížiacim sa termínom` : 'otvorených úloh' });
+  });
+  const proj = of('projects');
+  if (proj.length) {
+    const active = proj.flatMap((s) => (ov[s.id] || []).filter((i) => i.status === 'Rozpracované'));
+    stats.push({ sec: proj[0], label: 'Rozpracované projekty', val: active.length, sub: active.slice(0, 2).map((i) => i.title).join(', ') || 'Žiadne', icon: 'bolt' });
+  }
+  return stats.slice(0, 6);
+}
+
+function homeHTML() {
+  const hr = new Date().getHours();
+  const greet = hr < 10 ? 'Dobré ráno' : hr < 18 ? 'Pekný deň' : 'Dobrý večer';
+  const dateStr = new Date().toLocaleDateString('sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
+  const stats = buildStats();
+  const ov = state.overview || {};
+  return h`
+    <div class="hello"><small>${esc(dateStr)}</small><h1>${greet}<span class="grad-text">.</span></h1></div>
+    ${stats.length ? `<div class="stats">${stats.map((s) => `
+      <div class="stat glass" data-go="${esc(s.sec.id)}">
+        <div class="lbl" style="color:${esc(s.sec.color)}">${icon(s.icon || s.sec.icon)}<span style="color:var(--muted)">${esc(s.label)}</span></div>
+        <div class="val">${esc(s.val)}</div>
+        <div class="sub">${esc(s.sub)}</div>
+      </div>`).join('')}</div>` : ''}
+    <div class="section-title">Sekcie</div>
+    <div class="tiles">
+      ${(state.sections || []).map((s) => `
+        <a class="tile glass" href="#/s/${encodeURIComponent(s.id)}" style="--c:${esc(s.color)}">
+          ${secIcon(s)}
+          <div><div class="name">${esc(s.name)}</div><div class="count">${countLabel(s, ov[s.id])}</div></div>
+        </a>`).join('')}
+      <a class="tile glass add" href="#/nastavenia">${icon('plus')}<span>Pridať sekciu</span></a>
+    </div>`;
+}
+
+async function renderHome() {
+  if (state.sections) $app.innerHTML = homeHTML();
+  else $app.innerHTML = '<div class="spinner"></div>';
+  bindHome();
+  try {
+    const [secs, ov] = await Promise.all([loadSections(), api('/overview')]);
+    state.overview = ov;
+    Object.assign(state.items, ov);
+    store.set('cache:overview', ov);
+    if (route().view === 'home') { $app.innerHTML = homeHTML(); bindHome(); }
+    return secs;
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+function bindHome() {
+  $app.querySelectorAll('[data-go]').forEach((el) => { el.onclick = () => { location.hash = '#/s/' + encodeURIComponent(el.dataset.go); }; });
+}
+
+/* =========================================================
+   Sekcia
+   ========================================================= */
+function cardHTML(sec, it) {
+  const T = typeOf(sec);
+  const t = sec.type;
+  const files = (it.files || []).length;
+  const tags = (it.tags || []).map((x) => `<span class="badge">#${esc(x)}</span>`).join('');
+  const fileBadge = files ? `<span class="badge">${icon('clip')}${files}</span>` : '';
+  const check = T.checkable ? `<button class="check ${it.done ? 'on' : ''}" data-toggle="${it.id}" aria-label="Označiť">${icon('check')}</button>` : '';
+  const dueBadge = (iso, label = '') => {
+    if (!iso) return '';
+    const n = daysUntil(iso);
+    const cls = it.done ? '' : n < 0 ? 'danger' : n <= 2 ? 'warn' : '';
+    return `<span class="badge ${cls}">${icon('calendar')}${label}${esc(fmtDate(iso))}</span>`;
+  };
+  const note = it.note ? `<div class="note">${esc(it.note)}</div>` : '';
+  let meta = '';
+  let right = '';
+  let lead = check;
+
+  if (t === 'projects') {
+    const st = it.status || 'Nápad';
+    const cls = st === 'Hotové' ? 'ok' : st === 'Rozpracované' ? 'accent' : st === 'Pozastavené' ? 'warn' : '';
+    meta = `<span class="badge ${cls}">${esc(st)}</span>${(it.links || []).length ? `<span class="badge">${icon('link')}${it.links.length}</span>` : ''}${fileBadge}${tags}`;
+    const p = Math.max(0, Math.min(100, Number(it.progress) || 0));
+    meta += '</div>' + (p ? `<div class="progress"><i style="width:${p}%"></i></div>` : '') + '<div>';
+    lead = secIcon(sec);
+  } else if (t === 'documents') {
+    lead = `<div class="sec-ic" style="--c:${esc(sec.color)}">${icon('file')}</div>`;
+    meta = `${it.date ? dueBadge(it.date) : ''}${fileBadge}${tags}`;
+  } else if (t === 'checklist') {
+    meta = `${dueBadge(it.date)}${it.person ? `<span class="badge">${esc(it.person)}</span>` : ''}${fileBadge}`;
+  } else if (t === 'tasks') {
+    const pc = it.priority === 'Vysoká' ? 'danger' : it.priority === 'Nízka' ? '' : 'accent';
+    meta = `${it.priority ? `<span class="badge ${pc}">${esc(it.priority)}</span>` : ''}${dueBadge(it.due)}${fileBadge}`;
+  } else if (t === 'bills') {
+    meta = `${dueBadge(it.due, 'do ')}${it.recurring && it.recurring !== 'Jednorazovo' ? `<span class="badge">↻ ${esc(it.recurring)}</span>` : ''}${fileBadge}`;
+    right = `<div class="amount">${money(it.amount, it.currency)}</div>`;
+  } else if (t === 'progress') {
+    const d = it.date ? new Date(it.date + 'T00:00:00') : new Date(it.created);
+    lead = `<div class="date-col"><b>${d.getDate()}</b><span>${d.toLocaleDateString('sk-SK', { month: 'short' })}</span></div>`;
+    const p = Number(it.progress) || 0;
+    meta = `${tags}${fileBadge}</div>${p ? `<div class="progress"><i style="width:${Math.min(100, p)}%"></i></div>` : ''}<div>`;
+  } else {
+    meta = `${tags}${fileBadge}`;
+  }
+
+  return h`
+    <div class="card glass ${it.done ? 'done' : ''}" data-open="${it.id}">
+      ${lead}
+      <div class="body">
+        <div class="title">${esc(it.title)}</div>
+        ${note}
+        <div class="meta">${meta}</div>
+      </div>
+      ${right}
+    </div>`;
+}
+
+function sectionHTML(sec) {
+  const T = typeOf(sec);
+  const all = state.items[sec.id];
+  const f = state.filter[sec.id] || T.defaultFilter || 'all';
+  let list = all ? sortItems(sec, all) : null;
+  if (list && f !== 'all') {
+    list = list.filter((it) => (f === 'open' ? !it.done : f === 'done' ? it.done : T.match ? T.match(it, f) : true));
+  }
+  const q = state.query.trim().toLowerCase();
+  if (list && q) list = list.filter((it) => [it.title, it.note, ...(it.tags || []), it.person].join(' ').toLowerCase().includes(q));
+
+  let summary = '';
+  if (sec.type === 'bills' && all) {
+    const open = all.filter((i) => !i.done);
+    const byCur = {};
+    open.forEach((i) => { byCur[i.currency || 'EUR'] = (byCur[i.currency || 'EUR'] || 0) + (Number(i.amount) || 0); });
+    const s = Object.entries(byCur).map(([c, v]) => money(v, c)).join(' + ') || money(0);
+    summary = `<div class="summary-bar glass"><span>Na zaplatenie</span><b class="grad-text">${s}</b></div>`;
+  }
+
+  return h`
+    <div class="topbar">
+      <a class="icon-btn" href="#/">${icon('back')}</a>
+      ${secIcon(sec)}
+      <h1>${esc(sec.name)}</h1>
+    </div>
+    <div class="toolbar"><label class="search glass">${icon('search')}<input id="q" placeholder="Hľadať…" value="${esc(state.query)}"></label></div>
+    ${T.filters ? `<div class="chips">${T.filters.map(([k, l]) => `<button class="chip ${f === k ? 'on' : ''}" data-filter="${k}">${l}</button>`).join('')}</div>` : ''}
+    ${summary}
+    <div class="list ${sec.type === 'progress' ? 'timeline' : ''}">
+      ${!list ? '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'
+        : list.length ? list.map((it) => cardHTML(sec, it)).join('')
+        : `<div class="empty">${secIcon(sec)}<div>${q ? 'Nič sa nenašlo' : 'Zatiaľ tu nič nie je'}</div></div>`}
+    </div>
+    <button class="fab" id="fab" aria-label="${esc(T.add)}">${icon('plus')}</button>`;
+}
+
+async function renderSection(id) {
+  if (!state.sections) { try { await loadSections(); } catch (e) { toast(e.message, true); return; } }
+  const sec = state.sections.find((s) => s.id === id);
+  if (!sec) { $app.innerHTML = '<div class="empty">Sekcia neexistuje</div>'; return; }
+  state.query = '';
+  const paint = () => {
+    const old = document.getElementById('q');
+    const hadFocus = old && document.activeElement === old;
+    const pos = old?.selectionStart;
+    $app.innerHTML = sectionHTML(sec);
+    bindSection(sec);
+    if (hadFocus) { const q = document.getElementById('q'); q.focus(); q.setSelectionRange(pos, pos); }
+  };
+  sec._paint = paint;
+  paint();
+  try {
+    state.items[sec.id] = await api(`/sections/${sec.id}/items`);
+    if (route().id === id) paint();
+  } catch (e) { toast(e.message, true); }
+}
+
+function bindSection(sec) {
+  const q = document.getElementById('q');
+  q.oninput = () => { state.query = q.value; sec._paint(); };
+  $app.querySelectorAll('[data-filter]').forEach((b) => { b.onclick = () => { state.filter[sec.id] = b.dataset.filter; sec._paint(); }; });
+  $app.querySelectorAll('[data-toggle]').forEach((b) => {
+    b.onclick = (e) => { e.stopPropagation(); toggleDone(sec, b.dataset.toggle); };
+  });
+  $app.querySelectorAll('[data-open]').forEach((c) => {
+    c.onclick = () => openEditor(sec, (state.items[sec.id] || []).find((i) => i.id === c.dataset.open));
+  });
+  document.getElementById('fab').onclick = () => openEditor(sec, null);
+}
+
+function nextDue(iso, rec) {
+  const d = new Date((iso || new Date().toISOString().slice(0, 10)) + 'T00:00:00');
+  const m = { Mesačne: 1, Štvrťročne: 3, Ročne: 12 }[rec];
+  if (!m) return null;
+  d.setMonth(d.getMonth() + m);
+  return d.toLocaleDateString('sv-SE');
+}
+
+async function toggleDone(sec, id) {
+  const list = state.items[sec.id] || [];
+  const it = list.find((i) => i.id === id);
+  if (!it) return;
+  it.done = !it.done; // optimisticky
+  sec._paint();
+  try {
+    Object.assign(it, await api(`/sections/${sec.id}/items/${id}`, { method: 'PATCH', json: { done: it.done } }));
+    if (it.done && sec.type === 'bills' && nextDue(it.due, it.recurring)) {
+      const copy = { title: it.title, amount: it.amount, currency: it.currency, recurring: it.recurring, note: it.note, due: nextDue(it.due, it.recurring) };
+      const created = await api(`/sections/${sec.id}/items`, { method: 'POST', json: copy });
+      list.unshift(created);
+      toast(`Ďalšia platba pridaná na ${fmtDate(created.due)}`);
+    }
+    sec._paint();
+  } catch (e) {
+    it.done = !it.done; sec._paint(); toast(e.message, true);
+  }
+}
+
+/* =========================================================
+   Editor položky (spodný panel)
+   ========================================================= */
+function openSheet(html) {
+  $layer.innerHTML = `<div class="sheet-wrap"><div class="sheet"><div class="grab"></div>${html}</div></div>`;
+  const wrap = $layer.firstElementChild;
+  wrap.onclick = (e) => { if (e.target === wrap) closeSheet(); };
+  return wrap.querySelector('.sheet');
+}
+function closeSheet() { $layer.innerHTML = ''; }
+
+function fieldHTML(key, sec, val) {
+  const T = typeOf(sec);
+  const F = FIELDS[key];
+  const label = (T.labels && T.labels[key]) || F.label;
+  const v = val ?? '';
+  switch (F.type) {
+    case 'textarea': return `<div class="field"><label>${label}</label><textarea name="${key}">${esc(v)}</textarea></div>`;
+    case 'select': return `<div class="field"><label>${label}</label><select name="${key}">${F.options.map((o) => `<option ${o === v ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
+    case 'range': return `<div class="field"><label>${label}: <b id="rv-${key}">${Number(v) || 0} %</b></label><input type="range" name="${key}" min="0" max="100" step="5" value="${Number(v) || 0}" oninput="document.getElementById('rv-${key}').textContent=this.value+' %'"></div>`;
+    case 'tags': return `<div class="field"><label>${label}</label><input name="${key}" value="${esc((val || []).join(', '))}"></div>`;
+    case 'lines': return `<div class="field"><label>${label}</label><textarea name="${key}" style="min-height:70px">${esc((val || []).join('\n'))}</textarea></div>`;
+    case 'switch': return `<label class="switch"><span>${label}</span><input type="checkbox" name="${key}" ${val ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>`;
+    case 'number': return `<div class="field"><label>${label}</label><input type="number" inputmode="decimal" step="0.01" name="${key}" value="${esc(v)}"></div>`;
+    case 'date': return `<div class="field"><label>${label}</label><input type="date" name="${key}" value="${esc(v)}"></div>`;
+    default: return `<div class="field"><label>${label}</label><input name="${key}" value="${esc(v)}" ${key === 'title' ? 'required autocomplete="off"' : ''}></div>`;
+  }
+}
+
+function readForm(form, sec) {
+  const out = {};
+  for (const key of typeOf(sec).fields) {
+    const el = form.elements[key];
+    if (!el) continue;
+    const F = FIELDS[key];
+    if (F.type === 'switch') out[key] = el.checked;
+    else if (F.type === 'tags') out[key] = el.value.split(',').map((s) => s.trim()).filter(Boolean);
+    else if (F.type === 'lines') out[key] = el.value.split('\n').map((s) => s.trim()).filter(Boolean);
+    else if (F.type === 'number' || F.type === 'range') out[key] = el.value === '' ? null : Number(el.value);
+    else out[key] = el.value;
+  }
+  return out;
+}
+
+function filesHTML(item) {
+  return (item?.files || []).map((f) => `
+    <div class="file-row">
+      ${icon(f.type?.startsWith('image') ? 'image' : 'file')}
+      <div class="nm" data-view="${esc(f.path)}">${esc(f.name)}<br><small>${fileSize(f.size)}</small></div>
+      <button type="button" class="icon-btn danger" data-rmfile="${esc(f.path)}" aria-label="Odstrániť">${icon('trash')}</button>
+    </div>`).join('');
+}
+
+function openEditor(sec, item) {
+  const T = typeOf(sec);
+  const isNew = !item;
+  const data = item || { ...(T.defaults || {}), date: ['checklist', 'progress'].includes(sec.type) ? new Date().toLocaleDateString('sv-SE') : undefined };
+  let pending = [];
+
+  const sheet = openSheet(h`
+    <div class="sheet-head">
+      ${secIcon(sec)}
+      <h2>${isNew ? esc(T.add) : 'Upraviť'}</h2>
+      <button class="icon-btn" data-close>${icon('x')}</button>
+    </div>
+    <form id="ef">
+      ${T.fields.filter((k) => !(isNew && k === 'done')).map((k) => fieldHTML(k, sec, data[k])).join('')}
+      ${(item?.links || []).length ? `<div class="files">${item.links.map((l) => `<a class="file-row" href="${esc(l)}" target="_blank" rel="noopener">${icon('link')}<span class="nm">${esc(l)}</span></a>`).join('')}</div>` : ''}
+      <div class="field"><label>Prílohy (PDF, obrázky… max 4 MB)</label></div>
+      <div class="files" id="files">${filesHTML(item)}</div>
+      <label class="drop">${icon('upload')}<span id="droplbl">Pridať súbor</span>
+        <input type="file" id="fi" multiple hidden accept="application/pdf,image/*,.stl,.step,.3mf,.gcode,.zip,.txt,.kicad_pcb,.sch,.ino">
+      </label>
+      <div class="actions" style="margin-top:20px">
+        ${isNew ? '' : `<button type="button" class="btn danger" id="del">${icon('trash')}</button>`}
+        <button class="btn" id="save">${icon('check')}Uložiť</button>
+      </div>
+    </form>`);
+
+  sheet.querySelector('[data-close]').onclick = closeSheet;
+  const form = sheet.querySelector('#ef');
+  if (isNew) setTimeout(() => form.elements.title?.focus(), 250);
+
+  const bindFiles = () => {
+    sheet.querySelectorAll('[data-view]').forEach((el) => {
+      el.onclick = () => openFile((item.files || []).find((f) => f.path === el.dataset.view));
+    });
+    sheet.querySelectorAll('[data-rmfile]').forEach((el) => {
+      el.onclick = async () => {
+        if (!confirm('Odstrániť súbor?')) return;
+        try {
+          const upd = await api(`/sections/${sec.id}/items/${item.id}/files?path=${encodeURIComponent(el.dataset.rmfile)}`, { method: 'DELETE' });
+          Object.assign(item, upd);
+          sheet.querySelector('#files').innerHTML = filesHTML(item);
+          bindFiles();
+          sec._paint?.();
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+  };
+  bindFiles();
+
+  const upload = async (it, file) => {
+    if (file.size > 4 * 1024 * 1024) { toast(`${file.name} je väčší ako 4 MB`, true); return it; }
+    const fd = new FormData();
+    fd.append('file', file);
+    return api(`/sections/${sec.id}/items/${it.id}/files`, { method: 'POST', form: fd });
+  };
+
+  sheet.querySelector('#fi').onchange = async (e) => {
+    const files = [...e.target.files];
+    e.target.value = '';
+    if (isNew) {
+      pending.push(...files);
+      sheet.querySelector('#droplbl').textContent = `Pripravené: ${pending.map((f) => f.name).join(', ')}`;
+      return;
+    }
+    const lbl = sheet.querySelector('#droplbl');
+    for (const f of files) {
+      lbl.textContent = `Nahrávam ${f.name}…`;
+      try { Object.assign(item, await upload(item, f)); } catch (err) { toast(err.message, true); }
+    }
+    lbl.textContent = 'Pridať súbor';
+    sheet.querySelector('#files').innerHTML = filesHTML(item);
+    bindFiles();
+    sec._paint?.();
+  };
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = sheet.querySelector('#save');
+    btn.disabled = true;
+    try {
+      const body = readForm(form, sec);
+      let saved;
+      if (isNew) {
+        saved = await api(`/sections/${sec.id}/items`, { method: 'POST', json: body });
+        for (const f of pending) {
+          try { saved = await upload(saved, f); } catch (err) { toast(err.message, true); }
+        }
+        (state.items[sec.id] ||= []).unshift(saved);
+      } else {
+        saved = await api(`/sections/${sec.id}/items/${item.id}`, { method: 'PATCH', json: body });
+        Object.assign(item, saved);
+      }
+      closeSheet();
+      sec._paint?.();
+      toast('Uložené');
+    } catch (err) {
+      toast(err.message, true);
+      btn.disabled = false;
+    }
+  };
+
+  const del = sheet.querySelector('#del');
+  if (del) del.onclick = async () => {
+    if (!confirm(`Naozaj zmazať „${item.title}“?`)) return;
+    try {
+      await api(`/sections/${sec.id}/items/${item.id}`, { method: 'DELETE' });
+      state.items[sec.id] = state.items[sec.id].filter((i) => i.id !== item.id);
+      closeSheet();
+      sec._paint?.();
+      toast('Zmazané');
+    } catch (err) { toast(err.message, true); }
+  };
+}
+
+/* =========================================================
+   Prehliadač súborov (PDF cez pdf.js, obrázky)
+   ========================================================= */
+let pdfjsPromise;
+function loadPdfJs() {
+  pdfjsPromise ||= new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      res(window.pdfjsLib);
+    };
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  return pdfjsPromise;
+}
+
+async function openFile(f) {
+  if (!f) return;
+  const v = document.createElement('div');
+  v.className = 'viewer';
+  v.innerHTML = `<div class="vh"><button class="icon-btn" data-x>${icon('back')}</button><b>${esc(f.name)}</b><a class="icon-btn" data-dl>${icon('download')}</a></div><div class="vb"><div class="spinner"></div></div>`;
+  document.body.appendChild(v);
+  v.querySelector('[data-x]').onclick = () => { v.remove(); if (url) URL.revokeObjectURL(url); };
+  const body = v.querySelector('.vb');
+  let url;
+  try {
+    const blob = await api('/file?path=' + encodeURIComponent(f.path), { raw: true });
+    url = URL.createObjectURL(blob);
+    const dl = v.querySelector('[data-dl]');
+    dl.href = url;
+    dl.download = f.name;
+    if (blob.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
+      const pdfjs = await loadPdfJs();
+      const doc = await pdfjs.getDocument({ data: await blob.arrayBuffer() }).promise;
+      body.innerHTML = '';
+      const width = Math.min(body.clientWidth - 20, 900);
+      for (let p = 1; p <= doc.numPages; p++) {
+        const page = await doc.getPage(p);
+        const vp0 = page.getViewport({ scale: 1 });
+        const scale = (width / vp0.width) * (window.devicePixelRatio || 1);
+        const vp = page.getViewport({ scale });
+        const c = document.createElement('canvas');
+        c.width = vp.width; c.height = vp.height;
+        c.style.width = width + 'px';
+        body.appendChild(c);
+        await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      }
+    } else if (blob.type.startsWith('image/')) {
+      body.innerHTML = `<img src="${url}" alt="">`;
+    } else {
+      body.innerHTML = `<div class="empty" style="color:#fff">Tento typ súboru sa nedá zobraziť.<br><br><a class="btn" href="${url}" download="${esc(f.name)}">${icon('download')}Stiahnuť</a></div>`;
+    }
+  } catch (e) {
+    body.innerHTML = `<div class="empty" style="color:#fff">${esc(e.message)}</div>`;
+  }
+}
+
+/* =========================================================
+   Asistent
+   ========================================================= */
+const SUGGESTIONS = [
+  'Čo treba zajtra do školy?',
+  'Ktoré účty ešte nie sú zaplatené?',
+  'Zapíš do školy: v piatok výkres a farbičky',
+  'Zhrň moje rozpracované projekty',
+];
+
+function mdLite(s) {
+  return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+function renderAssistant() {
+  const enabled = state.status?.assistant;
+  $app.innerHTML = h`
+    <div class="topbar">
+      <h1>Asistent</h1>
+      ${state.chat.length ? `<button class="icon-btn" id="clr" aria-label="Nový rozhovor">${icon('trash')}</button>` : ''}
+    </div>
+    <div class="chat" id="chat">
+      ${state.chat.length ? '' : h`
+        <div class="hero">
+          <div class="orb">${icon('sparkles')}</div>
+          <h2>Ahoj, s čím pomôžem?</h2>
+          <p>${enabled ? 'Viem čítať a zapisovať do tvojich sekcií.' : 'Asistent zatiaľ nie je zapnutý – na Verceli nastav ANTHROPIC_API_KEY.'}</p>
+        </div>
+        <div class="suggest">${SUGGESTIONS.map((s) => `<button class="chip" data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div>`}
+      ${state.chat.map((m) => `<div class="msg ${m.role}">${mdLite(m.content)}</div>`).join('')}
+    </div>
+    <form class="composer glass" id="cf">
+      <textarea rows="1" name="m" placeholder="Napíš správu…" ${enabled ? '' : 'disabled'}></textarea>
+      <button class="btn" ${enabled ? '' : 'disabled'} aria-label="Odoslať">${icon('send')}</button>
+    </form>`;
+
+  const form = document.getElementById('cf');
+  const ta = form.m;
+  ta.oninput = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; };
+  ta.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+  document.getElementById('clr')?.addEventListener('click', () => { state.chat = []; store.set('chat', []); renderAssistant(); });
+  $app.querySelectorAll('[data-sug]').forEach((b) => { b.onclick = () => { ta.value = b.dataset.sug; form.requestSubmit(); }; });
+  window.scrollTo(0, document.body.scrollHeight);
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const text = ta.value.trim();
+    if (!text) return;
+    state.chat.push({ role: 'user', content: text });
+    store.set('chat', state.chat.slice(-40));
+    renderAssistant();
+    const chat = document.getElementById('chat');
+    chat.insertAdjacentHTML('beforeend', '<div class="msg assistant typing" id="typing"><i></i><i></i><i></i></div>');
+    window.scrollTo(0, document.body.scrollHeight);
+    try {
+      const res = await api('/assistant', { method: 'POST', json: { messages: state.chat } });
+      state.chat.push({ role: 'assistant', content: res.reply });
+      if (res.changed) { state.items = {}; state.overview = null; }
+    } catch (err) {
+      state.chat.push({ role: 'assistant', content: '⚠️ ' + err.message });
+    }
+    store.set('chat', state.chat.slice(-40));
+    if (route().view === 'assistant') renderAssistant();
+  };
+}
+
+/* =========================================================
+   Nastavenia
+   ========================================================= */
+function renderSettings() {
+  const st = state.status || {};
+  const secs = state.sections || [];
+  const theme = document.documentElement.dataset.theme;
+  $app.innerHTML = h`
+    <div class="topbar"><h1>Nastavenia</h1></div>
+    <div class="section-title">Sekcie</div>
+    <div class="set-list">
+      ${secs.map((s, i) => `
+        <div class="set-row glass">
+          ${secIcon(s)}
+          <div class="nm">${esc(s.name)}<small>${esc(st.section_types?.[s.type] || s.type)}</small></div>
+          <button class="icon-btn" data-mv="${i}:-1" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button>
+          <button class="icon-btn" data-mv="${i}:1" ${i === secs.length - 1 ? 'disabled' : ''}>${icon('down')}</button>
+          <button class="icon-btn" data-ed="${i}">${icon('edit')}</button>
+        </div>`).join('')}
+      <button class="btn ghost block" id="addsec">${icon('plus')}Pridať sekciu</button>
+    </div>
+    <div class="section-title">Vzhľad</div>
+    <div class="set-list">
+      <button class="set-row glass" id="theme" style="cursor:pointer;text-align:left;border:1px solid var(--border)">
+        <div class="sec-ic">${icon(theme === 'light' ? 'sun' : 'moon')}</div>
+        <div class="nm">${theme === 'light' ? 'Svetlý režim' : 'Tmavý režim'}<small>Ťukni pre zmenu</small></div>
+      </button>
+    </div>
+    <div class="section-title">Systém</div>
+    <div class="info-card glass">
+      <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
+      <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
+      <div class="r"><span>Verzia</span><span>1.0</span></div>
+    </div>
+    ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
+
+  $app.querySelectorAll('[data-mv]').forEach((b) => {
+    b.onclick = () => {
+      const [i, d] = b.dataset.mv.split(':').map(Number);
+      const arr = [...secs];
+      [arr[i], arr[i + d]] = [arr[i + d], arr[i]];
+      saveSections(arr);
+    };
+  });
+  $app.querySelectorAll('[data-ed]').forEach((b) => { b.onclick = () => editSection(Number(b.dataset.ed)); });
+  document.getElementById('addsec').onclick = () => editSection(-1);
+  document.getElementById('theme').onclick = () => {
+    const t = theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem('theme', t); } catch { /* bez úložiska */ }
+    renderSettings();
+  };
+  document.getElementById('lo')?.addEventListener('click', logout);
+  if (!state.sections) loadSections().then(() => route().view === 'settings' && renderSettings()).catch((e) => toast(e.message, true));
+}
+
+async function saveSections(arr) {
+  try {
+    state.sections = await api('/sections', { method: 'PUT', json: arr });
+    store.set('cache:sections', state.sections);
+    closeSheet();
+    renderSettings();
+    toast('Uložené');
+  } catch (e) { toast(e.message, true); }
+}
+
+function editSection(idx) {
+  const isNew = idx < 0;
+  const sec = isNew ? { name: '', type: 'notes', icon: 'folder', color: '#8b5cf6' } : { ...state.sections[idx] };
+  const types = state.status?.section_types || {};
+  const sheet = openSheet(h`
+    <div class="sheet-head">
+      <div class="sec-ic" id="pv" style="--c:${esc(sec.color)}">${icon(sec.icon)}</div>
+      <h2>${isNew ? 'Nová sekcia' : 'Upraviť sekciu'}</h2>
+      <button class="icon-btn" data-close>${icon('x')}</button>
+    </div>
+    <form id="sf">
+      <div class="field"><label>Názov</label><input name="name" value="${esc(sec.name)}" required></div>
+      <div class="field"><label>Typ sekcie</label><select name="type" ${isNew ? '' : 'disabled'}>
+        ${Object.entries(types).map(([k, v]) => `<option value="${k}" ${k === sec.type ? 'selected' : ''}>${esc(v)}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Farba</label><input type="color" name="color" value="${esc(sec.color)}"></div>
+      <div class="field"><label>Ikona</label>
+        <div class="icon-grid">${PICKABLE.map((k) => `<button type="button" data-ic="${k}" class="${k === sec.icon ? 'on' : ''}">${icon(k)}</button>`).join('')}</div>
+      </div>
+      <div class="field"><label>…alebo vlastná: emoji, alebo cesta k obrázku (napr. /assets/custom/moja.png)</label>
+        <input name="icon" value="${esc(sec.icon)}"></div>
+      <div class="actions">
+        ${isNew ? '' : `<button type="button" class="btn danger" id="dels">${icon('trash')}</button>`}
+        <button class="btn">${icon('check')}Uložiť</button>
+      </div>
+      ${isNew ? '' : '<p style="color:var(--muted);font-size:13px">Zmazaním sekcie sa dáta v GitHube nevymažú – ostanú v súbore data/items/.</p>'}
+    </form>`);
+  const form = sheet.querySelector('#sf');
+  const pv = sheet.querySelector('#pv');
+  const update = () => { pv.style.setProperty('--c', form.color.value); pv.innerHTML = icon(form.icon.value.trim()); };
+  sheet.querySelector('[data-close]').onclick = closeSheet;
+  form.color.oninput = update;
+  form.icon.oninput = () => { sheet.querySelectorAll('[data-ic]').forEach((b) => b.classList.toggle('on', b.dataset.ic === form.icon.value)); update(); };
+  sheet.querySelectorAll('[data-ic]').forEach((b) => {
+    b.onclick = () => { form.icon.value = b.dataset.ic; form.icon.oninput(); };
+  });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const s = { ...sec, name: form.name.value.trim(), color: form.color.value, icon: form.icon.value.trim() || 'folder' };
+    if (isNew) s.type = form.type.value;
+    const arr = [...state.sections];
+    if (isNew) arr.push(s); else arr[idx] = s;
+    saveSections(arr);
+  };
+  sheet.querySelector('#dels')?.addEventListener('click', () => {
+    if (!confirm(`Zmazať sekciu „${sec.name}“?`)) return;
+    saveSections(state.sections.filter((_, i) => i !== idx));
+  });
+}
+
+/* =========================================================
+   Štart
+   ========================================================= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+render();

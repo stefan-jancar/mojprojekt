@@ -1,0 +1,64 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Inštalácia
+        run: npm install
+
+      - name: Konfigurácia (adresa aplikácie)
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: node configure.mjs
+
+      - name: Android projekt + ikony
+        run: |
+          npx cap add android
+          npx capacitor-assets generate --android
+          npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../MojPriestor.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MojPriestor-apk
+          path: mobile/MojPriestor.apk
+
+      - name: Vydanie (release) na stiahnutie do mobilu
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Môj priestor – APK ${{ github.run_number }}
+          body: Stiahni MojPriestor.apk do mobilu a nainštaluj (povoľ inštaláciu z neznámych zdrojov).
+          files: mobile/MojPriestor.apk
