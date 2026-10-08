@@ -35,7 +35,8 @@ TOOLS = [
         "name": "add_item",
         "description": (
             "Pridá položku do sekcie. Polia: title (povinné), note, status, tags (zoznam), date, due, "
-            "amount (číslo), currency, done (bool), progress (0-100), links (zoznam URL), person, priority."
+            "amount (číslo), currency, done (bool), progress (0-100), links (zoznam URL), person, priority, "
+            "kind (v sekcii účtov: 'expense' = výdavok, 'income' = príjem), category (kategória, napr. Energie, Výplata)."
         ),
         "input_schema": {
             "type": "object",

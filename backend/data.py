@@ -43,6 +43,7 @@ ITEM_FIELDS = {
     "title": str, "note": str, "status": str, "tags": list, "date": str, "due": str,
     "amount": (int, float), "currency": str, "done": bool, "progress": (int, float),
     "links": list, "person": str, "priority": str, "recurring": str, "pinned": bool,
+    "kind": str, "category": str,
 }
 
 
