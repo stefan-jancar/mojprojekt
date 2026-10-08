@@ -180,15 +180,20 @@ def get_settings():
 def patch_settings(body: dict = Body(...)):
     if "zodiac" in body and body["zodiac"] not in horoscope.SIGNS:
         raise ValueError("Neznáme znamenie")
+    if "horo_source" in body and body["horo_source"] != "auto" and body["horo_source"] not in horoscope.SOURCES:
+        raise ValueError("Neznámy zdroj horoskopu")
     if "horoscope" in body:
         body["horoscope"] = bool(body["horoscope"])
     return repo.save_settings(body)
 
 
 @app.get("/api/horoscope", dependencies=[Depends(auth)])
-def get_horoscope(sign: str = "", debug: bool = False):
+def get_horoscope(sign: str = "", source: str = "", debug: bool = False):
+    if not sign or not source:
+        st = repo.settings()
+        sign, source = sign or st["zodiac"], source or st["horo_source"]
     try:
-        return horoscope.today(sign or repo.settings()["zodiac"], debug=debug)
+        return horoscope.today(sign, source, debug=debug)
     except horoscope.HoroscopeError as e:
         raise HTTPException(502, str(e))
 

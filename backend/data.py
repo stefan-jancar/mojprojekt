@@ -15,7 +15,7 @@ from .storage import mutate
 SECTIONS_PATH = "data/sections.json"
 SETTINGS_PATH = "data/settings.json"
 
-DEFAULT_SETTINGS = {"horoscope": True, "zodiac": "ryby"}
+DEFAULT_SETTINGS = {"horoscope": True, "zodiac": "ryby", "horo_source": "auto"}
 
 # Typy sekcií určujú, aké polia má položka (frontend podľa nich kreslí formulár).
 SECTION_TYPES = {

@@ -77,10 +77,11 @@ Alternatíva bez APK: otvor stránku v Chrome → ⋮ → **Pridať na plochu** 
 
 ## Denný horoskop
 
-Na úvodnej obrazovke sa zobrazuje denný horoskop z [noviny.sk](https://www.noviny.sk/horoskopy)
-(znamenie a zapnutie/vypnutie v Nastaveniach). noviny.sk nemajú API, text sa vyberá z HTML stránky
-v `backend/horoscope.py`. Ak prestane fungovať (zmenili vzhľad stránky), otvor
-`/api/horoscope?debug=1` – ukáže, čo sa zo stránky podarilo načítať.
+Na úvodnej obrazovke sa zobrazuje denný horoskop zo slovenských webov – [SITA.sk](https://sita.sk/horoskop/dnesny-horoskop/ryby/),
+[Sibyla – Zoznam.sk](https://sibyla.zoznam.sk/horoskop/horoskop-denny/12/ryby.php), [Moneo.sk](https://www.moneo.sk/horoskopy/denny-horoskop/ryby/)
+a [Vševedko.sk](https://horoskop.vsevedko.sk/ryby/). V Nastaveniach sa vyberá znamenie a zdroj (Automaticky = prvý, ktorý funguje).
+Weby nemajú API, text sa vyberá z HTML v `backend/horoscope.py`. Ak prestane fungovať, tlačidlo
+**Diagnostika** (na karte alebo v Nastaveniach) ukáže, čo sa z jednotlivých webov podarilo načítať.
 
 ## Ako sú uložené dáta (v dátovom repozitári)
 
