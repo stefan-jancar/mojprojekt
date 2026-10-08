@@ -328,7 +328,8 @@ function horoHTML() {
   if (!state.settings?.horoscope || !hs) return '';
   if (hs.loading) return '<div class="skeleton" style="height:120px;margin-bottom:22px"></div>';
   if (hs.error) {
-    return `<div class="horo glass"><div class="horo-head"><div class="horo-sym">✦</div><div><b>Horoskop</b><small>${esc(hs.error)}</small></div></div></div>`;
+    return `<div class="horo glass"><div class="horo-head"><div class="horo-sym">✦</div><div><b>Horoskop</b><small>${esc(hs.error)}</small></div></div>
+      <div class="horo-foot"><button class="chip" data-horo-diag>Diagnostika</button><button class="chip" data-horo-retry>Skúsiť znova</button></div></div>`;
   }
   const date = new Date(hs.date + 'T00:00:00').toLocaleDateString('sk-SK', { day: 'numeric', month: 'long' });
   return h`
@@ -347,10 +348,28 @@ function horoHTML() {
     </div>`;
 }
 
+async function showHoroDiag() {
+  const sheet = openSheet(`<div class="sheet-head"><h2>Diagnostika horoskopu</h2><button class="icon-btn" data-close>${icon('x')}</button></div>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:0">Urob screenshot (alebo skopíruj text) a pošli ho na opravu.</p>
+    <pre id="diag" style="white-space:pre-wrap;word-break:break-word;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;max-height:60vh;overflow:auto">Načítavam…</pre>
+    <button class="btn block" id="diag-copy">Kopírovať</button>`);
+  sheet.querySelector('[data-close]').onclick = closeSheet;
+  const pre = sheet.querySelector('#diag');
+  try {
+    const d = await api('/horoscope?debug=1&sign=' + encodeURIComponent(state.settings.zodiac || 'ryby'));
+    pre.textContent = JSON.stringify(d, null, 2);
+  } catch (e) { pre.textContent = 'Chyba: ' + e.message; }
+  sheet.querySelector('#diag-copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(pre.textContent); toast('Skopírované'); } catch { toast('Kopírovanie nie je dostupné', true); }
+  };
+}
+
 function paintHoroscope() {
   const el = document.getElementById('horo');
   if (!el) return;
   el.innerHTML = horoHTML();
+  el.querySelector('[data-horo-diag]')?.addEventListener('click', showHoroDiag);
+  el.querySelector('[data-horo-retry]')?.addEventListener('click', () => loadHoroscope());
   const card = document.getElementById('horo-card');
   const more = document.getElementById('horo-more');
   if (!card || !more) return;
@@ -859,6 +878,7 @@ function renderSettings() {
       <div class="field" style="margin:0"><select id="horo-sign" class="input">
         ${ZODIAC.map(([k, n, sym]) => `<option value="${k}" ${k === state.settings.zodiac ? 'selected' : ''}>${sym}\uFE0E ${n}</option>`).join('')}
       </select></div>
+      <button class="btn ghost block" id="horo-diag">Diagnostika horoskopu</button>
     </div>
     <div class="section-title">Systém</div>
     <div class="info-card glass">
@@ -886,6 +906,7 @@ function renderSettings() {
     } catch (e) { toast(e.message, true); }
   };
   document.getElementById('horo-on').onchange = (e) => saveHoro({ horoscope: e.target.checked });
+  document.getElementById('horo-diag').onclick = showHoroDiag;
   document.getElementById('horo-sign').onchange = (e) => saveHoro({ zodiac: e.target.value });
   document.getElementById('theme').onclick = () => {
     const t = theme === 'light' ? 'dark' : 'light';
