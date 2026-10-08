@@ -13,6 +13,9 @@ from datetime import datetime, timezone
 from .storage import mutate
 
 SECTIONS_PATH = "data/sections.json"
+SETTINGS_PATH = "data/settings.json"
+
+DEFAULT_SETTINGS = {"horoscope": True, "zodiac": "ryby"}
 
 # Typy sekcií určujú, aké polia má položka (frontend podľa nich kreslí formulár).
 SECTION_TYPES = {
@@ -95,6 +98,20 @@ def clean_item(fields: dict, partial=False) -> dict:
 class Repo:
     def __init__(self, store):
         self.store = store
+
+    # --- nastavenia ---
+    def settings(self):
+        data, _ = self.store.read_json(SETTINGS_PATH, {})
+        return {**DEFAULT_SETTINGS, **data}
+
+    def save_settings(self, changes: dict):
+        allowed = {k: changes[k] for k in DEFAULT_SETTINGS if k in changes}
+
+        def fn(data):
+            data.update(allowed)
+            return {**DEFAULT_SETTINGS, **data}
+
+        return mutate(self.store, SETTINGS_PATH, {}, fn, "Úprava nastavení")
 
     # --- sekcie ---
     def sections(self):

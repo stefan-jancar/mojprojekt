@@ -75,6 +75,13 @@ Alternatíva bez APK: otvor stránku v Chrome → ⋮ → **Pridať na plochu** 
 | Pokroky | denník pokrokov | dátum, hodnotenie |
 | Poznámky | čokoľvek iné | text, štítky |
 
+## Denný horoskop
+
+Na úvodnej obrazovke sa zobrazuje denný horoskop z [noviny.sk](https://www.noviny.sk/horoskopy)
+(znamenie a zapnutie/vypnutie v Nastaveniach). noviny.sk nemajú API, text sa vyberá z HTML stránky
+v `backend/horoscope.py`. Ak prestane fungovať (zmenili vzhľad stránky), otvor
+`/api/horoscope?debug=1` – ukáže, čo sa zo stránky podarilo načítať.
+
 ## Ako sú uložené dáta (v dátovom repozitári)
 
 ```
