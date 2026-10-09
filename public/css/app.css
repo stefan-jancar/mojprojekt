@@ -338,6 +338,36 @@ input[type=color] { width: 100%; height: 48px; border: 1px solid var(--border); 
 .viewer .vb { flex: 1; overflow: auto; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .viewer canvas, .viewer img { max-width: 100%; border-radius: 6px; background: #fff; }
 
+/* ---------- miniatúry a galéria ---------- */
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; }
+.thumb { position: relative; aspect-ratio: 1; }
+.thumb-img, .card-thumb { width: 100%; height: 100%; padding: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  background: var(--surface-2); cursor: pointer; display: block; position: relative; }
+.thumb-img img, .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .25s; }
+.thumb-img img.ok, .card-thumb img.ok { opacity: 1; }
+.thumb-x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; padding: 0;
+  background: rgba(0, 0, 0, .6); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.thumb-x .ic { width: 14px; height: 14px; }
+.card-thumbs { display: flex; gap: 6px; margin-top: 10px; }
+.card-thumb { width: 54px; height: 54px; flex: none; border-radius: 10px; }
+.card-thumb span { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, .55); color: #fff; font-weight: 700; font-size: 14px; }
+.viewer.gallery { background: #050508; }
+.gallery .vh .g-count { color: rgba(255, 255, 255, .7); font-size: 14px; white-space: nowrap; }
+.g-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; touch-action: pan-y; min-height: 0; }
+.g-stage .g-img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0; background: none; opacity: 0; transition: opacity .2s; user-select: none; -webkit-user-drag: none; }
+.g-stage .g-img.ok { opacity: 1; }
+.g-spin { position: absolute; }
+.g-spin[hidden] { display: none; }
+.g-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .2);
+  background: rgba(0, 0, 0, .45); color: #fff; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(6px); }
+.g-nav.prev { left: 10px; }
+.g-nav.next { right: 10px; }
+.g-nav:active { transform: translateY(-50%) scale(.92); }
+.g-strip { display: flex; gap: 6px; padding: 10px 14px calc(14px + env(safe-area-inset-bottom)); overflow-x: auto; scrollbar-width: none; }
+.g-strip button { width: 56px; height: 56px; flex: none; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid transparent; background: rgba(255, 255, 255, .08); opacity: .55; cursor: pointer; }
+.g-strip button.on { border-color: #fff; opacity: 1; }
+.g-strip img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0; background: none; }
+
 /* ---------- toast ---------- */
 .toast {
   position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top)); transform: translateX(-50%); z-index: 100;

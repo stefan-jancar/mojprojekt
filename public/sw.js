@@ -1,6 +1,6 @@
 // Service worker: aplikácia sa načíta aj bez internetu (dáta sa zobrazia z poslednej kópie).
-const CACHE = 'moj-priestor-v6';
-const SHELL = ['/', '/index.html', '/css/theme.css?v=6', '/css/app.css?v=6', '/js/app.js?v=6', '/js/icons.js', '/manifest.webmanifest', '/assets/icons/icon.svg'];
+const CACHE = 'moj-priestor-v7';
+const SHELL = ['/', '/index.html', '/css/theme.css?v=7', '/css/app.css?v=7', '/js/app.js?v=7', '/js/icons.js', '/manifest.webmanifest', '/assets/icons/icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

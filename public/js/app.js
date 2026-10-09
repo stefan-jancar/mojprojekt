@@ -453,6 +453,7 @@ function cardHTML(sec, it) {
         <div class="title">${esc(it.title)}</div>
         ${note}
         <div class="meta">${meta}</div>
+        ${thumbStrip(it)}
       </div>
       ${right}
     </div>`;
@@ -633,6 +634,14 @@ function bindSection(sec) {
   $app.querySelectorAll('[data-toggle]').forEach((b) => {
     b.onclick = (e) => { e.stopPropagation(); toggleDone(sec, b.dataset.toggle); };
   });
+  $app.querySelectorAll('[data-cgal]').forEach((b) => {
+    b.onclick = (e) => {
+      e.stopPropagation();
+      const it = (state.items[sec.id] || []).find((i) => i.id === b.dataset.item);
+      if (it) openGallery((it.files || []).filter(isImg), Number(b.dataset.cgal));
+    };
+  });
+  hydrateThumbs($app, true);
   $app.querySelectorAll('[data-open]').forEach((c) => {
     c.onclick = () => openEditor(sec, (state.items[sec.id] || []).find((i) => i.id === c.dataset.open));
   });
@@ -762,9 +771,16 @@ async function shrinkImage(file) {
 }
 
 function filesHTML(item) {
-  return (item?.files || []).map((f) => `
+  const files = item?.files || [];
+  const imgs = files.filter(isImg);
+  const thumbs = imgs.length ? `<div class="thumbs">${imgs.map((f, i) => `
+    <div class="thumb">
+      <button type="button" class="thumb-img" data-gal="${i}" aria-label="Zobraziť ${esc(f.name)}"><img data-src="${esc(f.path)}" alt=""></button>
+      <button type="button" class="thumb-x" data-rmfile="${esc(f.path)}" aria-label="Odstrániť ${esc(f.name)}">${icon('x')}</button>
+    </div>`).join('')}</div>` : '';
+  return thumbs + files.filter((f) => !isImg(f)).map((f) => `
     <div class="file-row">
-      ${icon(f.type?.startsWith('image') ? 'image' : 'file')}
+      ${icon('file')}
       <div class="nm" data-view="${esc(f.path)}">${esc(f.name)}<br><small>${fileSize(f.size)}</small></div>
       <button type="button" class="icon-btn danger" data-rmfile="${esc(f.path)}" aria-label="Odstrániť">${icon('trash')}</button>
     </div>`).join('');
@@ -805,6 +821,10 @@ function openEditor(sec, item) {
     sheet.querySelectorAll('[data-view]').forEach((el) => {
       el.onclick = () => openFile((item.files || []).find((f) => f.path === el.dataset.view));
     });
+    sheet.querySelectorAll('[data-gal]').forEach((el) => {
+      el.onclick = () => openGallery((item.files || []).filter(isImg), Number(el.dataset.gal));
+    });
+    hydrateThumbs(sheet);
     sheet.querySelectorAll('[data-rmfile]').forEach((el) => {
       el.onclick = async () => {
         if (!confirm('Odstrániť súbor?')) return;
@@ -904,7 +924,113 @@ function loadPdfJs() {
   return pdfjsPromise;
 }
 
+/* ---------- miniatúry a galéria fotiek ---------- */
+const isImg = (f) => (f.type || '').startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f.name || f.path || '');
+const imgUrls = new Map(); // cesta → Promise<objectURL>, aby sa každá fotka sťahovala len raz
+
+function imageUrl(path) {
+  if (!imgUrls.has(path)) {
+    const p = api('/file?path=' + encodeURIComponent(path), { raw: true }).then((b) => URL.createObjectURL(b));
+    p.catch(() => imgUrls.delete(path));
+    imgUrls.set(path, p);
+  }
+  return imgUrls.get(path);
+}
+
+function thumbStrip(it) {
+  const imgs = (it.files || []).filter(isImg);
+  if (!imgs.length) return '';
+  const shown = imgs.slice(0, 4);
+  return `<div class="card-thumbs">${shown.map((f, i) => `
+    <button type="button" class="card-thumb" data-cgal="${i}" data-item="${it.id}" aria-label="Zobraziť fotku ${i + 1}">
+      <img data-src="${esc(f.path)}" alt="">${i === shown.length - 1 && imgs.length > shown.length ? `<span>+${imgs.length - shown.length}</span>` : ''}
+    </button>`).join('')}</div>`;
+}
+
+let thumbObserver;
+function hydrateThumbs(root, lazy = false) {
+  const load = (img) => {
+    if (img.dataset.loaded) return;
+    img.dataset.loaded = '1';
+    imageUrl(img.dataset.src).then((u) => { img.src = u; img.classList.add('ok'); }).catch(() => img.classList.add('err'));
+  };
+  const imgs = root.querySelectorAll('img[data-src]');
+  if (!lazy || !('IntersectionObserver' in window)) { imgs.forEach(load); return; }
+  thumbObserver ||= new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { thumbObserver.unobserve(e.target); load(e.target); }
+  }), { rootMargin: '200px' });
+  imgs.forEach((img) => thumbObserver.observe(img));
+}
+
+function openGallery(files, start = 0) {
+  if (!files.length) return;
+  let i = Math.max(0, Math.min(start, files.length - 1));
+  const multi = files.length > 1;
+  const v = document.createElement('div');
+  v.className = 'viewer gallery';
+  v.innerHTML = `
+    <div class="vh"><button class="icon-btn" data-x aria-label="Zavrieť">${icon('x')}</button>
+      <b class="g-name"></b><span class="g-count"></span>
+      <a class="icon-btn" data-dl aria-label="Stiahnuť">${icon('download')}</a></div>
+    <div class="g-stage">
+      <img class="g-img" alt=""><div class="spinner g-spin"></div>
+      ${multi ? `<button class="g-nav prev" aria-label="Predchádzajúca">${icon('back')}</button>
+      <button class="g-nav next" aria-label="Ďalšia">${icon('chevron')}</button>` : ''}
+    </div>
+    ${multi ? `<div class="g-strip">${files.map((f, k) => `<button data-k="${k}" aria-label="Fotka ${k + 1}"><img data-src="${esc(f.path)}" alt=""></button>`).join('')}</div>` : ''}`;
+  document.body.appendChild(v);
+  const img = v.querySelector('.g-img'), spin = v.querySelector('.g-spin');
+
+  const show = async (k) => {
+    i = (k + files.length) % files.length;
+    const f = files[i];
+    v.querySelector('.g-name').textContent = f.name;
+    v.querySelector('.g-count').textContent = multi ? `${i + 1} / ${files.length}` : '';
+    v.querySelectorAll('.g-strip button').forEach((b) => b.classList.toggle('on', Number(b.dataset.k) === i));
+    v.querySelector(`.g-strip button[data-k="${i}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    img.classList.remove('ok');
+    spin.hidden = false;
+    try {
+      const u = await imageUrl(f.path);
+      if (files[i] !== f) return; // medzitým prepnuté na inú
+      img.src = u;
+      img.classList.add('ok');
+      const dl = v.querySelector('[data-dl]');
+      dl.href = u; dl.download = f.name;
+    } catch (e) { toast(e.message, true); }
+    spin.hidden = true;
+    // prednačítaj susedné
+    if (multi) { imageUrl(files[(i + 1) % files.length].path); imageUrl(files[(i - 1 + files.length) % files.length].path); }
+  };
+
+  const close = () => { v.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowRight') show(i + 1);
+    else if (e.key === 'ArrowLeft') show(i - 1);
+  };
+  document.addEventListener('keydown', onKey);
+  v.querySelector('[data-x]').onclick = close;
+  v.querySelector('.g-nav.prev')?.addEventListener('click', () => show(i - 1));
+  v.querySelector('.g-nav.next')?.addEventListener('click', () => show(i + 1));
+  v.querySelectorAll('.g-strip button').forEach((b) => { b.onclick = () => show(Number(b.dataset.k)); });
+
+  // potiahnutie prstom doľava/doprava
+  let x0 = null;
+  const stage = v.querySelector('.g-stage');
+  stage.addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+  stage.addEventListener('pointerup', (e) => {
+    if (x0 == null || !multi) return;
+    const dx = e.clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+  });
+  hydrateThumbs(v);
+  show(i);
+}
+
 async function openFile(f) {
+  if (f && isImg(f)) return openGallery([f]);
   if (!f) return;
   const v = document.createElement('div');
   v.className = 'viewer';
@@ -1070,7 +1196,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.4</span></div>
+      <div class="r"><span>Verzia</span><span>1.5</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
