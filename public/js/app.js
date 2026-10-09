@@ -1107,7 +1107,7 @@ function renderAssistant() {
         <div class="hero">
           <div class="orb">${icon('sparkles')}</div>
           <h2>Ahoj, s čím pomôžem?</h2>
-          <p>${enabled ? 'Viem čítať a zapisovať do tvojich sekcií.' : 'Asistent zatiaľ nie je zapnutý – na Verceli nastav ANTHROPIC_API_KEY.'}</p>
+          <p>${enabled ? 'Viem čítať a zapisovať do tvojich sekcií.' : 'Asistent zatiaľ nie je zapnutý – na Verceli nastav GEMINI_API_KEY (zadarmo z aistudio.google.com).'}</p>
         </div>
         <div class="suggest">${SUGGESTIONS.map((s) => `<button class="chip" data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div>`}
       ${state.chat.map((m) => `<div class="msg ${m.role}">${mdLite(m.content)}</div>`).join('')}
@@ -1195,8 +1195,8 @@ function renderSettings() {
     <div class="section-title">Systém</div>
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
-      <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.6</span></div>
+      <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
+      <div class="r"><span>Verzia</span><span>1.7</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
