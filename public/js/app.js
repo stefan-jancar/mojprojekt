@@ -1196,7 +1196,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.5</span></div>
+      <div class="r"><span>Verzia</span><span>1.6</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
@@ -1291,6 +1291,34 @@ function editSection(idx) {
     saveSections(state.sections.filter((_, i) => i !== idx));
   });
 }
+
+/* =========================================================
+   Kontrola novej verzie – aplikácia beží v pamäti, preto sa sama
+   pozrie, či na serveri nie je novšia, a ponúkne aktualizáciu.
+   ========================================================= */
+const MY_VERSION = new URL(import.meta.url).searchParams.get('v');
+
+async function checkForUpdate() {
+  if (!MY_VERSION || document.getElementById('update-bar')) return;
+  try {
+    const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
+    const latest = html.match(/app\.js\?v=(\w+)/)?.[1];
+    if (latest && latest !== MY_VERSION) showUpdateBar();
+  } catch { /* offline – skúsime nabudúce */ }
+}
+
+function showUpdateBar() {
+  const bar = document.createElement('div');
+  bar.id = 'update-bar';
+  bar.className = 'update-bar';
+  bar.innerHTML = `<span>${icon('sparkles')}Je dostupná nová verzia</span><button class="btn">Aktualizovať</button>`;
+  bar.querySelector('button').onclick = () => location.reload();
+  document.body.appendChild(bar);
+}
+
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkForUpdate(); });
+setInterval(checkForUpdate, 15 * 60 * 1000);
+setTimeout(checkForUpdate, 5000);
 
 /* =========================================================
    Štart
