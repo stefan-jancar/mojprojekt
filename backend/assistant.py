@@ -13,6 +13,8 @@ import anthropic
 
 MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+# Ako dlho Gemini „premýšľa“ pred odpoveďou: minimal / low / medium / high / off (= predvolené modelu)
+GEMINI_THINKING = (os.environ.get("GEMINI_THINKING") or "low").lower()
 MAX_TOOL_ROUNDS = 8
 
 SYSTEM = """Si osobný asistent v aplikácii „Môj priestor“, kde si používateľ ukladá \
@@ -133,8 +135,18 @@ def _history(history):
     return messages
 
 
-def _system():
-    return SYSTEM + f"\n\nDnešný dátum: {date.today().isoformat()}."
+def _system(repo=None):
+    text = SYSTEM + f"\n\nDnešný dátum: {date.today().isoformat()}."
+    if repo is not None:
+        # zoznam sekcií rovno v zadaní ušetrí jedno kolo volania nástroja
+        try:
+            secs = repo.sections()
+            lines = [f"- {s['id']}: {s['name']} (typ {s['type']})" for s in secs]
+            text += "\n\nSekcie používateľa (id: názov):\n" + "\n".join(lines)
+            text += "\nNa položky v sekcii použi list_items s jej id; list_sections už volať netreba."
+        except Exception:
+            pass
+    return text
 
 
 def chat(repo, history):
@@ -152,8 +164,12 @@ def _chat_gemini(repo, messages):
     from google.genai import types
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    thinking = None
+    if GEMINI_THINKING in ("minimal", "low", "medium", "high"):
+        thinking = types.ThinkingConfig(thinking_level=GEMINI_THINKING.upper())
     config = types.GenerateContentConfig(
-        system_instruction=_system(),
+        system_instruction=_system(repo),
+        thinking_config=thinking,
         tools=[types.Tool(function_declarations=[
             types.FunctionDeclaration(name=t["name"], description=t["description"],
                                       parameters_json_schema=t["input_schema"])
@@ -168,7 +184,15 @@ def _chat_gemini(repo, messages):
     changed = False
 
     for _ in range(MAX_TOOL_ROUNDS):
-        response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
+        try:
+            response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
+        except genai.errors.ClientError as e:
+            # model nepozná nastavenie premýšľania (napr. starší model) → skús bez neho
+            if config.thinking_config is not None and e.code == 400 and "think" in str(e).lower():
+                config.thinking_config = None
+                response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
+            else:
+                raise
         calls = response.function_calls or []
         if not calls:
             text = (response.text or "").strip()
@@ -193,7 +217,7 @@ def _chat_gemini(repo, messages):
 
 def _chat_claude(repo, messages):
     client = anthropic.Anthropic()
-    system = _system()
+    system = _system(repo)
     changed = False
 
     for _ in range(MAX_TOOL_ROUNDS):
