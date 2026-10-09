@@ -227,13 +227,21 @@ function secIcon(sec, cls = '') {
   return `<div class="sec-ic ${cls}" style="--c:${esc(sec.color)}">${icon(sec.icon)}</div>`;
 }
 
+// slovenské skloňovanie podľa počtu: 1 / 2–4 / 0 a 5+
+const plural = (n, one, few, many) => `${n} ${n === 1 ? one : n >= 2 && n <= 4 ? few : many}`;
+
 function countLabel(sec, items) {
   if (!items) return '…';
   const t = sec.type;
-  if (t === 'checklist' || t === 'tasks') { const o = items.filter((i) => !i.done).length; return o ? `${o} otvorených` : 'Všetko hotové'; }
-  if (t === 'bills') { const o = items.filter((i) => !i.done && !isIncome(i)); return o.length ? `${o.length} nezaplatených` : 'Všetko zaplatené'; }
-  const n = items.length;
-  return n === 1 ? '1 položka' : n >= 2 && n <= 4 ? `${n} položky` : `${n} položiek`;
+  if (t === 'checklist' || t === 'tasks') {
+    const o = items.filter((i) => !i.done).length;
+    return o ? plural(o, 'otvorená', 'otvorené', 'otvorených') : 'Všetko hotové';
+  }
+  if (t === 'bills') {
+    const o = items.filter((i) => !i.done && !isIncome(i)).length;
+    return o ? plural(o, 'nezaplatený', 'nezaplatené', 'nezaplatených') : 'Všetko zaplatené';
+  }
+  return plural(items.length, 'položka', 'položky', 'položiek');
 }
 
 function buildStats() {
@@ -1229,7 +1237,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.8</span></div>
+      <div class="r"><span>Verzia</span><span>1.9</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
