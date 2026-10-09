@@ -7,6 +7,7 @@ Ak sú nastavené obe, použije sa Gemini (prípadne vynúť AI_PROVIDER=gemini 
 """
 import json
 import os
+import time
 from datetime import date
 
 import anthropic
@@ -15,6 +16,9 @@ MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
 # Ako dlho Gemini „premýšľa“ pred odpoveďou: minimal / low / medium / high / off (= predvolené modelu)
 GEMINI_THINKING = (os.environ.get("GEMINI_THINKING") or "low").lower()
+# Záložný model pri preťažení hlavného (503) alebo vyčerpanom limite (429); "off" = bez zálohy
+GEMINI_FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-flash-lite-latest")
+GEMINI_RETRY_WAIT = (1.5, 3.0)  # sekundy medzi pokusmi pri preťažení
 MAX_TOOL_ROUNDS = 8
 
 SYSTEM = """Si osobný asistent v aplikácii „Môj priestor“, kde si používateľ ukladá \
@@ -215,17 +219,38 @@ def _chat_gemini(repo, messages):
         for m in messages
     ]
     changed = False
+    state = {"model": GEMINI_MODEL}
+
+    def generate():
+        """Volanie Gemini s opakovaním pri preťažení a prepnutím na záložný model."""
+        models = [state["model"]]
+        if GEMINI_FALLBACK_MODEL.lower() not in ("", "off", "none") and GEMINI_FALLBACK_MODEL != state["model"]:
+            models.append(GEMINI_FALLBACK_MODEL)
+        last = None
+        for m_index, model in enumerate(models):
+            waits = GEMINI_RETRY_WAIT if m_index == 0 else (2.0,)
+            for attempt in range(len(waits) + 1):
+                try:
+                    resp = client.models.generate_content(model=model, contents=contents, config=config)
+                    state["model"] = model  # v tejto konverzácii už ostaň na modeli, ktorý odpovedal
+                    return resp
+                except genai.errors.ClientError as e:
+                    # model nepozná nastavenie premýšľania (napr. starší model) → skús bez neho
+                    if config.thinking_config is not None and e.code == 400 and "think" in str(e).lower():
+                        config.thinking_config = None
+                        continue
+                    if e.code == 429:  # vyčerpaný limit – opakovanie nepomôže, skús záložný model
+                        last = e
+                        break
+                    raise
+                except genai.errors.ServerError as e:  # 500/503 – preťaženie, chvíľu počkaj
+                    last = e
+                    if attempt < len(waits):
+                        time.sleep(waits[attempt])
+        raise last
 
     for _ in range(MAX_TOOL_ROUNDS):
-        try:
-            response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
-        except genai.errors.ClientError as e:
-            # model nepozná nastavenie premýšľania (napr. starší model) → skús bez neho
-            if config.thinking_config is not None and e.code == 400 and "think" in str(e).lower():
-                config.thinking_config = None
-                response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
-            else:
-                raise
+        response = generate()
         calls = response.function_calls or []
         if not calls:
             text = (response.text or "").strip()

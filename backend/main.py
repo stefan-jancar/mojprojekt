@@ -223,6 +223,8 @@ def ask_assistant(body: dict = Body(...)):
             code = getattr(e, "code", None)
             if code == 429:
                 raise HTTPException(429, "Gemini: prekročený limit požiadaviek, skús o chvíľu.")
+            if code in (500, 502, 503, 504):
+                raise HTTPException(503, "Gemini je momentálne preťažený (výpadok na strane Google). Skús to o chvíľu znova.")
             if code in (400, 401, 403, 404):
                 raise HTTPException(502, f"Gemini odmietol požiadavku ({code}) – skontroluj GEMINI_API_KEY a GEMINI_MODEL.")
             raise HTTPException(502, f"Chyba asistenta Gemini: {e}")
