@@ -733,6 +733,34 @@ function readForm(form, sec) {
   return out;
 }
 
+/* ---------- zmenšovanie fotiek pred nahraním ---------- */
+const SHRINK = { maxSide: 1920, quality: 0.8 };
+const shrinkOn = () => store.get('shrinkImages', true);
+
+async function shrinkImage(file) {
+  // GIF (animácie) a SVG nechávame tak; HEIC prehliadač väčšinou nevie otvoriť → ostane originál
+  if (!shrinkOn() || !/^image\/(jpeg|png|webp|heic|heif|bmp)$/i.test(file.type) || file.size < 300 * 1024) return file;
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const scale = Math.min(1, SHRINK.maxSide / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * scale), h = Math.round(bmp.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; // priehľadné PNG → biele pozadie (JPEG nemá priehľadnosť)
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    bmp.close?.();
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', SHRINK.quality));
+    if (!blob || blob.size >= file.size) return file;
+    const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+    toast(`${file.name}: ${fileSize(file.size)} → ${fileSize(blob.size)}`);
+    return new File([blob], name, { type: 'image/jpeg', lastModified: file.lastModified });
+  } catch {
+    return file; // formát, ktorý prehliadač nevie spracovať – nahrá sa originál
+  }
+}
+
 function filesHTML(item) {
   return (item?.files || []).map((f) => `
     <div class="file-row">
@@ -757,7 +785,7 @@ function openEditor(sec, item) {
     <form id="ef">
       ${T.fields.filter((k) => !(isNew && k === 'done')).map((k) => fieldHTML(k, sec, data[k])).join('')}
       ${(item?.links || []).length ? `<div class="files">${item.links.map((l) => `<a class="file-row" href="${esc(l)}" target="_blank" rel="noopener">${icon('link')}<span class="nm">${esc(l)}</span></a>`).join('')}</div>` : ''}
-      <div class="field"><label>Prílohy (PDF, obrázky… max 4 MB)</label></div>
+      <div class="field"><label>Prílohy (PDF, obrázky… max 4 MB${shrinkOn() ? ', fotky sa zmenšia' : ''})</label></div>
       <div class="files" id="files">${filesHTML(item)}</div>
       <label class="drop">${icon('upload')}<span id="droplbl">Pridať súbor</span>
         <input type="file" id="fi" multiple hidden accept="application/pdf,image/*,.stl,.step,.3mf,.gcode,.zip,.txt,.kicad_pcb,.sch,.ino">
@@ -793,6 +821,7 @@ function openEditor(sec, item) {
   bindFiles();
 
   const upload = async (it, file) => {
+    file = await shrinkImage(file);
     if (file.size > 4 * 1024 * 1024) { toast(`${file.name} je väčší ako 4 MB`, true); return it; }
     const fd = new FormData();
     fd.append('file', file);
@@ -1020,6 +1049,11 @@ function renderSettings() {
         <div class="nm">${theme === 'light' ? 'Svetlý režim' : 'Tmavý režim'}<small>Ťukni pre zmenu</small></div>
       </button>
     </div>
+    <div class="section-title">Súbory</div>
+    <div class="set-list">
+      <label class="switch glass" style="margin:0"><span>Zmenšovať fotky pri nahrávaní<br><small style="color:var(--muted)">max. ${SHRINK.maxSide} px, typicky 200–500 kB</small></span>
+        <input type="checkbox" id="shrink-on" ${shrinkOn() ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>
+    </div>
     <div class="section-title">Horoskop</div>
     <div class="set-list">
       <label class="switch glass" style="margin:0"><span>Zobrazovať denný horoskop</span>
@@ -1036,7 +1070,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? 'Zapnutý' : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.3</span></div>
+      <div class="r"><span>Verzia</span><span>1.4</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
@@ -1061,6 +1095,7 @@ function renderSettings() {
   document.getElementById('horo-diag').onclick = showHoroDiag;
   document.getElementById('horo-src').onchange = (e) => saveHoro({ horo_source: e.target.value });
   document.getElementById('horo-sign').onchange = (e) => saveHoro({ zodiac: e.target.value });
+  document.getElementById('shrink-on').onchange = (e) => { store.set('shrinkImages', e.target.checked); toast('Uložené'); };
   document.getElementById('theme').onclick = () => {
     const t = theme === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = t;
