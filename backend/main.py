@@ -84,6 +84,7 @@ def status():
     return {
         "storage": repo.store.kind,
         "assistant": assistant.enabled(),
+        "assistant_provider": assistant.provider(),
         "auth_required": bool(os.environ.get("APP_PASSWORD")) or ON_VERCEL,
         "section_types": SECTION_TYPES,
     }
@@ -208,7 +209,7 @@ def zodiac_signs():
 @app.post("/api/assistant", dependencies=[Depends(auth)])
 def ask_assistant(body: dict = Body(...)):
     if not assistant.enabled():
-        raise HTTPException(503, "Asistent nie je nastavený – pridaj ANTHROPIC_API_KEY.")
+        raise HTTPException(503, "Asistent nie je nastavený – pridaj GEMINI_API_KEY (alebo ANTHROPIC_API_KEY).")
     try:
         return assistant.chat(repo, body.get("messages") or [])
     except anthropic.RateLimitError:
@@ -217,6 +218,15 @@ def ask_assistant(body: dict = Body(...)):
         raise HTTPException(502, f"Chyba asistenta: {e.message}")
     except anthropic.APIConnectionError:
         raise HTTPException(502, "Asistent je nedostupný.")
+    except Exception as e:  # chyby Gemini (google.genai.errors)
+        if type(e).__module__.startswith("google"):
+            code = getattr(e, "code", None)
+            if code == 429:
+                raise HTTPException(429, "Gemini: prekročený limit požiadaviek, skús o chvíľu.")
+            if code in (400, 401, 403, 404):
+                raise HTTPException(502, f"Gemini odmietol požiadavku ({code}) – skontroluj GEMINI_API_KEY a GEMINI_MODEL.")
+            raise HTTPException(502, f"Chyba asistenta Gemini: {e}")
+        raise
 
 
 # Lokálne (uvicorn) servíruje aj frontend. Na Verceli ho servíruje CDN z priečinka public/.

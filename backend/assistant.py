@@ -1,4 +1,10 @@
-"""AI asistent (Claude). Vie čítať a pridávať/upravovať položky v sekciách."""
+"""AI asistent. Vie čítať a pridávať/upravovať položky v sekciách.
+
+Poskytovateľ sa vyberá podľa premenných prostredia:
+  GEMINI_API_KEY     → Google Gemini (model GEMINI_MODEL, predvolene gemini-flash-latest)
+  ANTHROPIC_API_KEY  → Claude (model ANTHROPIC_MODEL)
+Ak sú nastavené obe, použije sa Gemini (prípadne vynúť AI_PROVIDER=gemini / claude).
+"""
 import json
 import os
 from datetime import date
@@ -6,6 +12,7 @@ from datetime import date
 import anthropic
 
 MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
 MAX_TOOL_ROUNDS = 8
 
 SYSTEM = """Si osobný asistent v aplikácii „Môj priestor“, kde si používateľ ukladá \
@@ -15,6 +22,27 @@ elektronické projekty, 3D projekty, tvorbu webov, dokumenty, pokroky, prácu, v
 Máš nástroje na prácu s dátami. Keď sa používateľ pýta na svoje veci, najprv si ich načítaj. \
 Keď ťa požiada niečo zapísať (napr. „zajtra treba do školy fixky“), pridaj položku do správnej sekcie \
 a potvrď, čo si uložil. Dátumy zapisuj vo formáte RRRR-MM-DD. Nikdy nič nemaž, len pridávaj alebo upravuj."""
+
+FIELDS_SCHEMA = {
+    "type": "object",
+    "description": "Polia položky.",
+    "properties": {
+        "title": {"type": "string", "description": "Názov (povinný pri pridaní)"},
+        "note": {"type": "string"},
+        "date": {"type": "string", "description": "RRRR-MM-DD"},
+        "due": {"type": "string", "description": "termín / splatnosť RRRR-MM-DD"},
+        "amount": {"type": "number"},
+        "currency": {"type": "string"},
+        "done": {"type": "boolean"},
+        "progress": {"type": "number", "description": "0-100"},
+        "status": {"type": "string"},
+        "priority": {"type": "string"},
+        "person": {"type": "string"},
+        "kind": {"type": "string", "description": "v účtoch: expense = výdavok, income = príjem"},
+        "category": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}},
+    },
+}
 
 TOOLS = [
     {
@@ -42,7 +70,7 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "section_id": {"type": "string"},
-                "fields": {"type": "object", "description": "Polia položky, title je povinný."},
+                "fields": FIELDS_SCHEMA,
             },
             "required": ["section_id", "fields"],
         },
@@ -55,7 +83,7 @@ TOOLS = [
             "properties": {
                 "section_id": {"type": "string"},
                 "item_id": {"type": "string"},
-                "fields": {"type": "object"},
+                "fields": FIELDS_SCHEMA,
             },
             "required": ["section_id", "item_id", "fields"],
         },
@@ -63,8 +91,19 @@ TOOLS = [
 ]
 
 
+def provider():
+    forced = (os.environ.get("AI_PROVIDER") or "").lower()
+    if forced in ("gemini", "claude"):
+        return forced
+    if os.environ.get("GEMINI_API_KEY"):
+        return "gemini"
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return "claude"
+    return None
+
+
 def enabled() -> bool:
-    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+    return provider() is not None
 
 
 def _slim(item):
@@ -83,9 +122,7 @@ def _run_tool(repo, name, args):
     raise ValueError(f"Neznámy nástroj {name}")
 
 
-def chat(repo, history):
-    """history: [{"role": "user"|"assistant", "content": str}, ...]"""
-    client = anthropic.Anthropic()
+def _history(history):
     messages = [
         {"role": m["role"], "content": str(m["content"])}
         for m in history[-30:]
@@ -93,10 +130,70 @@ def chat(repo, history):
     ]
     while messages and messages[0]["role"] != "user":
         messages.pop(0)
+    return messages
+
+
+def _system():
+    return SYSTEM + f"\n\nDnešný dátum: {date.today().isoformat()}."
+
+
+def chat(repo, history):
+    """history: [{"role": "user"|"assistant", "content": str}, ...]"""
+    messages = _history(history)
     if not messages:
         return {"reply": "Napíš mi, s čím pomôcť.", "changed": False}
+    if provider() == "gemini":
+        return _chat_gemini(repo, messages)
+    return _chat_claude(repo, messages)
 
-    system = SYSTEM + f"\n\nDnešný dátum: {date.today().isoformat()}."
+
+def _chat_gemini(repo, messages):
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    config = types.GenerateContentConfig(
+        system_instruction=_system(),
+        tools=[types.Tool(function_declarations=[
+            types.FunctionDeclaration(name=t["name"], description=t["description"],
+                                      parameters_json_schema=t["input_schema"])
+            for t in TOOLS
+        ])],
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+    )
+    contents = [
+        types.Content(role="user" if m["role"] == "user" else "model", parts=[types.Part(text=m["content"])])
+        for m in messages
+    ]
+    changed = False
+
+    for _ in range(MAX_TOOL_ROUNDS):
+        response = client.models.generate_content(model=GEMINI_MODEL, contents=contents, config=config)
+        calls = response.function_calls or []
+        if not calls:
+            text = (response.text or "").strip()
+            return {"reply": text or "Na toto ti neviem odpovedať.", "changed": changed}
+
+        # odpoveď modelu vrátime celú (obsahuje aj podpisy „premýšľania“, ktoré Gemini vyžaduje)
+        contents.append(response.candidates[0].content)
+        parts = []
+        for fc in calls:
+            try:
+                out = _run_tool(repo, fc.name, dict(fc.args or {}))
+                if fc.name in ("add_item", "update_item"):
+                    changed = True
+                result = {"result": out}
+            except Exception as e:  # chyba nástroja ide späť modelu
+                result = {"error": str(e)}
+            parts.append(types.Part(function_response=types.FunctionResponse(id=fc.id, name=fc.name, response=result)))
+        contents.append(types.Content(role="user", parts=parts))
+
+    return {"reply": "Úloha bola príliš zložitá, skús ju rozdeliť na menšie kroky.", "changed": changed}
+
+
+def _chat_claude(repo, messages):
+    client = anthropic.Anthropic()
+    system = _system()
     changed = False
 
     for _ in range(MAX_TOOL_ROUNDS):
