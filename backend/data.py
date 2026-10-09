@@ -5,6 +5,7 @@
   files/<sekcia>/<polozka>/...  – priložené súbory (PDF, obrázky)
 """
 import re
+from urllib.parse import quote
 import secrets
 import time
 import unicodedata
@@ -59,6 +60,31 @@ def slugify(text: str) -> str:
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     text = re.sub(r"[^a-zA-Z0-9]+", "-", text).strip("-").lower()
     return text[:40] or new_id()
+
+
+MAX_SVG = 8000
+_SVG_BAD = re.compile(r"<\s*script|<\s*foreignobject|\bon[a-z]+\s*=|javascript:|<\s*iframe|xlink:href\s*=\s*[\"']?(?!#)", re.I)
+
+
+def svg_to_icon(svg: str) -> str:
+    """Vlastná SVG ikona → data URL (zobrazí sa cez <img>, kde sa skripty aj tak nespúšťajú)."""
+    svg = (svg or "").strip()
+    if not svg.lower().startswith("<svg") or not svg.lower().rstrip().endswith("</svg>"):
+        raise ValueError("Ikona musí byť SVG (<svg …>…</svg>)")
+    if len(svg) > MAX_SVG:
+        raise ValueError("SVG ikona je príliš veľká")
+    if _SVG_BAD.search(svg):
+        raise ValueError("SVG ikona obsahuje nepovolené prvky (skripty, odkazy)")
+    if "xmlns=" not in svg[:200]:
+        svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"', 1)
+    return "data:image/svg+xml;utf8," + quote(svg, safe="=:/,.-_()'")
+
+
+def clean_icon(icon) -> str:
+    icon = str(icon or "folder").strip()
+    if icon.startswith("data:image/svg+xml"):
+        return icon[: MAX_SVG * 3]
+    return icon[:300]
 
 
 def items_path(section_id: str) -> str:
@@ -133,11 +159,29 @@ class Repo:
             typ = s.get("type") if s.get("type") in SECTION_TYPES else "notes"
             clean.append({
                 "id": sid, "name": name[:60], "type": typ,
-                "icon": str(s.get("icon") or "folder")[:300],
+                "icon": clean_icon(s.get("icon")),
                 "color": str(s.get("color") or "#8b5cf6")[:20],
             })
         self.store.write_json(SECTIONS_PATH, clean, self.store.read_json(SECTIONS_PATH, None)[1], "Úprava sekcií")
         return clean
+
+    def update_section(self, sid, name=None, icon=None, svg=None, color=None):
+        sections = [dict(s) for s in self.sections()]
+        for s in sections:
+            if s["id"] == sid:
+                if name:
+                    s["name"] = str(name)
+                if svg:
+                    s["icon"] = svg_to_icon(svg)
+                elif icon:
+                    s["icon"] = str(icon)
+                if color:
+                    if not re.fullmatch(r"#[0-9a-fA-F]{6}", str(color)):
+                        raise ValueError("Farba musí byť v tvare #RRGGBB")
+                    s["color"] = color
+                saved = self.save_sections(sections)
+                return next(x for x in saved if x["id"] == sid)
+        raise KeyError("Sekcia neexistuje")
 
     def section(self, sid):
         for s in self.sections():

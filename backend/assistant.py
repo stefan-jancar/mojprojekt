@@ -23,7 +23,10 @@ elektronické projekty, 3D projekty, tvorbu webov, dokumenty, pokroky, prácu, v
 
 Máš nástroje na prácu s dátami. Keď sa používateľ pýta na svoje veci, najprv si ich načítaj. \
 Keď ťa požiada niečo zapísať (napr. „zajtra treba do školy fixky“), pridaj položku do správnej sekcie \
-a potvrď, čo si uložil. Dátumy zapisuj vo formáte RRRR-MM-DD. Nikdy nič nemaž, len pridávaj alebo upravuj."""
+a potvrď, čo si uložil. Dátumy zapisuj vo formáte RRRR-MM-DD. Nikdy nič nemaž, len pridávaj alebo upravuj.
+
+Vzhľad sekcie (ikonu, farbu, názov) meníš nástrojom update_section. Keď si používateľ pýta ikonu, rovno ju nastav – buď vstavanú ikonu, emoji, alebo nakresli vlastnú SVG ikonu – a krátko povedz, čo si nastavil. Neposielaj používateľovi SVG kód, ten sa zobrazí v aplikácii sám.
+Odpovede formátuj jednoducho: krátke odseky, odrážky „- “, **tučné** písmo."""
 
 FIELDS_SCHEMA = {
     "type": "object",
@@ -45,6 +48,9 @@ FIELDS_SCHEMA = {
         "tags": {"type": "array", "items": {"type": "string"}},
     },
 }
+
+BUILTIN_ICONS = ("chip, cube, globe, file, trend, briefcase, backpack, wallet, folder, star, note, bolt, heart, "
+                 "camera, book, code, wrench, car, music, printer, target, cart, image, home, sparkles, calendar, lock")
 
 TOOLS = [
     {
@@ -112,7 +118,34 @@ def _slim(item):
     return {k: v for k, v in item.items() if k not in ("created",) and v not in (None, "", [])}
 
 
+TOOLS.append({
+    "name": "update_section",
+    "description": (
+        "Zmení vzhľad sekcie: ikonu, farbu alebo názov. Ikona môže byť: (a) vstavaná – jedno z: "
+        + BUILTIN_ICONS + "; (b) emoji, napr. 🚗; (c) vlastná SVG ikona v parametri svg. "
+        "Pravidlá pre SVG: <svg viewBox=\"0 0 64 64\">…</svg>, jednoduchá plochá ikona, výrazné farby uvedené priamo "
+        "(fill/stroke ako #RRGGBB, nie currentColor), priehľadné pozadie, bez textu, skriptov a odkazov, do 4000 znakov."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "section_id": {"type": "string"},
+            "icon": {"type": "string", "description": "vstavaná ikona alebo emoji"},
+            "svg": {"type": "string", "description": "kompletný SVG kód vlastnej ikony"},
+            "color": {"type": "string", "description": "farba sekcie #RRGGBB"},
+            "name": {"type": "string", "description": "nový názov sekcie"},
+        },
+        "required": ["section_id"],
+    },
+})
+
+
 def _run_tool(repo, name, args):
+    if name == "update_section":
+        sec = repo.update_section(args["section_id"], name=args.get("name"), icon=args.get("icon"),
+                                  svg=args.get("svg"), color=args.get("color"))
+        return {"id": sec["id"], "name": sec["name"], "color": sec["color"],
+                "icon": "vlastná SVG ikona" if sec["icon"].startswith("data:") else sec["icon"]}
     if name == "list_sections":
         return [{"id": s["id"], "name": s["name"], "type": s["type"]} for s in repo.sections()]
     if name == "list_items":
@@ -204,7 +237,7 @@ def _chat_gemini(repo, messages):
         for fc in calls:
             try:
                 out = _run_tool(repo, fc.name, dict(fc.args or {}))
-                if fc.name in ("add_item", "update_item"):
+                if fc.name in ("add_item", "update_item", "update_section"):
                     changed = True
                 result = {"result": out}
             except Exception as e:  # chyba nástroja ide späť modelu
@@ -245,7 +278,7 @@ def _chat_claude(repo, messages):
                 continue
             try:
                 out = _run_tool(repo, block.name, block.input or {})
-                if block.name in ("add_item", "update_item"):
+                if block.name in ("add_item", "update_item", "update_section"):
                     changed = True
                 results.append({"type": "tool_result", "tool_use_id": block.id,
                                 "content": json.dumps(out, ensure_ascii=False)})

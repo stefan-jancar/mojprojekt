@@ -1091,8 +1091,41 @@ const SUGGESTIONS = [
   'Zhrň moje rozpracované projekty',
 ];
 
-function mdLite(s) {
-  return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+/* Jednoduchý Markdown pre odpovede asistenta (všetko sa najprv escapuje). */
+function mdInline(t) {
+  return t
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s.,!?)]|$)/g, '$1<i>$2</i>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+
+function md(src) {
+  const lines = esc(src).replace(/\r/g, '').split('\n');
+  let out = '', list = null, para = [];
+  const flushPara = () => { if (para.length) { out += `<p>${para.map(mdInline).join('<br>')}</p>`; para = []; } };
+  const closeList = () => { if (list) { out += `</${list}>`; list = null; } };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const fence = line.match(/^\s*```/);
+    if (fence) {
+      flushPara(); closeList();
+      const code = [];
+      while (++i < lines.length && !/^\s*```/.test(lines[i])) code.push(lines[i]);
+      out += `<pre><code>${code.join('\n')}</code></pre>`;
+      continue;
+    }
+    let m;
+    if ((m = line.match(/^\s*(#{1,6})\s+(.*)$/))) { flushPara(); closeList(); out += `<h4>${mdInline(m[2])}</h4>`; continue; }
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { flushPara(); closeList(); out += '<hr>'; continue; }
+    if ((m = line.match(/^\s*[-*•]\s+(.*)$/))) { flushPara(); if (list !== 'ul') { closeList(); out += '<ul>'; list = 'ul'; } out += `<li>${mdInline(m[1])}</li>`; continue; }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { flushPara(); if (list !== 'ol') { closeList(); out += '<ol>'; list = 'ol'; } out += `<li>${mdInline(m[1])}</li>`; continue; }
+    if (!line.trim()) { flushPara(); closeList(); continue; }
+    closeList();
+    para.push(line);
+  }
+  flushPara(); closeList();
+  return out;
 }
 
 function renderAssistant() {
@@ -1110,7 +1143,7 @@ function renderAssistant() {
           <p>${enabled ? 'Viem čítať a zapisovať do tvojich sekcií.' : 'Asistent zatiaľ nie je zapnutý – na Verceli nastav GEMINI_API_KEY (zadarmo z aistudio.google.com).'}</p>
         </div>
         <div class="suggest">${SUGGESTIONS.map((s) => `<button class="chip" data-sug="${esc(s)}">${esc(s)}</button>`).join('')}</div>`}
-      ${state.chat.map((m) => `<div class="msg ${m.role}">${mdLite(m.content)}</div>`).join('')}
+      ${state.chat.map((m) => (m.role === 'assistant' ? `<div class="msg assistant md">${md(m.content)}</div>` : `<div class="msg user">${esc(m.content)}</div>`)).join('')}
     </div>
     <form class="composer glass" id="cf">
       <textarea rows="1" name="m" placeholder="Napíš správu…" ${enabled ? '' : 'disabled'}></textarea>
@@ -1138,7 +1171,7 @@ function renderAssistant() {
     try {
       const res = await api('/assistant', { method: 'POST', json: { messages: state.chat } });
       state.chat.push({ role: 'assistant', content: res.reply });
-      if (res.changed) { state.items = {}; state.overview = null; }
+      if (res.changed) { state.items = {}; state.overview = null; state.sections = null; store.del('cache:sections'); }
     } catch (err) {
       state.chat.push({ role: 'assistant', content: '⚠️ ' + err.message });
     }
@@ -1196,7 +1229,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.7</span></div>
+      <div class="r"><span>Verzia</span><span>1.8</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
