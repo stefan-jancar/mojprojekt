@@ -1,6 +1,8 @@
 /* =========================================================
    Elektro – príprava na skúšku (kvízová hra a kartičky)
    ========================================================= */
+import { TOOLS, renderTool } from './tools.js';
+
 let C; // kontext z app.js: { $app, $nav, api, icon, esc, toast, store, plural }
 const S = { catalog: null, quiz: {}, cards: {}, stats: null };
 const POINTS = 100;
@@ -10,6 +12,7 @@ const PASS = 0.75;
 export function renderElektro(ctx, sub) {
   C = ctx;
   if (sub === 'karticky') return renderCards();
+  if (TOOLS.some((t) => t.id === sub)) return renderTool(ctx, sub);
   return renderHub();
 }
 
@@ -81,6 +84,9 @@ function paintHub() {
       ${cMeta ? `<a class="ez-mode glass" href="#/elektro/karticky" style="--c:#22d3ee">
         <div class="sec-ic">${icon('book')}</div><div><b>Kartičky – otvorené otázky</b><span>${known} / ${cMeta.count} vieš · odpovede so schémami</span></div>${icon('chevron')}</a>` : ''}
     </div>
+    <div class="section-title">Nástroje</div>
+    <div class="ez-tools">${TOOLS.map((t) => `<a class="tile glass ez-tool" href="#/elektro/${t.id}" style="--c:${t.color}">
+      <div class="sec-ic">${icon(t.icon)}</div><div><div class="name">${esc(t.name)}</div><div class="count">${esc(t.sub)}</div></div></a>`).join('')}</div>
     <div class="section-title">Precvičiť okruh</div>
     <div class="ez-topics">${qMeta.topics.map((t) => {
       const ids = S.quiz[qMeta.id]?.questions.filter((q) => q.topic === t).map((q) => q.id) || [];
