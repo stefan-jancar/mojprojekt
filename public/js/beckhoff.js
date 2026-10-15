@@ -18,6 +18,8 @@ const KIND = {
   nc: ['Nezapojené', '#6b7280'], contact: ['Kontakt', '#d9822b'], sensor: ['Snímač', '#14b8a6'], comm: ['Komunikácia', '#9b51e0'], other: ['Iné', '#a0a0b0'],
 };
 const kindOf = (k) => KIND[k] || KIND.other;
+const busOf = (t) => (/^(KL|BK|BC)/.test(t.id) ? 'KL' : 'EL');
+const alt = (t) => (busOf(t) === 'KL' ? t.el : t.kl) || [];
 
 const $ = (s, r = document) => r.querySelector(s);
 
@@ -34,7 +36,8 @@ export async function renderBeckhoff(ctx, id) {
   C.$app.innerHTML = '<div class="spinner"></div>';
   try { await load(); } catch (e) { C.toast(e.message, true); return; }
   if (id) {
-    const t = DATA.find((x) => x.id.toUpperCase() === id.toUpperCase() || (x.kl || []).some((k) => k.toUpperCase() === id.toUpperCase()));
+    const U = id.toUpperCase();
+    const t = DATA.find((x) => x.id.toUpperCase() === U) || DATA.find((x) => (x.kl || []).some((k) => k.toUpperCase() === U));
     if (t) return detail(t, id.toUpperCase());
   }
   list();
@@ -43,11 +46,16 @@ export async function renderBeckhoff(ctx, id) {
 /* ---------- zoznam ---------- */
 function list() {
   const { icon, esc } = C;
-  const st = C.store.get('bk:filter', { fam: 'all', q: '' });
+  const st = { bus: 'all', ...C.store.get('bk:filter', { fam: 'all', q: '' }) };
   C.$app.innerHTML = `
     <div class="topbar"><a class="icon-btn" href="#/elektro" aria-label="Späť">${icon('back')}</a>
       <div class="sec-ic" style="--c:#e5484d">${icon('chip')}</div><h1>Beckhoff svorky</h1></div>
     <div class="search glass bk-search">${icon('search')}<input id="bk-q" placeholder="Hľadaj: EL1008, KL2408, PT100, relé…" value="${esc(st.q)}" autocomplete="off"></div>
+    <div class="chips" id="bk-bus">
+      <button class="chip" data-b="all">EL aj KL</button>
+      <button class="chip" data-b="EL">EL · EtherCAT</button>
+      <button class="chip" data-b="KL">KL · K-bus</button>
+    </div>
     <div class="chips" id="bk-fam">
       <button class="chip" data-f="all">Všetko</button>
       ${Object.entries(FAM).map(([k, f]) => `<button class="chip" data-f="${k}"><i class="bk-dot" style="background:${f.color}"></i>${f.short}</button>`).join('')}
@@ -57,17 +65,19 @@ function list() {
   const paint = () => {
     C.store.set('bk:filter', st);
     C.$app.querySelectorAll('#bk-fam .chip').forEach((b) => b.classList.toggle('on', b.dataset.f === st.fam));
+    C.$app.querySelectorAll('#bk-bus .chip').forEach((b) => b.classList.toggle('on', b.dataset.b === st.bus));
     const q = st.q.trim().toLowerCase();
-    const items = DATA.filter((t) => (st.fam === 'all' || t.family === st.fam)
-      && (!q || [t.id, ...(t.kl || []), t.name, t.desc, ...(t.specs || [])].join(' ').toLowerCase().includes(q)));
+    const items = DATA.filter((t) => (st.fam === 'all' || t.family === st.fam) && (st.bus === 'all' || busOf(t) === st.bus)
+      && (!q || [t.id, ...(t.kl || []), ...(t.el || []), t.name, t.desc, ...(t.specs || [])].join(' ').toLowerCase().includes(q)));
     const groups = Object.keys(FAM).map((f) => [f, items.filter((t) => t.family === f)]).filter(([, a]) => a.length);
     $('#bk-list').innerHTML = groups.length ? groups.map(([f, arr]) => `
       <div class="section-title">${FAM[f].name} <span class="bk-n">${arr.length}</span></div>
       <div class="bk-grid">${arr.map((t) => `<a class="bk-item glass" href="#/elektro/beckhoff/${encodeURIComponent(t.id)}">
-        ${mini(t)}<div><b>${esc(t.id)}</b>${(t.kl || []).length ? `<small>${esc(t.kl.join(', '))}</small>` : ''}<span>${esc(t.name)}</span></div></a>`).join('')}</div>`).join('')
+        ${mini(t)}<div><b>${esc(t.id)}</b>${alt(t).length ? `<small>${esc(alt(t).join(', '))}</small>` : ''}<span>${esc(t.name)}</span></div></a>`).join('')}</div>`).join('')
       : '<div class="empty glass" style="padding:24px;text-align:center;color:var(--muted)">Nič sa nenašlo.</div>';
   };
   C.$app.querySelectorAll('#bk-fam .chip').forEach((b) => { b.onclick = () => { st.fam = b.dataset.f; paint(); }; });
+  C.$app.querySelectorAll('#bk-bus .chip').forEach((b) => { b.onclick = () => { st.bus = b.dataset.b; paint(); }; });
   $('#bk-q').oninput = (e) => { st.q = e.target.value; paint(); };
   paint();
 }
@@ -156,7 +166,7 @@ function detail(t, asked) {
     <div class="bk-head glass">
       <span class="bk-fam" style="--c:${f.color}">${f.name}</span>
       <h2>${esc(t.name)}</h2>
-      ${asked && asked !== t.id.toUpperCase() ? `<div class="bk-kl">Ekvivalent ${esc(asked)} má rovnaké zapojenie.</div>` : (t.kl || []).length ? `<div class="bk-kl">Rovnaké zapojenie: <b>${esc(t.kl.join(', '))}</b></div>` : ''}
+      ${asked && asked !== t.id.toUpperCase() ? `<div class="bk-kl">Ekvivalent ${esc(asked)} má rovnaké zapojenie.</div>` : alt(t).length ? `<div class="bk-kl">${busOf(t) === 'KL' ? 'Náhrada v EtherCAT' : 'Náhrada v K-bus'}: ${alt(t).map((a) => DATA.some((x) => x.id === a) ? `<a href="#/elektro/beckhoff/${esc(a)}"><b>${esc(a)}</b></a>` : `<b>${esc(a)}</b>`).join(', ')}${t.same_pins === false ? ' <small>(iné rozloženie svoriek)</small>' : ''}</div>` : ''}
       <p>${esc(t.desc || '')}</p>
       ${(t.specs || []).length ? `<div class="bk-specs">${t.specs.map((s) => `<span>${esc(s)}</span>`).join('')}</div>` : ''}
       ${t.confidence === 'low' ? '<div class="bk-warn bad">⚠️ Zapojenie nie je overené v tabuľke výrobcu – pred zapojením ho určite skontroluj podľa potlače na svorke a dokumentácie.</div>'
