@@ -161,7 +161,7 @@ function route() {
   if (p[0] === 's' && p[1]) return { view: 'section', id: decodeURIComponent(p[1]) };
   if (p[0] === 'asistent') return { view: 'assistant' };
   if (p[0] === 'nastavenia') return { view: 'settings' };
-  if (p[0] === 'elektro') return { view: 'elektro', sub: p[1] || '' };
+  if (p[0] === 'elektro') return { view: 'elektro', sub: p[1] || '', arg: p[2] ? decodeURIComponent(p[2]) : '' };
   return { view: 'home' };
 }
 
@@ -183,7 +183,7 @@ async function render() {
   if (r.view === 'section') return renderSection(r.id);
   if (r.view === 'assistant') return renderAssistant();
   if (r.view === 'settings') return renderSettings();
-  if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural }, r.sub);
+  if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural }, r.sub, r.arg);
   return renderHome();
 }
 
@@ -1273,7 +1273,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.14</span></div>
+      <div class="r"><span>Verzia</span><span>1.15</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
