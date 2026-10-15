@@ -1,5 +1,6 @@
 import { icon, PICKABLE } from './icons.js';
 import { renderElektro } from './elektro.js';
+import { renderCircuit } from './circuit.js';
 
 /* =========================================================
    Stav a pomocné funkcie
@@ -174,6 +175,7 @@ function route() {
   if (p[0] === 's' && p[1]) return { view: 'section', id: decodeURIComponent(p[1]) };
   if (p[0] === 'asistent') return { view: 'assistant' };
   if (p[0] === 'nastavenia') return { view: 'settings' };
+  if (p[0] === 'obvod' && p[2]) return { view: 'circuit', sec: decodeURIComponent(p[1]), id: decodeURIComponent(p[2]) };
   if (p[0] === 'elektro') return { view: 'elektro', sub: p[1] || '', arg: p[2] ? decodeURIComponent(p[2]) : '' };
   return { view: 'home' };
 }
@@ -181,7 +183,7 @@ function route() {
 function renderNav(active) {
   const links = [['#/', 'home', 'Domov', 'home'], ['#/elektro', 'bolt', 'Elektro', 'elektro'], ['#/asistent', 'sparkles', 'Asistent', 'assistant'], ['#/nastavenia', 'settings', 'Nastavenia', 'settings']];
   $nav.hidden = false;
-  $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${active === v || (active === 'section' && v === 'home') ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('');
+  $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${active === v || ((active === 'section' || active === 'circuit') && v === 'home') ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('');
 }
 
 async function render() {
@@ -196,6 +198,7 @@ async function render() {
   if (r.view === 'section') return renderSection(r.id);
   if (r.view === 'assistant') return renderAssistant();
   if (r.view === 'settings') return renderSettings();
+  if (r.view === 'circuit') return renderCircuit({ $app, api, icon, esc, toast, store, openViewer, saveBlob, items: state.items, catalog: loadPartsCatalog }, r.sec, r.id);
   if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural, openViewer, saveBlob, nativeApp, canNativeShare }, r.sub, r.arg);
   return renderHome();
 }
@@ -451,7 +454,7 @@ function cardHTML(sec, it) {
   if (t === 'projects') {
     const st = it.status || 'Nápad';
     const cls = st === 'Hotové' ? 'ok' : st === 'Rozpracované' ? 'accent' : st === 'Pozastavené' ? 'warn' : '';
-    meta = `<span class="badge ${cls}">${esc(st)}</span>${(it.links || []).length ? `<span class="badge">${icon('link')}${it.links.length}</span>` : ''}${fileBadge}${tags}`;
+    meta = `<span class="badge ${cls}">${esc(st)}</span>${it.circuit ? `<span class="badge accent">${icon('chip')}schéma</span>` : ''}${(it.links || []).length ? `<span class="badge">${icon('link')}${it.links.length}</span>` : ''}${fileBadge}${tags}`;
     const p = Math.max(0, Math.min(100, Number(it.progress) || 0));
     meta += '</div>' + (p ? `<div class="progress"><i style="width:${p}%"></i></div>` : '') + '<div>';
     lead = secIcon(sec);
@@ -636,7 +639,7 @@ function sectionHTML(sec) {
       <h1>${esc(sec.name)}</h1>
     </div>
     <div class="toolbar"><label class="search glass">${icon('search')}<input id="q" placeholder="Hľadať…" value="${esc(state.query)}"></label></div>
-    ${sec.type === 'components' ? `<button class="btn block ideas-btn" id="ideas">${icon('sparkles')}Čo z toho postavím?</button>` : ''}
+    ${sec.type === 'components' ? `<div class="ideas-row"><button class="btn ideas-btn" id="ideas">${icon('sparkles')}Čo z toho postavím?</button></div>` : ''}
     ${compLink(sec)}
     ${filters && (!T.dynFilters || filters.length > 2) ? `<div class="chips">${filters.map(([k, l]) => `<button class="chip ${f === k ? 'on' : ''}" data-filter="${k}">${l}</button>`).join('')}</div>` : ''}
     ${summary}
@@ -689,7 +692,7 @@ function bindSection(sec) {
   });
   document.getElementById('fab').onclick = () => openEditor(sec, null);
   if (sec.type === 'bills') bindFinance(sec);
-  document.getElementById('ideas')?.addEventListener('click', () => openIdeas(sec));
+  document.getElementById('ideas')?.addEventListener('click', () => openIdeas());
   document.getElementById('complink')?.addEventListener('click', openComponents);
 }
 
@@ -723,16 +726,28 @@ async function toggleDone(sec, id) {
 }
 
 /* =========================================================
-   Súčiastky – návrhy projektov od asistenta
+   Súčiastky – katalóg a návrhy projektov od asistenta
    ========================================================= */
 const fmtQty = (q) => (Number(q) || 0).toLocaleString('sk-SK', { maximumFractionDigits: 2 });
 const isElektroSec = (s) => s.type === 'projects' && (s.id === 'elektronika' || /elektr/i.test(s.name));
+const norm = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9µω]/g, '');
 
-// v sekcii Elektronika odkaz na súčiastky (a naopak sa z návrhov ukladá sem)
+let partsCatalog = null;
+async function loadPartsCatalog() {
+  if (!partsCatalog) {
+    const r = await fetch('/data/parts.json');
+    if (!r.ok) throw new Error('Nepodarilo sa načítať katalóg súčiastok');
+    partsCatalog = await r.json();
+  }
+  return partsCatalog;
+}
+
+// v sekcii Elektronika: návrh projektu + odkaz na súčiastky
 function compLink(sec) {
   if (!isElektroSec(sec)) return '';
   const comp = state.sections.find((s) => s.type === 'components');
-  return `<button class="btn ghost block ideas-btn" id="complink">${icon('bolt')}${comp ? `Moje súčiastky – ${esc(comp.name)}` : 'Pridať sekciu Súčiastky'}</button>`;
+  return `<div class="ideas-row"><button class="btn ideas-btn" id="ideas">${icon('sparkles')}Navrhnúť projekt</button>
+    <button class="btn ghost ideas-btn" id="complink">${icon('bolt')}${comp ? esc(comp.name) : 'Pridať Súčiastky'}</button></div>`;
 }
 
 async function openComponents() {
@@ -776,7 +791,8 @@ function ideaHTML(p, i) {
         ${p.steps.length ? `<div class="idea-sub">Postup</div><ol>${p.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
         ${p.tips ? `<div class="idea-tip">💡 ${esc(p.tips)}</div>` : ''}
       </details>
-      ${tgt ? `<button class="btn ghost block" data-save-idea="${i}" ${p._saved ? 'disabled' : ''}>${p._saved ? `${icon('check')}Uložené v sekcii ${esc(tgt.name)}` : `${icon('plus')}Uložiť do sekcie ${esc(tgt.name)}`}</button>` : ''}
+      ${!tgt ? '' : p._saved ? `<a class="btn ghost block" href="#/obvod/${esc(p._saved.sec)}/${esc(p._saved.id)}">${icon('chip')}Uložené · otvoriť schému a DPS</a>`
+        : `<button class="btn ghost block" data-save-idea="${i}">${icon('plus')}Uložiť do sekcie ${esc(tgt.name)}</button>`}
     </div>`;
 }
 
@@ -795,41 +811,121 @@ function ideaNote(p) {
   return lines.join('\n').trim();
 }
 
-function openIdeas(sec) {
-  const parts = sortItems(sec, state.items[sec.id] || []);
-  const last = store.get('ideas:last', null);
-  const sel = new Set(parts.filter((p) => Number(p.qty) !== 0).map((p) => p.id));
-  let wish = '';
-  let ideas = null;
-  let busy = false;
-  const sheet = openSheet('<div id="ideas-body"></div>');
+// súčiastka zo skladu, ktorá zodpovedá položke katalógu
+function stockFor(c, inv) {
+  const n = norm(c.name), v = norm(c.value), cat = norm(c.cat).slice(0, 5);
+  return inv.find((i) => norm(i.title) === n || (v && norm(i.value) === v && (!i.category || norm(i.category).slice(0, 5) === cat)));
+}
+
+async function openIdeas() {
+  const sheet = openSheet('<div id="ideas-body"><div class="idea-wait"><div class="msg assistant typing"><i></i><i></i><i></i></div></div></div>');
   const body = sheet.querySelector('#ideas-body');
+  let cat, inv = [];
+  const comp = (state.sections || []).find((s) => s.type === 'components');
+  try {
+    cat = await loadPartsCatalog();
+    if (comp) inv = state.items[comp.id] || (state.items[comp.id] = await api(`/sections/${comp.id}/items`));
+  } catch (e) { toast(e.message, true); closeSheet(); return; }
+  if (!body.isConnected) return;
+  if (comp) inv = sortItems(comp, inv);
+  const last = store.get('ideas:last', null);
+  // výber: kľúč → súčiastka; zo skladu predvolene všetko, čo máš (počet > 0)
+  const sel = new Map();
+  const fromInv = (i) => ({ title: i.title, category: i.category, value: i.value, qty: i.qty, package: i.package });
+  const fromCat = (c) => ({ title: c.name, category: c.cat, value: c.value, package: c.pkg, desc: c.desc, kind: c.kind, pins: c.pins });
+  inv.filter((i) => Number(i.qty) !== 0).forEach((i) => sel.set('m:' + i.id, fromInv(i)));
+  let tab = inv.length ? 'mine' : 'cat';
+  let q = '', catF = 'all', wish = '', ideas = null, busy = false, onlySel = false;
+  const cats = [...new Set(cat.map((c) => c.cat))];
 
   const head = (title, back = false) => `<div class="sheet-head">
-      ${back ? `<button class="icon-btn" id="ib-back" aria-label="Späť">${icon('back')}</button>` : `<div class="sec-ic" style="--c:${esc(sec.color)}">${icon('sparkles')}</div>`}
+      ${back ? `<button class="icon-btn" id="ib-back" aria-label="Späť">${icon('back')}</button>` : `<div class="sec-ic" style="--c:#facc15">${icon('sparkles')}</div>`}
       <h2>${title}</h2><button class="icon-btn" data-close>${icon('x')}</button></div>`;
+
+  const row = (key, title, sub, right, cls = '') => `<label class="pick-row ${cls}"><input type="checkbox" data-pick="${esc(key)}" ${sel.has(key) ? 'checked' : ''}>
+      <span class="nm">${esc(title)}<small>${sub}</small></span>${right}</label>`;
+
+  const listHTML = () => {
+    const qq = norm(q);
+    if (tab === 'mine') {
+      const rows = inv.filter((i) => (onlySel ? sel.has('m:' + i.id) : !qq || norm([i.title, i.category, i.value].join(' ')).includes(qq)));
+      return rows.length ? rows.map((i) => row('m:' + i.id, i.title, [i.category, i.value, i.package].filter(Boolean).map(esc).join(' · '),
+        `<span class="q">${fmtQty(i.qty)} ks</span>`, Number(i.qty) === 0 ? 'zero' : '')).join('')
+        : `<div class="pick-empty">${inv.length ? 'Nič sa nenašlo' : 'V sklade zatiaľ nič nemáš – vyber z katalógu.'}</div>`;
+    }
+    const rows = cat.filter((c) => (onlySel ? sel.has('c:' + c.id) : (catF === 'all' || c.cat === catF) && (!qq || norm([c.name, c.value, c.cat, c.desc].join(' ')).includes(qq))));
+    const extra = [...sel.entries()].filter(([k]) => k.startsWith('x:') && (onlySel || !qq || norm(k).includes(qq)));
+    let html = '', group = '';
+    for (const c of rows) {
+      if (c.cat !== group) { group = c.cat; html += `<div class="pick-group">${esc(group)}</div>`; }
+      const st = stockFor(c, inv);
+      html += row('c:' + c.id, c.name, [c.value && !c.name.includes(c.value) && c.value, c.desc].filter(Boolean).map(esc).join(' · '),
+        st ? `<span class="q have">máš ${fmtQty(st.qty)} ks</span>` : '');
+    }
+    if (extra.length) html = `<div class="pick-group">Vlastné</div>${extra.map(([k, v]) => row(k, v.title, 'vlastná súčiastka', '')).join('')}` + html;
+    return html || '<div class="pick-empty">Nič sa nenašlo – pridaj ju ako vlastnú súčiastku nižšie.</div>';
+  };
+
+  const paintList = () => {
+    const box = body.querySelector('#pick-list');
+    if (!box) return;
+    box.innerHTML = listHTML();
+    box.querySelectorAll('[data-pick]').forEach((c) => {
+      c.onchange = () => {
+        const k = c.dataset.pick;
+        if (!c.checked) sel.delete(k);
+        else if (k.startsWith('m:')) sel.set(k, fromInv(inv.find((i) => 'm:' + i.id === k)));
+        else if (k.startsWith('c:')) sel.set(k, fromCat(cat.find((x) => 'c:' + x.id === k)));
+        count();
+      };
+    });
+  };
+  const count = () => {
+    const n = body.querySelector('#pick-n');
+    if (n) n.textContent = `Vybrané: ${sel.size}`;
+    const go = body.querySelector('#go');
+    if (go) go.disabled = !sel.size;
+  };
 
   const paintPick = () => {
     body.innerHTML = h`${head('Čo z toho postavím?')}
-      ${!parts.length ? '<div class="empty"><div>Najprv si pridaj súčiastky, ktoré máš doma.</div></div>' : h`
-      <p class="idea-hint">Vyber súčiastky, ktoré chceš použiť. Asistent navrhne projekty a povie, čo prípadne dokúpiť.</p>
-      <div class="pick-tools"><b id="pick-n"></b><button type="button" class="chip" id="pick-all">Všetky</button><button type="button" class="chip" id="pick-none">Žiadne</button></div>
-      <div class="pick-list">${parts.map((p) => `<label class="pick-row ${Number(p.qty) === 0 ? 'zero' : ''}"><input type="checkbox" data-pick="${p.id}" ${sel.has(p.id) ? 'checked' : ''}>
-        <span class="nm">${esc(p.title)}<small>${[p.category, p.value, p.package].filter(Boolean).map(esc).join(' · ')}</small></span><span class="q">${fmtQty(p.qty)} ks</span></label>`).join('')}</div>
-      <div class="field" style="margin-top:14px"><label>Prianie (nepovinné)</label><textarea id="wish" style="min-height:64px" placeholder="napr. niečo s Arduinom, blikačka pre deti, meranie teploty…">${esc(wish)}</textarea></div>
+      <p class="idea-hint">Vyklikaj súčiastky – zo svojho skladu alebo z katalógu. Asistent navrhne projekty a povie, čo prípadne dokúpiť.</p>
+      <div class="seg pick-tabs" role="tablist">
+        <label><input type="radio" name="ptab" value="mine" ${tab === 'mine' ? 'checked' : ''}><span>Moje súčiastky${inv.length ? ` (${inv.length})` : ''}</span></label>
+        <label><input type="radio" name="ptab" value="cat" ${tab === 'cat' ? 'checked' : ''}><span>Katalóg (${cat.length})</span></label>
+      </div>
+      <label class="search glass pick-search">${icon('search')}<input id="pq" placeholder="Hľadať súčiastku…" value="${esc(q)}"></label>
+      ${tab === 'cat' ? `<div class="chips pick-cats">${[['all', 'Všetko'], ...cats.map((c) => [c, c])].map(([k, l]) => `<button type="button" class="chip ${catF === k ? 'on' : ''}" data-pcat="${esc(k)}">${esc(l)}</button>`).join('')}</div>` : ''}
+      <div class="pick-tools"><b id="pick-n"></b>
+        <button type="button" class="chip ${onlySel ? 'on' : ''}" id="pick-sel">Len vybrané</button>
+        <button type="button" class="chip" id="pick-none">Zrušiť výber</button></div>
+      <div class="pick-list" id="pick-list"></div>
+      ${tab === 'cat' ? `<form class="pick-add" id="pick-add"><input class="input" id="pick-own" placeholder="Iná súčiastka, napr. HC-12, TDA2030…" autocomplete="off"><button class="btn ghost" aria-label="Pridať">${icon('plus')}</button></form>` : ''}
+      <div class="field" style="margin-top:14px"><label>Prianie (nepovinné)</label><textarea id="wish" style="min-height:60px" placeholder="napr. niečo s Arduinom, blikačka pre deti, meranie teploty…">${esc(wish)}</textarea></div>
       <button class="btn block" id="go">${icon('sparkles')}Navrhnúť projekty</button>
-      ${last ? `<button class="btn ghost block" id="last" style="margin-top:10px">Posledné návrhy (${new Date(last.at).toLocaleDateString('sk-SK')})</button>` : ''}`}`;
+      ${last ? `<button class="btn ghost block" id="last" style="margin-top:10px">Posledné návrhy (${new Date(last.at).toLocaleDateString('sk-SK')})</button>` : ''}`;
     sheet.querySelector('[data-close]').onclick = closeSheet;
-    if (!parts.length) return;
-    const count = () => { body.querySelector('#pick-n').textContent = `Vybrané: ${sel.size} z ${parts.length}`; body.querySelector('#go').disabled = !sel.size; };
-    body.querySelectorAll('[data-pick]').forEach((c) => { c.onchange = () => { c.checked ? sel.add(c.dataset.pick) : sel.delete(c.dataset.pick); count(); }; });
-    const setAll = (on) => { parts.forEach((p) => (on ? sel.add(p.id) : sel.delete(p.id))); body.querySelectorAll('[data-pick]').forEach((c) => { c.checked = on; }); count(); };
-    body.querySelector('#pick-all').onclick = () => setAll(true);
-    body.querySelector('#pick-none').onclick = () => setAll(false);
+    body.querySelectorAll('input[name=ptab]').forEach((r) => { r.onchange = () => { tab = r.value; paintPick(); }; });
+    const pq = body.querySelector('#pq');
+    pq.oninput = () => { q = pq.value; paintList(); };
+    body.querySelectorAll('[data-pcat]').forEach((b) => {
+      b.onclick = () => { catF = b.dataset.pcat; body.querySelectorAll('[data-pcat]').forEach((x) => x.classList.toggle('on', x === b)); paintList(); };
+    });
+    body.querySelector('#pick-sel').onclick = (e) => { onlySel = !onlySel; e.currentTarget.classList.toggle('on', onlySel); paintList(); };
+    body.querySelector('#pick-none').onclick = () => { sel.clear(); paintList(); count(); };
+    body.querySelector('#pick-add')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inp = body.querySelector('#pick-own');
+      const t = inp.value.trim();
+      if (!t) return;
+      sel.set('x:' + t, { title: t });
+      inp.value = '';
+      paintList(); count();
+    });
     body.querySelector('#wish').oninput = (e) => { wish = e.target.value; };
     body.querySelector('#go').onclick = run;
     body.querySelector('#last')?.addEventListener('click', () => { ideas = last.projects; paintIdeas(); });
-    count();
+    paintList(); count();
   };
 
   const paintIdeas = () => {
@@ -840,20 +936,23 @@ function openIdeas(sec) {
     body.querySelector('#ib-back').onclick = paintPick;
     body.querySelector('#again').onclick = run;
     body.querySelectorAll('[data-save-idea]').forEach((b) => { b.onclick = () => saveIdea(Number(b.dataset.saveIdea), b); });
+    body.querySelectorAll('a[href^="#/obvod"]').forEach((a) => { a.onclick = closeSheet; });
     sheet.scrollTop = 0;
   };
 
   async function run() {
-    if (busy) return;
+    if (busy || !sel.size) return;
     busy = true;
-    const chosen = parts.filter((p) => sel.has(p.id)).map(({ title, category, value, qty, package: pkg }) => ({ title, category, value, qty, package: pkg }));
+    const chosen = [...sel.values()];
     body.innerHTML = h`${head('Čo z toho postavím?')}
       <div class="idea-wait"><div class="orb">${icon('sparkles')}</div><div class="msg assistant typing"><i></i><i></i><i></i></div>
       <p>Asistent skladá projekty z ${plural(chosen.length, 'súčiastky', 'súčiastok', 'súčiastok')}…</p></div>`;
     sheet.querySelector('[data-close]').onclick = closeSheet;
     try {
-      const res = await api('/ideas', { method: 'POST', json: { parts: chosen, wish } });
-      ideas = res.projects || [];
+      const res = await api('/ideas', { method: 'POST', json: { parts: chosen.map(({ kind, pins, desc, ...p }) => p), wish } });
+      // súčiastky z katalógu (s vývodmi) si projekt zapamätá pre neskoršiu schému
+      const known = chosen.filter((c) => c.kind).map((c) => ({ name: c.title, kind: c.kind, pkg: c.package, pins: c.pins }));
+      ideas = (res.projects || []).map((p) => ({ ...p, known }));
       store.set('ideas:last', { at: Date.now(), projects: ideas });
       if (body.isConnected) paintIdeas();
     } catch (e) {
@@ -868,13 +967,15 @@ function openIdeas(sec) {
     if (!p || !tgt) return;
     btn.disabled = true;
     try {
+      const { _saved, ...idea } = p;
       const created = await api(`/sections/${tgt.id}/items`, { method: 'POST',
-        json: { title: p.name, status: 'Nápad', progress: 0, tags: ['návrh asistenta'], note: ideaNote(p) } });
+        json: { title: p.name, status: 'Nápad', progress: 0, tags: ['návrh asistenta'], note: ideaNote(p), idea } });
       if (state.items[tgt.id]) state.items[tgt.id].unshift(created);
       state.overview = null;
-      p._saved = true;
-      btn.innerHTML = `${icon('check')}Uložené v sekcii ${esc(tgt.name)}`;
+      p._saved = { sec: tgt.id, id: created.id };
+      store.set('ideas:last', { at: last && ideas === last.projects ? last.at : Date.now(), projects: ideas });
       toast(`Projekt uložený do ${tgt.name}`);
+      paintIdeas();
     } catch (e) { btn.disabled = false; toast(e.message, true); }
   }
 
@@ -1004,6 +1105,7 @@ function openEditor(sec, item) {
     </div>
     <form id="ef">
       ${T.fields.filter((k) => !(isNew && k === 'done')).map((k) => fieldHTML(k, sec, data[k])).join('')}
+      ${item && sec.type === 'projects' ? `<a class="btn ghost block circ-open" href="#/obvod/${esc(sec.id)}/${esc(item.id)}">${icon('chip')}${item.circuit ? 'Schéma a plošný spoj' : 'Navrhnúť schému a plošný spoj'}</a>` : ''}
       ${(item?.links || []).length ? `<div class="files">${item.links.map((l) => `<a class="file-row" href="${esc(l)}" target="_blank" rel="noopener">${icon('link')}<span class="nm">${esc(l)}</span></a>`).join('')}</div>` : ''}
       <div class="field"><label>Prílohy (PDF, obrázky… max 4 MB${shrinkOn() ? ', fotky sa zmenšia' : ''})</label></div>
       <div class="files" id="files">${filesHTML(item)}</div>
@@ -1494,7 +1596,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.19</span></div>
+      <div class="r"><span>Verzia</span><span>1.20</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 

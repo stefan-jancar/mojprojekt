@@ -123,7 +123,7 @@ def enabled() -> bool:
 
 
 def _slim(item):
-    return {k: v for k, v in item.items() if k not in ("created",) and v not in (None, "", [])}
+    return {k: v for k, v in item.items() if k not in ("created", "circuit", "idea") and v not in (None, "", [])}
 
 
 TOOLS.append({

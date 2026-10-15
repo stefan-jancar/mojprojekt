@@ -293,6 +293,12 @@ def project_ideas(body: dict = Body(...)):
     return _ai(ideas.suggest, body.get("parts") or [], body.get("wish") or "", body.get("count") or 4)
 
 
+@app.post("/api/circuit", dependencies=[Depends(auth)])
+def project_circuit(body: dict = Body(...)):
+    """Schéma zapojenia (súčiastky + spoje) pre projekt."""
+    return _ai(ideas.circuit, body.get("project") or {}, body.get("known") or [])
+
+
 # Lokálne (uvicorn) servíruje aj frontend. Na Verceli ho servíruje CDN z priečinka public/.
 _public = Path(__file__).resolve().parent.parent / "public"
 if not ON_VERCEL and _public.exists():
