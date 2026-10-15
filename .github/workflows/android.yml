@@ -7,6 +7,7 @@ on:
     paths:
       - 'mobile/**'
       - '.github/workflows/android.yml'
+      - '.github/signing/**'
 
 permissions:
   contents: write
@@ -42,6 +43,19 @@ jobs:
           npx cap add android
           npx capacitor-assets generate --android
           npx cap sync android
+
+      - name: Stály podpisový kľúč
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::warning::Chýba tajný údaj KEYSTORE_PASSWORD – APK sa podpíše náhodným kľúčom a aktualizácia bude vyžadovať odinštalovanie."
+            exit 0
+          fi
+          mkdir -p ~/.android
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ../.github/signing/debug.keystore.enc -out ~/.android/debug.keystore -pass env:KEYSTORE_PASSWORD
+          if [ -n "$ANDROID_USER_HOME" ]; then mkdir -p "$ANDROID_USER_HOME" && cp ~/.android/debug.keystore "$ANDROID_USER_HOME/"; fi
+          echo "Podpisový kľúč pripravený."
 
       - name: Build APK
         run: |

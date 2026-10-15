@@ -1,0 +1,7 @@
+{
+  "appId": "sk.mojpriestor.elektro",
+  "appName": "Elektro",
+  "webDir": "www",
+  "backgroundColor": "#07070d",
+  "android": { "allowMixedContent": false }
+}
