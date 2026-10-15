@@ -723,3 +723,43 @@ input[type=color] { width: 100%; height: 48px; border: 1px solid var(--border); 
 .cb-table > div + div { border-top: 1px solid var(--border); }
 .cb-table .h { color: var(--muted); font-size: 12.5px; }
 .cb-table .pick { background: color-mix(in srgb, var(--success) 12%, transparent); border-radius: 10px; font-weight: 700; color: var(--success); }
+
+/* ---------- impedancia slučky a delič ---------- */
+.lp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lp-note { width: 100%; font-size: 13px; line-height: 1.45; }
+.lp-res.ok { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); }
+.lp-res.warn { border-color: color-mix(in srgb, var(--warning) 50%, var(--border)); }
+.lp-res.bad { border-color: color-mix(in srgb, var(--danger) 50%, var(--border)); }
+.lp-verdict { display: flex; gap: 14px; align-items: center; position: relative; }
+.lp-verdict i { font-style: normal; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font: 800 26px var(--font-display); color: #fff; flex: none; }
+.lp-res.ok .lp-verdict i { background: var(--success); box-shadow: 0 8px 24px color-mix(in srgb, var(--success) 45%, transparent); }
+.lp-res.warn .lp-verdict i { background: var(--warning); box-shadow: 0 8px 24px color-mix(in srgb, var(--warning) 45%, transparent); }
+.lp-res.bad .lp-verdict i { background: var(--danger); box-shadow: 0 8px 24px color-mix(in srgb, var(--danger) 45%, transparent); animation: qzShake .45s; }
+.lp-verdict b { display: block; font: 700 24px var(--font-display); }
+.lp-verdict span { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+.lp-gauge { position: relative; height: 12px; border-radius: 99px; background: color-mix(in srgb, var(--danger) 55%, transparent); overflow: visible; }
+.lp-gauge .w, .lp-gauge .z { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; }
+.lp-gauge .w { background: var(--warning); }
+.lp-gauge .z { background: var(--success); z-index: 1; }
+.lp-gauge i { position: absolute; top: -6px; width: 4px; height: 24px; margin-left: -2px; border-radius: 3px; background: var(--text); z-index: 2; box-shadow: 0 0 0 2px var(--bg); transition: left .4s cubic-bezier(.2, .8, .2, 1); }
+.lp-scale { position: relative; height: 16px; font-size: 11.5px; color: var(--muted); margin-top: -6px; }
+.lp-scale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.lp-scale span:first-child { left: 0; transform: none; }
+.lp-lmax { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
+.lp-lmax span { font-size: 13px; color: var(--muted); }
+.lp-lmax b { font: 700 26px var(--font-display); color: var(--accent-2); }
+.lp-lmax small { font-size: 12px; color: var(--muted); }
+.dv-wrap { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: start; }
+.dv-sch { width: 100%; position: sticky; top: 10px; }
+.dv-sch .w { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
+.dv-sch .r { fill: color-mix(in srgb, var(--accent) 18%, var(--surface-2)); stroke: var(--accent); stroke-width: 2; }
+.dv-sch .pin { fill: var(--surface-solid); stroke: var(--text); stroke-width: 2; }
+.dv-sch .pin.out { stroke: var(--success); }
+.dv-sch .dot { fill: var(--muted); }
+.dv-sch .lbl { font: 600 12.5px var(--font); fill: var(--text); }
+.dv-sch .lbl.out { fill: var(--success); }
+.dv-fields { display: grid; gap: 10px; min-width: 0; }
+.dv-fields .tl-in input { height: 48px; font-size: 18px; }
+.dv-fields .tl-f label { font-size: 12.5px; }
+.cb-main em strong { color: var(--text); }
+.tl-sl { font-style: normal; }
