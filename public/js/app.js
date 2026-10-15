@@ -1191,6 +1191,29 @@ function renderAssistant() {
 /* =========================================================
    Nastavenia
    ========================================================= */
+const VERCEL = 'https://vercel.com/stefan-jancar/mojprojekt';
+const GH = 'https://github.com/stefan-jancar';
+const QUICK_LINKS = [
+  ['Vercel', 'globe', [
+    ['Projekt – deploye a prehľad', VERCEL],
+    ['Premenné prostredia', `${VERCEL}/settings/environment-variables`],
+    ['Logy servera', `${VERCEL}/logs`],
+    ['Stav servera (API)', `${location.origin}/api/status`],
+  ]],
+  ['Render', 'cube', [
+    ['Dashboard (stará Django služba)', 'https://dashboard.render.com'],
+  ]],
+  ['GitHub', 'github', [
+    ['Kód aplikácie', `${GH}/mojprojekt`],
+    ['Uložené dáta', `${GH}/mojprojekt-data`],
+    ['APK na stiahnutie', `${GH}/mojprojekt/releases`],
+    ['Zostavenie APK (Actions)', `${GH}/mojprojekt/actions`],
+  ]],
+  ['Ostatné', 'sparkles', [
+    ['Gemini API kľúč', 'https://aistudio.google.com/apikey'],
+  ]],
+];
+
 function renderSettings() {
   const st = state.status || {};
   const secs = state.sections || [];
@@ -1233,11 +1256,20 @@ function renderSettings() {
       </select></div>
       <button class="btn ghost block" id="horo-diag">Diagnostika horoskopu</button>
     </div>
+    <div class="section-title">Odkazy</div>
+    <div class="set-list">
+      ${QUICK_LINKS.map(([grp, ic, items]) => `
+        <div class="link-group glass">
+          <div class="lg-head"><div class="sec-ic">${icon(ic)}</div><b>${grp}</b></div>
+          ${items.map(([name, url]) => `<a class="link-row" href="${esc(url)}" target="_blank" rel="noopener">
+            <span>${esc(name)}<small>${esc(url.replace(/^https:\/\//, ''))}</small></span>${icon('chevron')}</a>`).join('')}
+        </div>`).join('')}
+    </div>
     <div class="section-title">Systém</div>
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.9</span></div>
+      <div class="r"><span>Verzia</span><span>1.10</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
