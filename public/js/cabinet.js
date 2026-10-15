@@ -29,9 +29,15 @@ const ROLES = {
   'r-': { name: '−R svorka PT100 karty', ok: (c, p) => /^[−-]R\d+$/.test(p.label), ch: true },
   'tc+': { name: '+TC svorka karty pre termočlánky', ok: (c, p) => /^\+TC\d+$/.test(p.label), ch: true },
   'tc-': { name: '−TC svorka karty pre termočlánky', ok: (c, p) => /^[−-]TC\d+$/.test(p.label), ch: true },
+  encA: { name: 'svorka A karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'A' && c.id === 'EL5101' },
+  encAn: { name: 'svorka /A karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/A' && c.id === 'EL5101' },
+  encB: { name: 'svorka B karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'B' && c.id === 'EL5101' },
+  encBn: { name: 'svorka /B karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/B' && c.id === 'EL5101' },
+  enc5: { name: 'napájanie snímača +5 V (Ue) na EL5101', ok: (c, p) => /^Ue/.test(p.label) },
+  enc0: { name: '0 V napájania snímača (Uo) na EL5101', ok: (c, p) => /^Uo/.test(p.label) },
   'do+': { name: 'výstup digitálnej karty (Output)', ok: (c, p) => p.kind === 'out' && (c.family === 'do' || c.id === 'EL1859') && !isNeg(c) && /^Output \d+$/.test(p.label) },
 };
-const SUPPLY = new Set(['24', '0', 'gnd']);
+const SUPPLY = new Set(['24', '0', 'gnd', 'enc5', 'enc0']);
 const chOf = (p) => { const m = String(p.label).match(/(\d+)\s*$/); return m ? Number(m[1]) : null; };
 
 const BN = '#8b5a2b', BU = '#2f6fe0', BK = '#1c1c1c', RD = '#d42a2a', WH = '#eeeeee', GN = '#1f9d48';
@@ -44,6 +50,17 @@ const SENSORS = {
     wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál', BK, 'di+']] },
   ind_npn: { name: 'Indukčný snímač NPN', icon: 'ind', kind: 'di', act: 'Priblížiť kov', suggest: ['EL1088', 'EL9186', 'EL9187'],
     wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál (spína na 0 V)', BK, 'di-']] },
+  refl: { name: 'Reflexná svetelná závora PNP', icon: 'eye', kind: 'di', act: 'Prerušiť lúč', suggest: ['EL1002'], wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál', BK, 'di+']] },
+  ultra_pnp: { name: 'Ultrazvukový snímač PNP', icon: 'ultra', kind: 'di', act: 'Priblížiť predmet', suggest: ['EL1002'], wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál', BK, 'di+']] },
+  press_sw: { name: 'Tlakový spínač PNP', icon: 'press', kind: 'di', act: 'Zvýšiť tlak', suggest: ['EL1002'], wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál', BK, 'di+']] },
+  photo_npn: { name: 'Optický snímač NPN', icon: 'eye', kind: 'di', act: 'Prerušiť lúč', suggest: ['EL1088', 'EL9186', 'EL9187'],
+    wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál (spína na 0 V)', BK, 'di-']] },
+  reed: { name: 'Jazýčkový snímač valca (2-vodičový)', icon: 'reed', kind: 'di', act: 'Vysunúť piest', suggest: ['EL1004'],
+    wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', 'signál', BU, 'di+']] },
+  float: { name: 'Plavákový spínač', icon: 'float', kind: 'di', act: 'Zvýšiť hladinu', suggest: ['EL1004'],
+    wires: [['com', 'COM', '+24 V', BN, '24'], ['no', 'NO', 'signál', BK, 'di+']] },
+  thermostat: { name: 'Termostat (kontakt)', icon: 'box', txt: 'T°', kind: 'di', act: 'Prehriať', suggest: ['EL1004'],
+    wires: [['c', '1', '+24 V', BN, '24'], ['no', '2', 'signál', BK, 'di+']] },
   limit: { name: 'Koncový spínač (NO)', icon: 'limit', kind: 'di', act: 'Zopnúť spínač', suggest: ['EL1004'],
     wires: [['com', 'COM', '+24 V', BN, '24'], ['no', 'NO', 'signál', BK, 'di+']] },
   button: { name: 'Tlačidlo (NO)', icon: 'button', kind: 'di', act: 'Stlačiť', suggest: ['EL1004'],
@@ -52,16 +69,34 @@ const SENSORS = {
     wires: [['r', 'červený', '+R', RD, 'r+'], ['w', 'biely', '−R', WH, 'r-']] },
   pt100_3: { name: 'PT100 3-vodičový', icon: 'rtd', kind: 'temp', suggest: ['EL3202'],
     wires: [['r', 'červený', '+R', RD, 'r+'], ['r2', 'červený', '+RL', RD, 'rl'], ['w', 'biely', '−R', WH, 'r-']] },
+  pt1000_2: { name: 'PT1000 2-vodičový', icon: 'rtd', kind: 'temp', suggest: ['EL3204'],
+    wires: [['r', 'červený', '+R', RD, 'r+'], ['w', 'biely', '−R', WH, 'r-']] },
+  tc_j: { name: 'Termočlánok typ J', icon: 'tc', kind: 'temp', suggest: ['EL3314'],
+    wires: [['p', 'čierny', '+TC', BK, 'tc+'], ['m', 'biely', '−TC', WH, 'tc-']] },
   tc_k: { name: 'Termočlánok typ K', icon: 'tc', kind: 'temp', suggest: ['EL3314'],
     wires: [['p', 'zelený', '+TC', GN, 'tc+'], ['m', 'biely', '−TC', WH, 'tc-']] },
   s010: { name: 'Snímač 0–10 V (3-vodičový)', icon: 'box', kind: 'volt', suggest: ['EL3062'],
     wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V / GND', BU, 'gnd'], ['bk', 'BK čierny', 'signál 0–10 V', BK, 'ai_v']] },
+  press_010: { name: 'Tlakový snímač 0–10 V', icon: 'press', kind: 'volt', suggest: ['EL3062'],
+    wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V / GND', BU, 'gnd'], ['bk', 'BK čierny', 'signál 0–10 V', BK, 'ai_v']] },
+  hum_010: { name: 'Snímač vlhkosti 0–10 V', icon: 'box', txt: '%rH', kind: 'volt', suggest: ['EL3062'],
+    wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V / GND', BU, 'gnd'], ['bk', 'BK čierny', 'signál 0–10 V', BK, 'ai_v']] },
+  ultra_420: { name: 'Ultrazvukový snímač vzdialenosti 4–20 mA', icon: 'ultra', kind: 'ma', suggest: ['EL3052'],
+    wires: [['bn', 'BN hnedý', '+24 V', BN, '24'], ['bu', 'BU modrý', '0 V', BU, '0'], ['bk', 'BK čierny', 'signál 4–20 mA', BK, 'ai_i']] },
+  level_420: { name: 'Hladinomer 4–20 mA (2-vodičový)', icon: 'float', kind: 'ma', suggest: ['EL3052'],
+    wires: [['p', '+', 'napájanie 24 V', BN, '24'], ['m', '−', 'signál 4–20 mA', BU, 'ai_i']] },
+  enc: { name: 'Inkrementálny enkodér RS422 (5 V)', icon: 'enc', kind: 'enc', act: 'Otočiť hriadeľom', suggest: ['EL5101'],
+    wires: [['a', 'A', 'stopa A', GN, 'encA'], ['an', '/A', 'stopa /A', '#9be0a8', 'encAn'], ['b', 'B', 'stopa B', '#e0a21f', 'encB'], ['bn2', '/B', 'stopa /B', '#f2d48a', 'encBn'], ['u', '+5 V', 'napájanie 5 V', RD, 'enc5'], ['g', '0 V', '0 V snímača', BU, 'enc0']] },
   t420: { name: 'Prevodník 4–20 mA (2-vodičový)', icon: 'box', kind: 'ma', suggest: ['EL3052'],
     wires: [['p', '+', 'napájanie 24 V', BN, '24'], ['m', '−', 'signál 4–20 mA', BU, 'ai_i']] },
   coil: { name: 'Relé / stýkač 24 V', icon: 'coil', kind: 'do', act: 'Zapnúť výstup', suggest: ['EL2002'],
     wires: [['a1', 'A1', 'výstup karty', BK, 'do+'], ['a2', 'A2', '0 V', BU, '0']] },
   valve: { name: 'Elektroventil 24 V', icon: 'valve', kind: 'do', act: 'Zapnúť výstup', suggest: ['EL2002'],
     wires: [['p', '1', 'výstup karty', BK, 'do+'], ['m', '2', '0 V', BU, '0']] },
+  beacon: { name: 'Signalizačný maják 24 V', icon: 'beacon', kind: 'do', act: 'Zapnúť výstup', suggest: ['EL2002'],
+    wires: [['p', '+', 'výstup karty', BK, 'do+'], ['m', '−', '0 V', BU, '0']] },
+  buzzer: { name: 'Bzučiak 24 V', icon: 'buzzer', kind: 'do', act: 'Zapnúť výstup', suggest: ['EL2002'],
+    wires: [['p', '+', 'výstup karty', BK, 'do+'], ['m', '−', '0 V', BU, '0']] },
   lamp: { name: 'Kontrolka 24 V', icon: 'lamp', kind: 'do', act: 'Zapnúť výstup', suggest: ['EL2002'],
     wires: [['x1', 'X1', 'výstup karty', BK, 'do+'], ['x2', 'X2', '0 V', BU, '0']] },
 };
@@ -288,8 +323,31 @@ function sensorIcon(s, x, y, st, on) {
       <path d="M${x + 14} ${y + 60} h56 v18 h-56 z" class="sn-metal"/><path d="M${x + 30} ${y + 60} l12 18 l12 -18" fill="none" stroke="${on ? '#2f80ed' : '#666'}" stroke-width="3"/>`;
   } else if (t === 'lamp') {
     body = `<circle cx="${x + 42}" cy="${y + 42}" r="24" class="sn-lamp ${on ? 'on' : ''}"/><rect x="${x + 30}" y="${y + 66}" width="24" height="16" rx="3" class="sn-dark"/>`;
+  } else if (t === 'eye') {
+    body = `<rect x="${x + 18}" y="${y + 20}" width="48" height="56" rx="6" class="sn-dark"/><circle cx="${x + 42}" cy="${y + 42}" r="12" fill="#1d4f7a" stroke="#7fb3e0" stroke-width="2"/>
+      <path d="M${x + 42} ${y + 30} L${x + 42} ${y + 4}" class="sn-beam ${on ? 'cut' : ''}"/>${on ? `<rect x="${x + 32}" y="${y + 2}" width="20" height="8" class="sn-target"/>` : ''}`;
+  } else if (t === 'ultra') {
+    body = `<rect x="${x + 14}" y="${y + 28}" width="56" height="48" rx="6" class="sn-dark"/><circle cx="${x + 30}" cy="${y + 44}" r="9" class="sn-metal"/><circle cx="${x + 54}" cy="${y + 44}" r="9" class="sn-metal"/>
+      ${[0, 1, 2].map((i) => `<path d="M${x + 26 - i * 4} ${y + 24 - i * 6} q16 -10 32 0" fill="none" stroke="#7fb3e0" stroke-width="1.5" opacity="${on ? 1 : 0.35}"/>`).join('')}`;
+  } else if (t === 'press') {
+    body = `<circle cx="${x + 42}" cy="${y + 40}" r="24" class="sn-metal"/><circle cx="${x + 42}" cy="${y + 40}" r="19" fill="#f7f7f2"/>
+      <line x1="${x + 42}" y1="${y + 40}" x2="${on ? x + 56 : x + 30}" y2="${y + 30}" stroke="#d42a2a" stroke-width="2.5" stroke-linecap="round"/><rect x="${x + 36}" y="${y + 64}" width="12" height="18" class="sn-metal"/>`;
+  } else if (t === 'reed') {
+    body = `<rect x="${x + 8}" y="${y + 36}" width="68" height="22" rx="8" class="sn-metal"/><rect x="${on ? x + 52 : x + 14}" y="${y + 39}" width="10" height="16" rx="2" fill="#555b63"/>
+      <rect x="${x + 34}" y="${y + 28}" width="18" height="10" rx="2" fill="#2f6fe0"/>`;
+  } else if (t === 'float') {
+    body = `<rect x="${x + 14}" y="${y + 50}" width="56" height="30" rx="4" fill="#2f80ed" opacity="${on ? 0.7 : 0.25}"/><line x1="${x + 42}" y1="${y + 10}" x2="${x + 42}" y2="${on ? y + 40 : y + 60}" class="sn-lever"/>
+      <ellipse cx="${x + 42}" cy="${on ? y + 46 : y + 66}" rx="12" ry="8" fill="#f5c518" stroke="#b08a00"/>`;
+  } else if (t === 'enc') {
+    body = `<rect x="${x + 18}" y="${y + 22}" width="48" height="48" rx="24" class="sn-metal"/><circle cx="${x + 42}" cy="${y + 46}" r="6" class="sn-dark"/>
+      <line x1="${x + 42}" y1="${y + 46}" x2="${x + 42}" y2="${y + 8}" stroke="#555b63" stroke-width="5" stroke-linecap="round" transform="rotate(${(Number(s.sim) || 0) % 360} ${x + 42} ${y + 46})"/>`;
+  } else if (t === 'beacon') {
+    body = `<path d="M${x + 26} ${y + 62} v-26 a16 16 0 0 1 32 0 v26 z" class="sn-lamp ${on ? 'on' : ''}" ${on ? 'style="fill:#ff8a1f;filter:drop-shadow(0 0 10px #ff8a1f)"' : ''}/><rect x="${x + 20}" y="${y + 62}" width="44" height="16" rx="3" class="sn-dark"/>`;
+  } else if (t === 'buzzer') {
+    body = `<circle cx="${x + 42}" cy="${y + 44}" r="24" class="sn-dark"/><circle cx="${x + 42}" cy="${y + 44}" r="6" fill="#888"/>
+      ${on ? [0, 1, 2].map((i) => `<path d="M${x + 70 + i * 5} ${y + 30 - i * 3} q8 14 0 28" fill="none" stroke="#f5c518" stroke-width="2"/>`).join('') : ''}`;
   } else {
-    body = `<rect x="${x + 18}" y="${y + 18}" width="48" height="60" rx="6" class="sn-dark"/><text x="${x + 42}" y="${y + 54}" class="sn-txt">${s.type === 't420' ? 'mA' : 'V'}</text>`;
+    body = `<rect x="${x + 18}" y="${y + 18}" width="48" height="60" rx="6" class="sn-dark"/><text x="${x + 42}" y="${y + 54}" class="sn-txt">${esc(SENSORS[s.type].txt || (SENSORS[s.type].kind === 'ma' ? 'mA' : 'V'))}</text>`;
   }
   return `<g class="sn-icon ${glow}">${body}${led}</g>`;
 }
@@ -368,6 +426,7 @@ function draw(cb, L, ev, sel) {
 }
 
 function fmtSim({ sim, kind }) {
+  if (kind === 'enc') return `${sim} imp.`;
   const u = { temp: '°C', volt: 'V', ma: 'mA' }[kind] || '';
   return `${sim.toFixed(1).replace('.', ',')} ${u}`;
 }
@@ -384,6 +443,7 @@ function editor(cb) {
       <button class="btn ghost" id="cb-add-card">${icon('plus')}Karta</button>
       <button class="btn ghost" id="cb-add-sensor">${icon('plus')}Snímač</button>
       <button class="btn ghost" id="cb-zoom" aria-label="Priblížiť">${icon('search')}</button>
+      <button class="btn ghost" id="cb-pdf" aria-label="Export do PDF">PDF</button>
     </div>
     <div class="cb-canvas glass" id="cb-canvas"></div>
     <div class="cb-hint" id="cb-hint">Potiahni farebný koniec vodiča na svorku karty – alebo ťukni na vodič a potom na svorku.</div>
@@ -498,7 +558,7 @@ function editor(cb) {
       const def = SENSORS[s.type], st = ev[s.uid];
       const ws = wiresOf(s);
       const status = st.short ? '<span class="cbp-st bad">⚡ Skrat</span>' : st.ok ? '<span class="cbp-st ok">✓ Zapojený správne</span>' : st.complete ? '<span class="cbp-st bad">✕ Chyba v zapojení</span>' : '<span class="cbp-st">Nezapojený</span>';
-      const sim = !st.ok ? '' : def.kind === 'di' ? `<button class="btn block cbp-sim ${s.sim ? 'on' : ''}" id="cbp-sim">${s.sim ? '✋ Uvoľniť' : '👉 ' + def.act}</button>`
+      const sim = !st.ok ? '' : def.kind === 'enc' ? `<button class="btn block cbp-sim" id="cbp-enc">🔄 ${def.act} (${Number(s.sim) || 0} imp.)</button>` : def.kind === 'di' ? `<button class="btn block cbp-sim ${s.sim ? 'on' : ''}" id="cbp-sim">${s.sim ? '✋ Uvoľniť' : '👉 ' + def.act}</button>`
         : def.kind === 'temp' ? simSlider(s, -50, 400, 0.5, '°C', 21)
           : def.kind === 'volt' ? simSlider(s, 0, 10, 0.1, 'V', 5)
             : def.kind === 'ma' ? simSlider(s, 4, 20, 0.1, 'mA', 12)
@@ -522,6 +582,7 @@ function editor(cb) {
           <button class="btn danger" id="cbp-del">Odstrániť</button>
         </div>`;
       $('#cbp-sim')?.addEventListener('click', () => { s.sim = !s.sim; render(); });
+      $('#cbp-enc')?.addEventListener('click', () => { s.sim = (Number(s.sim) || 0) + 250; render(); });
       $('#cbp-out')?.addEventListener('click', () => { cb.outs ||= {}; const k = st.card + ':' + st.channel; cb.outs[k] = !cb.outs[k]; render(); });
       P.querySelector('input[type=range]')?.addEventListener('input', (e) => { s.sim = Number(e.target.value); render(); });
       $('#cbp-show').onclick = () => {
@@ -621,12 +682,12 @@ function editor(cb) {
   };
 
   $('#cb-add-sensor').onclick = () => {
-    const groups = [['di', 'Snímače a spínače (digitálne)'], ['temp', 'Teplota'], ['volt', 'Analógové 0–10 V'], ['ma', 'Analógové 4–20 mA'], ['do', 'Akčné členy (výstupy)']];
+    const groups = [['di', 'Snímače a spínače (digitálne)'], ['temp', 'Teplota'], ['volt', 'Analógové 0–10 V'], ['ma', 'Analógové 4–20 mA'], ['enc', 'Enkodéry'], ['do', 'Akčné členy (výstupy)']];
     sheet(`<h2>Pridať snímač</h2>${groups.map(([k, n]) => `<div class="section-title">${n}</div><div class="cbs-list">${Object.entries(SENSORS).filter(([, d]) => d.kind === k).map(([id, d]) => `<button class="cbs-item" data-s="${id}"><b>${esc(d.name)}</b><span>${d.wires.map((w) => `<i style="background:${w[3]}"></i>${esc(w[1])}`).join(' ')}</span></button>`).join('')}</div>`).join('')}`, (el) => {
       el.querySelectorAll('[data-s]').forEach((b) => {
         b.onclick = () => {
           const type = b.dataset.s, def = SENSORS[type];
-          const prefix = def.kind === 'do' ? (type === 'lamp' ? 'H' : type === 'valve' ? 'Y' : 'K') : def.kind === 'di' && /limit|button/.test(type) ? 'S' : 'B';
+          const prefix = def.kind === 'do' ? ({ lamp: 'H', beacon: 'H', buzzer: 'H', valve: 'Y' }[type] || 'K') : def.kind === 'di' && /limit|button|float|thermostat|press_sw/.test(type) ? 'S' : 'B';
           const n = cb.sensors.filter((s) => s.name.startsWith(prefix)).length + 1;
           const s = { uid: uid(), type, name: prefix + n, wires: {} };
           cb.sensors.push(s); save(); closeSheet(); sel = { sensor: s.uid }; render();
@@ -636,6 +697,41 @@ function editor(cb) {
     });
   };
 
+  $('#cb-pdf').onclick = async () => {
+    const btn = $('#cb-pdf');
+    btn.disabled = true; btn.textContent = '…';
+    let blob;
+    try { blob = await exportCabinetPdf(C, cb); } catch (e) { C.toast('PDF sa nepodarilo vytvoriť: ' + e.message, true); return; } finally { btn.disabled = false; btn.textContent = 'PDF'; }
+    const fname = `zapojenie-${cb.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w-]+/g, '-').toLowerCase()}.pdf`;
+    const url = URL.createObjectURL(blob);
+    const file = new File([blob], fname, { type: 'application/pdf' });
+    const canShare = !!navigator.canShare?.({ files: [file] });
+    sheet(`<h2>PDF je pripravené</h2>
+      <p class="tl-muted">${fname} · ${Math.max(1, Math.round(blob.size / 1024))} kB</p>
+      <div class="cbs-list">
+        <button class="cbs-item" id="cbp-save"><b>💾 Uložiť do aplikácie</b><span>Do sekcie Dokumenty – uvidíš ho aj na mobile, uložené na GitHube</span></button>
+        <a class="cbs-item" href="${url}" download="${fname}"><b>⬇️ Stiahnuť</b><span>Do zariadenia (v prehliadači)</span></a>
+        <a class="cbs-item" href="${url}" target="_blank" rel="noopener"><b>👁️ Otvoriť</b><span>Zobraziť PDF v novom okne</span></a>
+        ${canShare ? '<button class="cbs-item" id="cbp-share"><b>📤 Zdieľať</b><span>E-mail, WhatsApp, Disk…</span></button>' : ''}
+      </div>`, (el) => {
+      $('#cbp-share', el)?.addEventListener('click', () => navigator.share({ files: [file], title: `Zapojenie – ${cb.name}` }).catch(() => {}));
+      $('#cbp-save', el).onclick = async (ev) => {
+        const b = ev.currentTarget;
+        b.disabled = true; b.querySelector('b').textContent = 'Ukladám…';
+        try {
+          const secs = await C.api('/sections');
+          const sec = secs.find((x) => x.type === 'documents');
+          if (!sec) throw new Error('Nemáš sekciu typu Dokumenty – pridaj ju v Nastaveniach');
+          const item = await C.api(`/sections/${encodeURIComponent(sec.id)}/items`, { method: 'POST', json: { title: `Zapojenie – ${cb.name}`, note: `Export z Elektro → Rozvádzač, ${new Date().toLocaleString('sk-SK')}`, tags: ['rozvádzač', 'zapojenie'] } });
+          const fd = new FormData();
+          fd.append('file', file);
+          await C.api(`/sections/${encodeURIComponent(sec.id)}/items/${encodeURIComponent(item.id)}/files`, { method: 'POST', form: fd });
+          closeSheet();
+          C.toast(`✓ Uložené do sekcie ${sec.name}`);
+        } catch (e) { C.toast(e.message, true); b.disabled = false; b.querySelector('b').textContent = '💾 Uložiť do aplikácie'; }
+      };
+    });
+  };
   $('#cb-zoom').onclick = () => { zoom = zoom >= 1.4 ? 0.7 : zoom >= 1 ? 1.4 : 1; C.store.set('cb:zoom', zoom); render(); C.toast(`Mierka ${Math.round(zoom * 100)} %`); };
   $('#cb-menu').onclick = () => {
     sheet(`<h2>Rozvádzač</h2><div class="cbs-list">
@@ -648,4 +744,184 @@ function editor(cb) {
     });
   };
   render();
+}
+
+/* ---------- export do PDF ---------- */
+const A4W = 1240, A4H = 1754, M = 70; // A4 pri ~150 dpi
+
+// SVG do obrázka: štýly z CSS sa musia vložiť priamo do prvkov
+async function diagramImage(cb) {
+  const html = document.documentElement;
+  const prevTheme = html.dataset.theme;
+  html.dataset.theme = 'light';
+  const cbx = { ...cb, outs: {}, sensors: cb.sensors.map((s) => ({ ...s, sim: null })) };
+  const L = layout(cbx), ev = evaluate(cbx, L);
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:-20000px;top:0;';
+  box.innerHTML = draw(cbx, L, ev, null);
+  document.body.appendChild(box);
+  const svg = box.querySelector('svg');
+  svg.querySelector('#cb-drag')?.remove();
+  const props = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'opacity', 'font-size', 'font-weight', 'text-anchor'];
+  svg.querySelectorAll('*').forEach((el) => {
+    const cs = getComputedStyle(el);
+    el.setAttribute('style', props.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(';') + ';font-family:Arial,Helvetica,sans-serif;filter:none;animation:none');
+  });
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const xml = new XMLSerializer().serializeToString(svg);
+  box.remove();
+  if (prevTheme) html.dataset.theme = prevTheme; else delete html.dataset.theme;
+  const img = new Image();
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  await img.decode();
+  return { img, w: L.W, h: L.H, ev, L };
+}
+
+function newPage(pages, title, cbName) {
+  const cv = document.createElement('canvas');
+  cv.width = A4W; cv.height = A4H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, A4W, A4H);
+  x.fillStyle = '#14b8a6'; x.fillRect(0, 0, A4W, 14);
+  x.fillStyle = '#1b1f24'; x.font = 'bold 34px Arial, sans-serif'; x.textBaseline = 'alphabetic';
+  x.fillText(title, M, 80);
+  x.fillStyle = '#6b7280'; x.font = '20px Arial, sans-serif';
+  x.fillText(cbName, M, 112);
+  pages.push(cv);
+  return x;
+}
+function fit(x, text, maxW) {
+  text = String(text ?? '');
+  if (x.measureText(text).width <= maxW) return text;
+  while (text.length > 1 && x.measureText(text + '…').width > maxW) text = text.slice(0, -1);
+  return text + '…';
+}
+
+async function buildReport(cb) {
+  const { img, w, h, ev, L } = await diagramImage(cb);
+  const pages = [];
+  const date = new Date().toLocaleString('sk-SK', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // 1. strana – schéma
+  let x = newPage(pages, 'Schéma zapojenia rozvádzača', `${cb.name} · ${date}`);
+  const okN = cb.sensors.filter((s) => ev[s.uid]?.ok).length;
+  x.fillStyle = '#1b1f24'; x.font = '22px Arial, sans-serif';
+  x.fillText(`Karty: ${cb.cards.length}   ·   Snímače a akčné členy: ${cb.sensors.length}   ·   Zapojené správne: ${okN}/${cb.sensors.length}`, M, 160);
+  const maxW = A4W - 2 * M, maxH = A4H - 260;
+  const sc = Math.min(maxW / w, maxH / h);
+  x.strokeStyle = '#d6d9dd'; x.lineWidth = 2;
+  x.strokeRect(M - 6, 190 - 6, w * sc + 12, h * sc + 12);
+  x.drawImage(img, M, 190, w * sc, h * sc);
+
+  // 2. strana – zostava kariet + pripojenia
+  const rowH = 38;
+  const cols = [['Snímač', 120], ['Vodič', 230], ['Karta', 150], ['Bod', 70], ['Význam bodu', 360], ['Stav', 170]];
+  let y;
+  const header = (title) => {
+    x = newPage(pages, title, cb.name);
+    y = 160;
+  };
+  header('Zostava kariet a pripojenia');
+  x.font = 'bold 24px Arial, sans-serif'; x.fillStyle = '#1b1f24';
+  x.fillText('Zostava kariet (zľava doprava)', M, y); y += 20;
+  x.font = '19px Arial, sans-serif';
+  L.cards.forEach((g, i) => {
+    if (y > A4H - 120) header('Zostava kariet (pokračovanie)');
+    y += 32;
+    x.fillStyle = i % 2 ? '#fff' : '#f4f6f8'; x.fillRect(M, y - 24, A4W - 2 * M, 32);
+    x.fillStyle = '#6b7280'; x.fillText(String(i + 1), M + 10, y);
+    x.fillStyle = '#1b1f24'; x.font = 'bold 19px Arial, sans-serif'; x.fillText(g.c.id, M + 60, y);
+    x.font = '19px Arial, sans-serif'; x.fillStyle = '#374151'; x.fillText(fit(x, g.c.name, A4W - 2 * M - 220), M + 200, y);
+  });
+  y += 60;
+  const tableHead = () => {
+    x.fillStyle = '#1b1f24'; x.fillRect(M, y - 26, A4W - 2 * M, 36);
+    x.fillStyle = '#fff'; x.font = 'bold 18px Arial, sans-serif';
+    let cx = M + 10;
+    cols.forEach(([n, cw]) => { x.fillText(n, cx, y); cx += cw; });
+    y += 10;
+  };
+  if (y > A4H - 200) header('Pripojenia');
+  x.font = 'bold 24px Arial, sans-serif'; x.fillStyle = '#1b1f24';
+  x.fillText('Pripojenia vodičov', M, y); y += 44;
+  tableHead();
+  let n = 0;
+  for (const s of cb.sensors) {
+    const st = ev[s.uid];
+    for (const wdef of wiresOf(s)) {
+      if (y > A4H - 110) { header('Pripojenia (pokračovanie)'); y += 20; tableHead(); }
+      y += rowH;
+      const ws = st.wires[wdef.k];
+      x.fillStyle = n++ % 2 ? '#fff' : '#f4f6f8'; x.fillRect(M, y - 26, A4W - 2 * M, rowH);
+      const pos = ws?.g ? L.cards.indexOf(ws.g) + 1 : '';
+      const cells = [s.name, `${wdef.name} – ${wdef.func}`, ws?.g ? `${ws.g.c.id} (${pos}.)` : '—', ws?.pp ? String(ws.pp.p.n) : '—',
+        ws?.pp ? ws.pp.p.label : 'nezapojený', ws?.state === 'ok' ? 'OK' : ws?.state === 'bad' ? 'CHYBA' : 'nezapojený'];
+      let cx = M + 10;
+      cells.forEach((t, i) => {
+        const cw = cols[i][1];
+        if (i === 1) { x.fillStyle = wdef.color; x.beginPath(); x.arc(cx + 7, y - 7, 7, 0, 7); x.fill(); x.strokeStyle = '#888'; x.lineWidth = 1; x.stroke(); }
+        x.font = i === 0 || i === 3 ? 'bold 18px Arial, sans-serif' : '18px Arial, sans-serif';
+        x.fillStyle = i === 5 ? (t === 'OK' ? '#0f8a4a' : t === 'CHYBA' ? '#c62828' : '#6b7280') : '#1b1f24';
+        x.fillText(fit(x, t, cw - (i === 1 ? 30 : 14)), cx + (i === 1 ? 20 : 0), y);
+        cx += cw;
+      });
+    }
+    // typ snímača pod jeho riadkami
+    y += 26; x.fillStyle = '#6b7280'; x.font = 'italic 16px Arial, sans-serif';
+    x.fillText(`${s.name} = ${SENSORS[s.type].name}${st.ok && st.card ? ` · signál na ${L.cards.find((g) => g.uid === st.card).c.id}, kanál ${st.channel ?? '–'}` : ''}`, M + 10, y);
+    y += 6;
+  }
+  if (!cb.sensors.length) { y += 40; x.fillStyle = '#6b7280'; x.font = '19px Arial, sans-serif'; x.fillText('V rozvádzači zatiaľ nie sú žiadne snímače.', M, y); }
+  // pätička
+  pages.forEach((cv, i) => {
+    const c = cv.getContext('2d');
+    c.fillStyle = '#9aa1a9'; c.font = '16px Arial, sans-serif';
+    c.fillText(`Môj priestor · Elektro – Rozvádzač · ${date}`, M, A4H - 40);
+    c.textAlign = 'right'; c.fillText(`${i + 1} / ${pages.length}`, A4W - M, A4H - 40); c.textAlign = 'left';
+    c.fillText('Zapojenie podľa katalógu svoriek v aplikácii – pred realizáciou over podľa dokumentácie výrobcu.', M, A4H - 18);
+  });
+  return pages;
+}
+
+// jednoduchý zapisovač PDF: každá strana = jeden JPEG obrázok A4
+async function pagesToPdf(pages) {
+  const enc = new TextEncoder();
+  const chunks = [];
+  let len = 0;
+  const offsets = [];
+  const push = (b) => { const u = typeof b === 'string' ? enc.encode(b) : b; chunks.push(u); len += u.length; };
+  const obj = (n, body) => { offsets[n] = len; push(`${n} 0 obj\n`); body(); push('\nendobj\n'); };
+  const imgs = [];
+  for (const cv of pages) {
+    const blob = await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.82));
+    imgs.push(new Uint8Array(await blob.arrayBuffer()));
+  }
+  const W = 595.28, H = 841.89;
+  const N = pages.length;
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const kids = pages.map((_, i) => `${3 + i * 3} 0 R`).join(' ');
+  obj(1, () => push('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2, () => push(`<< /Type /Pages /Kids [${kids}] /Count ${N} >>`));
+  pages.forEach((cv, i) => {
+    const pn = 3 + i * 3, cn = pn + 1, im = pn + 2;
+    obj(pn, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${cn} 0 R >>`));
+    const content = `q ${W} 0 0 ${H} 0 0 cm /Im${i} Do Q`;
+    obj(cn, () => push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`));
+    obj(im, () => {
+      push(`<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgs[i].length} >>\nstream\n`);
+      push(imgs[i]);
+      push('\nendstream');
+    });
+  });
+  const total = 3 + N * 3;
+  const xref = len;
+  push(`xref\n0 ${total}\n0000000000 65535 f \n`);
+  for (let n = 1; n < total; n++) push(`${String(offsets[n]).padStart(10, '0')} 00000 n \n`);
+  push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(chunks, { type: 'application/pdf' });
+}
+
+export async function exportCabinetPdf(ctx, cb) {
+  C = ctx;
+  const pages = await buildReport(cb);
+  return pagesToPdf(pages);
 }
