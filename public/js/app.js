@@ -1,4 +1,5 @@
 import { icon, PICKABLE } from './icons.js';
+import { renderElektro } from './elektro.js';
 
 /* =========================================================
    Stav a pomocné funkcie
@@ -160,11 +161,12 @@ function route() {
   if (p[0] === 's' && p[1]) return { view: 'section', id: decodeURIComponent(p[1]) };
   if (p[0] === 'asistent') return { view: 'assistant' };
   if (p[0] === 'nastavenia') return { view: 'settings' };
+  if (p[0] === 'elektro') return { view: 'elektro', sub: p[1] || '' };
   return { view: 'home' };
 }
 
 function renderNav(active) {
-  const links = [['#/', 'home', 'Domov', 'home'], ['#/asistent', 'sparkles', 'Asistent', 'assistant'], ['#/nastavenia', 'settings', 'Nastavenia', 'settings']];
+  const links = [['#/', 'home', 'Domov', 'home'], ['#/elektro', 'bolt', 'Elektro', 'elektro'], ['#/asistent', 'sparkles', 'Asistent', 'assistant'], ['#/nastavenia', 'settings', 'Nastavenia', 'settings']];
   $nav.hidden = false;
   $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${active === v || (active === 'section' && v === 'home') ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('');
 }
@@ -181,6 +183,7 @@ async function render() {
   if (r.view === 'section') return renderSection(r.id);
   if (r.view === 'assistant') return renderAssistant();
   if (r.view === 'settings') return renderSettings();
+  if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural }, r.sub);
   return renderHome();
 }
 
@@ -289,6 +292,10 @@ function homeHTML() {
         <div class="val">${esc(s.val)}</div>
         <div class="sub">${esc(s.sub)}</div>
       </div>`).join('')}</div>` : ''}
+    <a class="ez-banner glass" href="#/elektro">
+      <div class="ez-bolt">${icon('bolt')}</div>
+      <div><b>Elektro · príprava na skúšku</b><span>Kvíz, ostrý test a kartičky s odpoveďami</span></div>${icon('chevron')}
+    </a>
     <div class="section-title">Sekcie</div>
     <div class="tiles">
       ${(state.sections || []).map((s) => `
@@ -1266,7 +1273,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.11</span></div>
+      <div class="r"><span>Verzia</span><span>1.12</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 

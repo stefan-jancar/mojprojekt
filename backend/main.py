@@ -12,7 +12,7 @@ import anthropic
 from fastapi import Body, Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 
-from . import assistant, horoscope
+from . import assistant, elektro, horoscope
 from .data import SECTION_TYPES, Repo
 from .storage import StorageError, make_store
 
@@ -202,6 +202,48 @@ def get_horoscope(sign: str = "", source: str = "", debug: bool = False):
 @app.get("/api/zodiac")
 def zodiac_signs():
     return [{"id": k, "name": v[0], "symbol": v[1]} for k, v in horoscope.SIGNS.items()]
+
+
+# ---------- elektro – príprava na skúšky ----------
+
+@app.get("/api/elektro", dependencies=[Depends(auth)])
+def elektro_catalog():
+    return elektro.catalog()
+
+
+@app.get("/api/elektro/quiz/{sid}", dependencies=[Depends(auth)])
+def elektro_quiz(sid: str):
+    return elektro.quiz(sid)
+
+
+@app.get("/api/elektro/cards/{sid}", dependencies=[Depends(auth)])
+def elektro_cards(sid: str):
+    return elektro.cards(sid)
+
+
+@app.get("/api/elektro/img/{name}", dependencies=[Depends(auth)])
+def elektro_img(name: str):
+    return Response(elektro.image(name), media_type="image/webp", headers={"Cache-Control": "private, max-age=604800"})
+
+
+@app.get("/api/elektro/stats", dependencies=[Depends(auth)])
+def elektro_stats():
+    return elektro.stats(repo.store)
+
+
+@app.post("/api/elektro/stats/attempt", dependencies=[Depends(auth)])
+def elektro_attempt(body: dict = Body(...)):
+    return elektro.add_attempt(repo.store, body)
+
+
+@app.post("/api/elektro/stats/card", dependencies=[Depends(auth)])
+def elektro_card(body: dict = Body(...)):
+    return elektro.rate_card(repo.store, body)
+
+
+@app.delete("/api/elektro/stats", dependencies=[Depends(auth)])
+def elektro_reset():
+    return elektro.reset(repo.store)
 
 
 # ---------- asistent ----------
