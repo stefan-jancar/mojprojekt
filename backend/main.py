@@ -12,7 +12,7 @@ import anthropic
 from fastapi import Body, Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
 
-from . import assistant, elektro, horoscope
+from . import assistant, elektro, horoscope, ideas
 from .data import SECTION_TYPES, Repo
 from .storage import StorageError, make_store
 
@@ -258,12 +258,11 @@ def elektro_reset():
 
 # ---------- asistent ----------
 
-@app.post("/api/assistant", dependencies=[Depends(auth)])
-def ask_assistant(body: dict = Body(...)):
+def _ai(fn, *args):
     if not assistant.enabled():
         raise HTTPException(503, "Asistent nie je nastavený – pridaj GEMINI_API_KEY (alebo ANTHROPIC_API_KEY).")
     try:
-        return assistant.chat(repo, body.get("messages") or [])
+        return fn(*args)
     except anthropic.RateLimitError:
         raise HTTPException(429, "Asistent je preťažený, skús o chvíľu.")
     except anthropic.APIStatusError as e:
@@ -281,6 +280,17 @@ def ask_assistant(body: dict = Body(...)):
                 raise HTTPException(502, f"Gemini odmietol požiadavku ({code}) – skontroluj GEMINI_API_KEY a GEMINI_MODEL.")
             raise HTTPException(502, f"Chyba asistenta Gemini: {e}")
         raise
+
+
+@app.post("/api/assistant", dependencies=[Depends(auth)])
+def ask_assistant(body: dict = Body(...)):
+    return _ai(assistant.chat, repo, body.get("messages") or [])
+
+
+@app.post("/api/ideas", dependencies=[Depends(auth)])
+def project_ideas(body: dict = Body(...)):
+    """Návrhy projektov z vybraných súčiastok."""
+    return _ai(ideas.suggest, body.get("parts") or [], body.get("wish") or "", body.get("count") or 4)
 
 
 # Lokálne (uvicorn) servíruje aj frontend. Na Verceli ho servíruje CDN z priečinka public/.
