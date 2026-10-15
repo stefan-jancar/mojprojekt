@@ -4,6 +4,7 @@
   data/items/<sekcia>.json      – položky v sekcii
   files/<sekcia>/<polozka>/...  – priložené súbory (PDF, obrázky)
 """
+import json
 import re
 from urllib.parse import quote
 import secrets
@@ -47,7 +48,9 @@ ITEM_FIELDS = {
     "amount": (int, float), "currency": str, "done": bool, "progress": (int, float),
     "links": list, "person": str, "priority": str, "recurring": str, "pinned": bool,
     "kind": str, "category": str, "value": str, "qty": (int, float), "package": str,
+    "idea": dict, "circuit": dict,
 }
+MAX_DICT_FIELD = 150_000  # znakov v JSON (schéma + rozloženie DPS)
 
 
 def now_iso():
@@ -104,7 +107,12 @@ def clean_item(fields: dict, partial=False) -> dict:
         if val is None:
             out[key] = None
             continue
-        if typ is bool:
+        if typ is dict:
+            if not isinstance(val, dict):
+                raise ValueError(f"Pole {key} musí byť objekt")
+            if len(json.dumps(val, ensure_ascii=False)) > MAX_DICT_FIELD:
+                raise ValueError(f"Pole {key} je príliš veľké")
+        elif typ is bool:
             val = bool(val)
         elif typ is list:
             val = [str(v).strip() for v in (val if isinstance(val, list) else str(val).split(",")) if str(v).strip()]

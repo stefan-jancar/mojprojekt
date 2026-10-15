@@ -979,3 +979,57 @@ a.cbs-item { text-decoration: none; }
 .idea-sub { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-top: 10px; }
 .idea-sub.warn { color: var(--warning); }
 .idea-tip { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; margin-top: 8px; }
+.ideas-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.ideas-row .btn { flex: 1; margin: 0; }
+.pick-tabs { margin-bottom: 12px; }
+.pick-search { margin-bottom: 10px; }
+.pick-cats { margin-bottom: 8px; }
+.pick-group { position: sticky; top: 0; z-index: 1; background: var(--surface-solid); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; padding: 9px 12px 6px; border-bottom: 1px solid var(--border); }
+.pick-empty { padding: 18px 14px; color: var(--muted); font-size: 14px; text-align: center; }
+.pick-row .q.have { color: var(--success); }
+.pick-add { display: flex; gap: 8px; margin-top: 10px; }
+.pick-add input { flex: 1; }
+.pick-add .btn { width: 48px; padding: 0; }
+.muted { color: var(--muted); font-size: 13px; }
+
+/* ---------- schéma a plošný spoj ---------- */
+.circ-title { font-size: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.circ-tabs { margin-bottom: 14px; }
+.circ-tabs span .ic { width: 16px; height: 16px; }
+.circ-empty { text-align: center; padding: 28px 18px; border-radius: 22px; }
+.circ-empty .orb { width: 76px; height: 76px; border-radius: 24px; margin: 0 auto 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.circ-empty .orb .ic { width: 36px; height: 36px; }
+.circ-empty p { color: var(--muted); font-size: 14.5px; margin: 8px 0 18px; }
+.circ-empty .typing { display: inline-block; background: none; }
+.circ-box { border-radius: 18px; padding: 10px; overflow: auto; max-height: 70vh; }
+.circ-box svg { display: block; width: 100%; height: auto; }
+.circ-box.zoom svg { width: auto; max-width: none; }
+.circ-box .sch-net { cursor: pointer; }
+.circ-bar { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.circ-actions { display: flex; gap: 10px; margin: 12px 0; }
+.circ-actions .btn { flex: 1; }
+.circ-warn { background: color-mix(in srgb, var(--warning) 12%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent); color: var(--warning); border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+.circ-list { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.circ-row { display: flex; gap: 10px; align-items: baseline; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.circ-row:last-child { border-bottom: 0; }
+.circ-row b { min-width: 52px; }
+.circ-row span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.circ-row small, .circ-row em { color: var(--muted); font-style: normal; font-size: 12.5px; }
+.circ-row.net { cursor: pointer; }
+.circ-row.net.on { background: var(--surface-2); }
+.circ-note { color: var(--muted); font-size: 12.5px; margin: 12px 2px; }
+.pcb-status { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; margin-bottom: 10px; }
+.pcb-status .ic { width: 16px; height: 16px; }
+.pcb-status.ok { color: var(--success); }
+.pcb-status.warn { color: var(--warning); }
+.pcb-box { background: #0a1410; border-radius: 18px; padding: 10px; border: 1px solid var(--border); }
+.pcb-box svg { display: block; width: 100%; height: auto; max-height: 62vh; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pcb-box [data-ref] { cursor: grab; }
+.pcb-sel { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 8px 2px; font-size: 14px; }
+.pcb-sel span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pcb-tools { display: flex; gap: 8px; }
+.pcb-tools .btn { flex: 1; padding-left: 8px; padding-right: 8px; }
+.pcb-size { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 4px; font-size: 14px; }
+.pcb-size input { width: 64px; text-align: center; padding: 8px 4px; }
+.circ-open { margin-bottom: 14px; }
+.pcb-sel .muted { white-space: normal; }
