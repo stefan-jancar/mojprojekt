@@ -103,4 +103,3 @@ Bez `GITHUB_TOKEN` sa dáta ukladajú do `.data/`, bez `APP_PASSWORD` sa lokáln
 ## Obmedzenia
 
 - Max veľkosť jedného súboru je **4 MB** (limit Vercelu).
-- Pôvodná Django aplikácia na rozpočet je presunutá v `legacy_django/`.
