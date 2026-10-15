@@ -103,7 +103,9 @@ function paintHub() {
       return `<div class="r"><span>${new Date(a.t * 1000).toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric' })} · ${esc(modeName(a.mode))}</span>
         <div class="bar"><i class="${p >= PASS * 100 ? 'ok' : 'bad'}" style="width:${p}%"></i></div><b>${p} %</b></div>`;
     }).join('')}</div>
-    <button class="btn ghost block ez-reset" id="ez-reset">Vynulovať štatistiky</button>` : ''}`;
+    <button class="btn ghost block ez-reset" id="ez-reset">Vynulovať štatistiky</button>` : ''}
+    ${C.version ? `<p class="ez-ver">Elektro · verzia ${esc(C.version)}</p>` : ''}`;
+  C.onHub?.();
 
   C.$app.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => start(qMeta.id, b.dataset.mode); });
   C.$app.querySelectorAll('[data-topic]').forEach((b) => { b.onclick = () => start(qMeta.id, 'topic', b.dataset.topic); });
