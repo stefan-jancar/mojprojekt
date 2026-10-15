@@ -1,0 +1,96 @@
+{
+ "id": "1000v-a-otazky",
+ "title": "Otázky na opakovanie s odpoveďami",
+ "cards": [
+  {
+   "id": 1,
+   "label": "01",
+   "q": "Vysvetlite rozdiel medzi striedavými sieťami systémov TN-C a TN-S",
+   "img": "q01.webp"
+  },
+  {
+   "id": 2,
+   "label": "02",
+   "q": "Popíšte ochranu samočinným odpojením napájania v striedavej sieti TN-C",
+   "img": "q02.webp"
+  },
+  {
+   "id": 3,
+   "label": "03",
+   "q": "Popíšte ochranu samočinným odpojením napájania v striedavej sieti TN-S",
+   "img": "q03.webp"
+  },
+  {
+   "id": 4,
+   "label": "04",
+   "q": "Popíšte ochranu elektrickým oddelením",
+   "img": "q04.webp"
+  },
+  {
+   "id": 5,
+   "label": "05",
+   "q": "Popíšte ochranu umiestnením mimo dosahu",
+   "img": "q05.webp"
+  },
+  {
+   "id": 6,
+   "label": "06",
+   "q": "Popíšte ochranu malým bezpečným napätím",
+   "img": "q06.webp"
+  },
+  {
+   "id": 7,
+   "label": "07",
+   "q": "Akým podmienkam musí vyhovovať vodič PE (farba izolácie, istenie, prierezy, …)?",
+   "img": "q07.webp"
+  },
+  {
+   "id": 8,
+   "label": "08 + 09",
+   "q": "Do akého času musí vypnúť ochranný prístroj v obvode so striedavým napätím 230 V a 400 V?",
+   "img": "q08.webp"
+  },
+  {
+   "id": 10,
+   "label": "10",
+   "q": "Aké sú medzné hodnoty napäťových pásiem HV (vysoké napätie), LV (nízke napätie) a ELV (malé napätie)?",
+   "img": "q10.webp"
+  },
+  {
+   "id": 11,
+   "label": "11",
+   "q": "Čo je práca pod dozorom a práca s dohľadom?",
+   "img": "q11.webp"
+  },
+  {
+   "id": 12,
+   "label": "12",
+   "q": "Čo je príkaz B a na aké práce sa vystavuje? Na akú dobu sa vystavuje príkaz B?",
+   "img": "q12.webp"
+  },
+  {
+   "id": 13,
+   "label": "13",
+   "q": "Čo vyjadruje skratka LPL pri LPS systémoch? Hlavné časti bleskozvodu, ochranný priestor, metóda ochranného uhla, mrežová sústava, uzemňovacie sústavy a max. odpor uzemnenia bleskozvodu.",
+   "img": "q13.webp"
+  },
+  {
+   "id": 14,
+   "label": "14",
+   "q": "Ochrany v priestoroch s vaňou: zóny v kúpeľni, čo sa smie montovať v zóne 0 a 1, ochrana elektrickým oddelením, čo vyjadruje IP 2X, aké krytie v zóne 1?",
+   "img": "q14.webp"
+  },
+  {
+   "id": 15,
+   "label": "15",
+   "q": "Čo je posudzovanie zhody a čo vyjadruje značka zhody? Čo je určený výrobok podľa zákona č. 56/2018 Z. z.?",
+   "img": "q15.webp"
+  },
+  {
+   "id": 16,
+   "label": "16",
+   "q": "Vyslobodenie postihnutého z dosahu elektrického prúdu a prvá pomoc pri úraze elektrickým prúdom.",
+   "img": "q16.webp"
+  }
+ ]
+}

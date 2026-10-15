@@ -1,0 +1,1016 @@
+{
+ "id": "1000v-a",
+ "title": "Elektrotechnik do 1000 V – objekty triedy A",
+ "source": "TESTY do 1000 V obj. tr. A",
+ "questions": [
+  {
+   "id": 1,
+   "topic": "Ochrany",
+   "q": "Čo vyjadruje C v označení siete systému TN-C?",
+   "options": [
+    {
+     "k": "b",
+     "t": "Do rozvodu je vyvedený samostatný neutrálny vodič N"
+    },
+    {
+     "k": "c",
+     "t": "Do rozvodu je vyvedený samostatný ochranný vodič PE"
+    },
+    {
+     "k": "d",
+     "t": "Vodič PEN plní funkciu ochranného aj neutrálneho vodiča"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 2,
+   "topic": "Ochrany",
+   "q": "Čo vyjadruje S v označení siete systému TN-S?",
+   "options": [
+    {
+     "k": "c",
+     "t": "Ochranný vodič PE a neutrálny vodič N sú v sieti vedené samostatne"
+    },
+    {
+     "k": "d",
+     "t": "Ochranný vodič (PE) je spojený s neutrálnym vodičom (N)"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 3,
+   "topic": "Ochrany",
+   "intro": "Písmená T a N v označení sieti určujú spôsoby uzemnenia siete.",
+   "q": "Čo vyjadruje písmeno T v označení siete systému TN-S?",
+   "options": [
+    {
+     "k": "c",
+     "t": "Vyjadruje situáciu pri spotrebiči - uzemnenie neživých vodivých časti"
+    },
+    {
+     "k": "d",
+     "t": "Vyjadruje situáciu pri zdroji - uzemnenie neutrálneho bodu"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 4,
+   "topic": "Ochrany",
+   "q": "Ako sa označuje sieť, ktorá má neutrálny bod zdroja uzemnený, a neživé vodivé časti spotrebičov (kovové kryty) sa pripájajú na samostatné uzemňovače?",
+   "options": [
+    {
+     "k": "a",
+     "t": "sieť systému TN-S"
+    },
+    {
+     "k": "b",
+     "t": "sieť systému TT"
+    },
+    {
+     "k": "c",
+     "t": "sieť systému IT"
+    },
+    {
+     "k": "d",
+     "t": "sieť systému TN-C"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 5,
+   "topic": "Ochrany",
+   "q": "Aký má byť celkový odpor uzemnenia vodičov PEN odchádzajúcich z transformovne vrátane jeho uzemneného neutrálneho bodu? (je to pre sieť s menovitým napätím 230 V a ak je merný odpor pôdy v hĺbke 1 až 3 m do 200 Ωm).",
+   "options": [
+    {
+     "k": "b",
+     "t": "do 2 ohmov"
+    },
+    {
+     "k": "c",
+     "t": "do 15 ohmov"
+    },
+    {
+     "k": "d",
+     "t": "do 200 ohmov"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 6,
+   "topic": "Ochrany",
+   "q": "Ktorá je medzná hodnota striedavého napätia napäťového pásma LV (nízke napätie)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "U > 1000 V"
+    },
+    {
+     "k": "b",
+     "t": "1000 V < U < 1500 V"
+    },
+    {
+     "k": "c",
+     "t": "50 V < U < 120 V"
+    },
+    {
+     "k": "d",
+     "t": "U ≤ 1000 V"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 7,
+   "topic": "Ochrany",
+   "q": "Ktoré sú malé bezpečné napätia v zariadeniach do 1000 V v priestoroch osobitne nebezpečných?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Striedavé do 25 V, jednosmerné do 60 V"
+    },
+    {
+     "k": "b",
+     "t": "Striedavé do 50 V, jednosmerné do 120 V"
+    },
+    {
+     "k": "d",
+     "t": "Striedavé do 12 V, jednosmerné do 30 V"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 8,
+   "topic": "Ochrany",
+   "q": "Akú farbu má izolácia ochranného vodiča PE (v striedavej sieti)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Farba oranžová"
+    },
+    {
+     "k": "b",
+     "t": "Farba bledo modrá (svetlo modrá)"
+    },
+    {
+     "k": "c",
+     "t": "Farba zelená/žltá"
+    },
+    {
+     "k": "d",
+     "t": "Farba čierna"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 9,
+   "topic": "Ochrany",
+   "q": "Akú farbu má izolácia neutrálneho vodiča N (v striedavej sieti) a stredného vodiča M (v jednosmernej sieti)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Farba oranžová"
+    },
+    {
+     "k": "b",
+     "t": "Farba zelená/žltá"
+    },
+    {
+     "k": "c",
+     "t": "Farba čierna"
+    },
+    {
+     "k": "d",
+     "t": "Farba bledo modrá (svetlo modrá)"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 10,
+   "topic": "Ochrany",
+   "q": "Môže sa ochranný vodič PE istiť?",
+   "options": [
+    {
+     "k": "a",
+     "t": "áno - musí sa istiť"
+    },
+    {
+     "k": "b",
+     "t": "Môže sa istiť poistkou alebo ističom"
+    },
+    {
+     "k": "c",
+     "t": "Nesmie sa istiť"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 11,
+   "topic": "Ochrany",
+   "intro": "Pri ochrane samočinným odpojením napájania v TN sieti – napätie 230 V AC:",
+   "q": "Do akého času musí ochranný prvok odpojiť poruchové zariadenie?",
+   "options": [
+    {
+     "k": "a",
+     "t": "do 0,4 s"
+    },
+    {
+     "k": "b",
+     "t": "do 1 s"
+    },
+    {
+     "k": "c",
+     "t": "do 0,5 s"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 12,
+   "topic": "Ochrany",
+   "intro": "Jedna z ochrán živých častí môže byť umiestnením mimo dosahu.",
+   "q": "Aká je minimálna výška živých častí nad stanoviskom v budovách - do 1000 V?",
+   "options": [
+    {
+     "k": "a",
+     "t": "minimálne 1 m"
+    },
+    {
+     "k": "b",
+     "t": "minimálne 2 m"
+    },
+    {
+     "k": "c",
+     "t": "minimálne 2,5 m"
+    },
+    {
+     "k": "d",
+     "t": "minimálne 0,5 m"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 13,
+   "topic": "Ochrany",
+   "q": "Koľko vodičov (žíl) má pohyblivý prívod pre elektrické spotrebiče s triedou ochrany II (prívod je jedným koncom pevne pripojený k spotrebiču a na druhom konci má vidlicu)?",
+   "options": [
+    {
+     "k": "b",
+     "t": "Má len dva vodiče"
+    },
+    {
+     "k": "c",
+     "t": "Môže mať dva alebo tri vodiče"
+    },
+    {
+     "k": "d",
+     "t": "Musí mať tri vodiče"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 14,
+   "topic": "Ochrany",
+   "q": "V čom spočíva ochrana (pri poruche) samočinným odpojením napájania v sieti TN?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Poruchu signalizuje opticky"
+    },
+    {
+     "k": "b",
+     "t": "Nastáva samočinné odpojenie poruchového zariadenia od napájania z krajného (fázového) vodiča - odpojenie nastane najbližším istiacim prvkom"
+    },
+    {
+     "k": "c",
+     "t": "Spočíva vo vypnutí napájacieho zdroja"
+    },
+    {
+     "k": "d",
+     "t": "Poruchu signalizuje akusticky"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 15,
+   "topic": "Ochrany",
+   "intro": "Ochranný vodič PE môže byť súčasťou kábla, alebo môže to byť samostatný vodič a môže byť chránený pred mechanickým poškodením, alebo nie je chránený pred mechanickým poškodením.",
+   "q": "Aký môže byť minimálny prierez vodiča PE ak nie je súčasťou kábla a je chránený pred mechanickým poškodením?",
+   "options": [
+    {
+     "k": "a",
+     "t": "vždy musí byť 4 mm²"
+    },
+    {
+     "k": "b",
+     "t": "najmenej 1 mm²"
+    },
+    {
+     "k": "c",
+     "t": "najmenej 1,5 mm²"
+    },
+    {
+     "k": "d",
+     "t": "najmenej 2,5 mm²"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 16,
+   "topic": "Ochrany",
+   "q": "Aký môže byť minimálny prierez vodiča PE ak nie je súčasťou kábla a nie je chránený (je nechránený) pred mechanickým poškodením?",
+   "options": [
+    {
+     "k": "a",
+     "t": "vždy musí byť 6 mm²"
+    },
+    {
+     "k": "b",
+     "t": "najmenej 2,5 mm²"
+    },
+    {
+     "k": "c",
+     "t": "najmenej 4 mm²"
+    },
+    {
+     "k": "d",
+     "t": "najmenej 1,5 mm²"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 17,
+   "topic": "Ochrany",
+   "intro": "Výskyt vody ako vonkajší vplyv podľa STN 33 2000-5-51:2010 označujeme: AD1 až AD8.",
+   "q": "Čo vyjadruje označenie vonkajšieho vplyvu AD1?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Výskyt vody - striekajúca pod tlakom"
+    },
+    {
+     "k": "b",
+     "t": "Výskyt vody - kvapky"
+    },
+    {
+     "k": "d",
+     "t": "Výskyt vody je zanedbateľný"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 18,
+   "topic": "Ochrany",
+   "intro": "Stupeň ochrany krytom sa vyznačí symbolom IP a: prvé povinné číslo 0 až 6, druhé povinné číslo 0 až 9, tretie nepovinné písmeno A,B,C,D a štvrté nepovinné písmeno H,S,M,W.",
+   "q": "Čo vyjadrujú prvé povinné čísla (napríklad: IP4X, IP2X, …)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Stupeň ochrany pred vniknutím cudzieho telesa"
+    },
+    {
+     "k": "b",
+     "t": "Stupeň ochrany pred vniknutím vody"
+    },
+    {
+     "k": "c",
+     "t": "Stupeň ochrany pred vibráciami"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 19,
+   "topic": "Ochrany",
+   "intro": "Elektrický predmet triedy I - je predmet, ktorý má všade aspoň základnú izoláciu.",
+   "q": "Má elektrický predmet triedy I ochrannú svorku alebo ochranný kontakt na pripojenie ochranného vodiča?",
+   "options": [
+    {
+     "k": "a",
+     "t": "áno, má ochrannú svorku alebo ochranný kontakt"
+    },
+    {
+     "k": "b",
+     "t": "nie, nemá ochrannú svorku ani ochranný kontakt"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 20,
+   "topic": "Ochrany",
+   "q": "Koľko žilová musí byť jednofázová predlžovacia šnúra (podľa STN)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Musí byť trojžilová (vodiče L, N, PE)"
+    },
+    {
+     "k": "b",
+     "t": "Dvojžilová (vodiče L a PEN)"
+    },
+    {
+     "k": "c",
+     "t": "Môže byť dvoj i trojžilová"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 21,
+   "topic": "Ochrany",
+   "intro": "Ochranný prístroj musí pri poruche odpojiť poruchové zariadenie do 0,4 sek (pri striedavom napätí 230 V), aby nedošlo k úrazu elektrickým prúdom.",
+   "q": "Akú najvyššiu hodnotu môže mať impedancia poruchovej slučky pri použití ističa 16/1/C ak sme z jeho vypínacej charakteristiky odčítali, pre vypínací čas 0,4 sek., prúd veľkosti: 10 násobok menovitého prúdu ističa? ",
+   "type": "number",
+   "unit": "Ω",
+   "answer": 1.437,
+   "tol": 0.006,
+   "formula": "Zs ≤ U₀ / Iₐ   (U₀ = 230 V)",
+   "explain": "Iₐ = 10 × 16 A = 160 A → Zs = 230 / 160 = 1,437 Ω"
+  },
+  {
+   "id": 22,
+   "topic": "Ochrany",
+   "intro": "Ochranný prístroj musí pri poruche odpojiť poruchové zariadenie do 0,4 sek (pri stried. napätí 230 V), aby nedošlo k úrazu elektrickým prúdom.",
+   "q": "Akú najvyššiu hodnotu môže mať impedancia poruchovej slučky pri použití valcovej 16 A poistky ak sme z jej vypínacej charakteristiky odčítali, pre vypínací čas 0,4 sek., prúd veľkosti: 5,625 násobok menovitého prúdu poistky  (menovitá hodnota je I=16 A)?",
+   "type": "number",
+   "unit": "Ω",
+   "answer": 2.555,
+   "tol": 0.006,
+   "formula": "Zs ≤ U₀ / Iₐ   (U₀ = 230 V)",
+   "explain": "Iₐ = 5,625 × 16 A = 90 A → Zs = 230 / 90 = 2,555 Ω"
+  },
+  {
+   "id": 23,
+   "topic": "Bezpečná práca",
+   "q": "Musí sa pre každú elektrickú inštaláciu určiť osoba zodpovedná za jej prevádzku?",
+   "options": [
+    {
+     "k": "a",
+     "t": "áno - ale len pri inštaláciách nad 1000 V"
+    },
+    {
+     "k": "b",
+     "t": "nie - nemusí sa určiť"
+    },
+    {
+     "k": "c",
+     "t": "áno - musí sa určiť"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 24,
+   "topic": "Bezpečná práca",
+   "intro": "Práca s dohľadom.",
+   "q": "Kto zodpovedá za dodržiavanie bezpečnostných predpisov pri práci s dohľadom?",
+   "options": [
+    {
+     "k": "a",
+     "t": "osoba, ktorá vykonáva dohľad"
+    },
+    {
+     "k": "b",
+     "t": "osoby, ktoré vykonávajú prácu"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 25,
+   "topic": "Bezpečná práca",
+   "intro": "Práca pod dozorom.",
+   "q": "Musí byť dozorujúca osoba trvalo prítomná na pracovisku, ktoré dozoruje?",
+   "options": [
+    {
+     "k": "a",
+     "t": "nemusí tam byť trvalo prítomná"
+    },
+    {
+     "k": "b",
+     "t": "musí byť prítomná len na začiatku práce"
+    },
+    {
+     "k": "c",
+     "t": "áno musí tam byť trvalo prítomná a zodpovedá za dodržiavanie bezpečnostných predpisov."
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 26,
+   "topic": "Bezpečná práca",
+   "intro": "Pri elektrických inštaláciách mn a nn, pri zaistení pracoviska, sa vodiče nemusia spájať so zemou a skratovať ak je vypnutý stav bezpečne zaistený.",
+   "q": "Aký nápis (na doplnkovom štítku) sa musí umiestniť pri príslušných poistkách?",
+   "options": [
+    {
+     "k": "b",
+     "t": "žiadna značka sa tam nedáva"
+    },
+    {
+     "k": "c",
+     "t": "Pozor, na zariadení sa pracuje"
+    },
+    {
+     "k": "d",
+     "t": "Pozor, pod napätím"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 27,
+   "topic": "Bezpečná práca",
+   "intro": "Príkaz B sa vždy musí vydať na práce na elektrických inštaláciách vn, vvn a zvn a na práce v ich blízkosti.",
+   "q": "Kedy sa príkaz B musí vystaviť na práce na vedeniach mn alebo nn?",
+   "options": [
+    {
+     "k": "c",
+     "t": "na práce na vedeniach mn a nn sa príkaz B nikdy nevystavuje"
+    },
+    {
+     "k": "d",
+     "t": "ak vedenia mn alebo nn sa krížujú alebo sú v súbehu s vedeniami vn"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 28,
+   "topic": "Bezpečná práca",
+   "intro": "Príkaz B alebo B-PPN vydáva a podpisuje osoba s vyššou kvalifikáciou zodpovedná za prevádzku príslušnej elektrickej inštalácie vn, vvn alebo zvn.",
+   "q": "Na akú dobu sa vystavuje príkaz B?",
+   "options": [
+    {
+     "k": "a",
+     "t": "36 hodín"
+    },
+    {
+     "k": "b",
+     "t": "12 hodín"
+    },
+    {
+     "k": "c",
+     "t": "48 hodín"
+    },
+    {
+     "k": "d",
+     "t": "24 hodín"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 29,
+   "topic": "Bezpečná práca",
+   "q": "Je prácou na elektrickej inštalácii i meranie napätia prenosným meracím prístrojom?",
+   "options": [
+    {
+     "k": "c",
+     "t": "áno"
+    },
+    {
+     "k": "d",
+     "t": "nie"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 30,
+   "topic": "Bleskozvody",
+   "intro": "Úroveň ochrany pred bleskom sa označuje LPL I, LPL II, LPL III a LPL IV.",
+   "q": "Ktorá úroveň vyjadruje najvyšší stupeň ochrany pred bleskom (LPS - systém ochrany pred bleskom)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "LPL I"
+    },
+    {
+     "k": "b",
+     "t": "LPL IV"
+    },
+    {
+     "k": "c",
+     "t": "všetky vyjadrujú rovnakú úroveň ochrany"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 31,
+   "topic": "Bleskozvody",
+   "q": "Ako nazývame vonkajší LPS systém, ktorého vonkajšie časti nie sú v dotyku s chránenou stavbou (LPS - systém ochrany pred bleskom)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "vonkajší LPS izolovaný"
+    },
+    {
+     "k": "b",
+     "t": "vonkajší LPS neizolovaný"
+    },
+    {
+     "k": "c",
+     "t": "vonkajší LPS oddialený"
+    }
+   ],
+   "answer": [
+    "a",
+    "c"
+   ],
+   "type": "multi"
+  },
+  {
+   "id": 32,
+   "topic": "Bleskozvody",
+   "q": "Patrí do LPS systému i ekvipotenciálne pospájanie vo vnútri budovy (LPS - systém ochrany pred bleskom)?",
+   "options": [
+    {
+     "k": "c",
+     "t": "áno"
+    },
+    {
+     "k": "d",
+     "t": "nie"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 33,
+   "topic": "Prvá pomoc",
+   "intro": "Záchranca, po vyslobodení postihnutého z dosahu elektrického prúdu je povinný poskytnúť mu prvú pomoc pokým nepríde privolaný lekár.",
+   "q": "Môže záchranca postihnutého opustiť skôr ako mu na to dá pokyn lekár?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Nie, nesmie ho opustiť"
+    },
+    {
+     "k": "b",
+     "t": "Môže ho opustiť a občas kontrolovať jeho stav"
+    },
+    {
+     "k": "d",
+     "t": "Môže ho opustiť, keď si myslí, že už nežije"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 34,
+   "topic": "Prvá pomoc",
+   "q": "Do akej polohy dáme postihnutého pri úraze elektrickým prúdom, keď postihnutý je v bezvedomí, avšak dýcha, má hmatateľný pulz a nemá známky vážnejšieho zranenia?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Vodorovná poloha na chrbte, hlavu zakloniť"
+    },
+    {
+     "k": "b",
+     "t": "Vodorovná poloha na boku, hlavu predkloniť"
+    },
+    {
+     "k": "c",
+     "t": "Vodorovná poloha na boku, hlavu zakloniť (stabilizovaná poloha)"
+    },
+    {
+     "k": "d",
+     "t": "Vodorovná poloha na chrbte, hlavu predkloniť"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 35,
+   "topic": "Prvá pomoc",
+   "q": "V akom pomere kompresia hrudníka a vdychy sa robí resuscitácia?",
+   "options": [
+    {
+     "k": "a",
+     "t": "V pomere 30:2 (30 kompresií hrudníka a 2 vdychy)"
+    },
+    {
+     "k": "b",
+     "t": "V pomere 16:1 (16 kompresií hrudníka a 1 vdych)"
+    },
+    {
+     "k": "c",
+     "t": "V pomere 14:4 (14 kompresií hrudníka a 4 vdychy)"
+    },
+    {
+     "k": "d",
+     "t": "V pomere 12:8 (12 kompresií hrudníka a 8 vdychov)"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 36,
+   "topic": "Prvá pomoc",
+   "q": "Podľa akých vonkajších príznakov záchranca zistí, že resuscitácia (oživovanie) je neúčinná?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Tvár postihnutého je bledá a zrenice sú rozšírené"
+    },
+    {
+     "k": "b",
+     "t": "Podľa rýchleho pulzu postihnutého"
+    },
+    {
+     "k": "c",
+     "t": "Tvár postihnutého je červená"
+    },
+    {
+     "k": "d",
+     "t": "Nie je to možné zistiť"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 37,
+   "topic": "Prvá pomoc",
+   "intro": "Prvá pomoc pri šoku spočíva v odstránení vyvolávajúcej príčiny (zastavenie krvácania, odstránenie bolesti) a psychickým upokojovaním postihnutého.",
+   "q": "Aká má byť poloha postihnutého pri šoku?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Poloha na chrbte, nohy zodvihnuté a podložené v zodvihnutej polohe"
+    },
+    {
+     "k": "b",
+     "t": "Poloha na chrbte s natiahnutými nohami"
+    },
+    {
+     "k": "c",
+     "t": "Vždy poloha na ľavom boku"
+    },
+    {
+     "k": "d",
+     "t": "Vždy poloha na pravom boku"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 38,
+   "topic": "Prvá pomoc",
+   "q": "Akým lekárskym zásahom je možné zastaviť fibriláciu srdca?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Použitím dýchacej masky"
+    },
+    {
+     "k": "b",
+     "t": "Použitím defibrilačného prístroja"
+    },
+    {
+     "k": "c",
+     "t": "Fibriláciu nie je možné zastaviť"
+    },
+    {
+     "k": "d",
+     "t": "Nepriamou masážou srdca"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 39,
+   "topic": "Prvá pomoc",
+   "q": "Ako postupujeme pri ošetrení zlomenín alebo vykĺbenín?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Nenaprávame ich, len ich znehybníme pomocou dláh"
+    },
+    {
+     "k": "b",
+     "t": "Napravíme ich a znehybníme"
+    },
+    {
+     "k": "c",
+     "t": "Ošetrenie zlomenín a vykĺbenín necháme na privolaného lekára"
+    }
+   ],
+   "answer": [
+    "a"
+   ]
+  },
+  {
+   "id": 40,
+   "topic": "Legislatíva",
+   "q": "Do akej triedy sú zaradené objekty bez nebezpečenstva výbuchu? Pozor! nehovoríme tu o priestoroch z pohľadu nebezpečenstva úrazu elektrickým prúdom.",
+   "options": [
+    {
+     "k": "a",
+     "t": "Objekty triedy C"
+    },
+    {
+     "k": "b",
+     "t": "Objekty triedy A"
+    },
+    {
+     "k": "c",
+     "t": "Objekty triedy B"
+    },
+    {
+     "k": "d",
+     "t": "Objekty triedy B1"
+    }
+   ],
+   "answer": [
+    "b"
+   ]
+  },
+  {
+   "id": 41,
+   "topic": "Legislatíva",
+   "intro": "Na pracovisku alebo v priestoroch zamestnávateľa môže vzniknúť pracovný úraz.",
+   "q": "Ktorý je registrovaný pracovný úraz (podľa zákona č. 124/2006 Z. z.)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Ak práceneschopnosť následkom pracovného úrazu trvá viac ako 3 dni"
+    },
+    {
+     "k": "b",
+     "t": "Všetky pracovné úrazy"
+    },
+    {
+     "k": "c",
+     "t": "Ak nastala smrť následkom pracovného úrazu"
+    },
+    {
+     "k": "d",
+     "t": "Ak práceneschopnosť je dlhšia ako 1 deň"
+    }
+   ],
+   "answer": [
+    "a",
+    "c"
+   ],
+   "type": "multi"
+  },
+  {
+   "id": 42,
+   "topic": "Legislatíva",
+   "q": "Do akej doby musí zamestnávateľ (od kedy sa o registrovanom pracovnom úraze dozvedel) zaslať záznam o tomto úraze na inšpektorát práce (podľa zákona č. 124/2006 Z.z.)?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Do 14 dní"
+    },
+    {
+     "k": "b",
+     "t": "Do 10 dní"
+    },
+    {
+     "k": "c",
+     "t": "Záznam nemusí nikde posielať"
+    },
+    {
+     "k": "d",
+     "t": "Do 8 dní"
+    }
+   ],
+   "answer": [
+    "d"
+   ]
+  },
+  {
+   "id": 43,
+   "topic": "Legislatíva",
+   "q": "Musí zamestnávateľ viesť aj evidenciu pracovných úrazov, ktoré nie sú registrovanými pracovnými úrazmi (podľa zákona č. 124/2006 Z.z.)?",
+   "options": [
+    {
+     "k": "b",
+     "t": "Nie"
+    },
+    {
+     "k": "c",
+     "t": "Áno - musí evidovať údaje ako o registrovanom úraze"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  },
+  {
+   "id": 44,
+   "topic": "Legislatíva",
+   "intro": "Osoba, ktorá vykonáva činnosti na vyhradených technických zariadeniach elektrických musí byť držiteľom osvedčenia o odbornej spôsobilosti v elektrotechnike.",
+   "q": "Ktorý právny predpis definuje ktoré technické zariadenia elektrické sa považujú za vyhradené technické zariadenia elektrické?",
+   "options": [
+    {
+     "k": "a",
+     "t": "Zákon č.124/2006 Z. z."
+    },
+    {
+     "k": "b",
+     "t": "Vyhláška MPSVaR SR č.356/2007 Z. z."
+    },
+    {
+     "k": "c",
+     "t": "Vyhláška MPSVaR SR č.508/2009 Z. z."
+    },
+    {
+     "k": "d",
+     "t": "NV SR č. 386/2018"
+    }
+   ],
+   "answer": [
+    "c"
+   ]
+  }
+ ]
+}
