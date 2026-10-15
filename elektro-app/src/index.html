@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Elektro</title>
+  <meta name="theme-color" content="#07070d">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    /* samostatná aplikácia beží offline – systémové písmo namiesto Google Fonts */
+    :root { --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --font-display: var(--font); }
+  </style>
+  <script>
+    try {
+      var t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <main id="app"><div class="spinner"></div></main>
+  <nav class="nav glass" id="nav"></nav>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

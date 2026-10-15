@@ -709,13 +709,13 @@ function editor(cb) {
       <p class="tl-muted">${fname} · ${Math.max(1, Math.round(blob.size / 1024))} kB</p>
       <div class="cbs-list">
         <button class="cbs-item" id="cbp-open"><b>👁️ Otvoriť</b><span>Zobraziť PDF priamo v aplikácii</span></button>
-        <button class="cbs-item" id="cbp-save"><b>💾 Uložiť do aplikácie</b><span>Do sekcie Dokumenty – uložené na GitHube, uvidíš ho všade</span></button>
+        ${C.standalone ? '' : '<button class="cbs-item" id="cbp-save"><b>💾 Uložiť do aplikácie</b><span>Do sekcie Dokumenty – uložené na GitHube, uvidíš ho všade</span></button>'}
         ${!native || share ? `<button class="cbs-item" id="cbp-dl"><b>${native ? '📤 Stiahnuť / zdieľať' : '⬇️ Stiahnuť'}</b><span>${native ? 'Uložiť do Súborov, na Disk, poslať e-mailom či cez WhatsApp' : 'Uložiť do zariadenia'}</span></button>`
           : '<div class="cbs-note">ℹ️ Sťahovanie a zdieľanie v mobile pôjde po nainštalovaní najnovšieho APK (Nastavenia → Odkazy → APK na stiahnutie).</div>'}
       </div>`, (el) => {
       $('#cbp-open', el).onclick = () => { closeSheet(); C.openViewer(fname, async () => blob); };
       $('#cbp-dl', el)?.addEventListener('click', () => C.saveBlob(blob, fname).catch((e) => C.toast(e.message, true)));
-      $('#cbp-save', el).onclick = async (ev) => {
+      if ($('#cbp-save', el)) $('#cbp-save', el).onclick = async (ev) => {
         const b = ev.currentTarget;
         b.disabled = true; b.querySelector('b').textContent = 'Ukladám…';
         try {
