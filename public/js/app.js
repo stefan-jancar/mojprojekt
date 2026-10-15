@@ -183,7 +183,7 @@ async function render() {
   if (r.view === 'section') return renderSection(r.id);
   if (r.view === 'assistant') return renderAssistant();
   if (r.view === 'settings') return renderSettings();
-  if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural }, r.sub, r.arg);
+  if (r.view === 'elektro') return renderElektro({ $app, $nav, api, icon, esc, toast, store, plural, openViewer, saveBlob, nativeApp, canNativeShare }, r.sub, r.arg);
   return renderHome();
 }
 
@@ -1047,20 +1047,44 @@ function openGallery(files, start = 0) {
 async function openFile(f) {
   if (f && isImg(f)) return openGallery([f]);
   if (!f) return;
+  return openViewer(f.name, () => api('/file?path=' + encodeURIComponent(f.path), { raw: true }));
+}
+
+// Natívna aplikácia (APK) – WebView nevie sťahovať súbory ani otvárať nové okná
+const nativeApp = () => !!window.Capacitor?.isNativePlatform?.();
+const canNativeShare = () => nativeApp() && window.Capacitor.isPluginAvailable?.('Filesystem') && window.Capacitor.isPluginAvailable?.('Share');
+const blobToBase64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+
+// Uloží / zdieľa súbor: v prehliadači stiahnutím, v APK cez systémové menu „Zdieľať“ (Uložiť do Súborov, Disk, e-mail…)
+async function saveBlob(blob, name) {
+  if (canNativeShare()) {
+    const cap = window.Capacitor;
+    const { uri } = await cap.nativePromise('Filesystem', 'writeFile', { path: name, data: await blobToBase64(blob), directory: 'CACHE' });
+    await cap.nativePromise('Share', 'share', { title: name, files: [uri], dialogTitle: 'Uložiť alebo poslať' }).catch(() => {});
+    return;
+  }
+  if (nativeApp()) throw new Error('Na sťahovanie v mobile nainštaluj najnovšie APK (Nastavenia → Odkazy → APK na stiahnutie). Zatiaľ použi „Uložiť do aplikácie“.');
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// Prehliadač súboru v aplikácii (PDF cez pdf.js, obrázky) – funguje aj v APK
+async function openViewer(name, getBlob) {
   const v = document.createElement('div');
   v.className = 'viewer';
-  v.innerHTML = `<div class="vh"><button class="icon-btn" data-x>${icon('back')}</button><b>${esc(f.name)}</b><a class="icon-btn" data-dl>${icon('download')}</a></div><div class="vb"><div class="spinner"></div></div>`;
+  v.innerHTML = `<div class="vh"><button class="icon-btn" data-x>${icon('back')}</button><b>${esc(name)}</b><button class="icon-btn" data-dl aria-label="Stiahnuť">${icon('download')}</button></div><div class="vb"><div class="spinner"></div></div>`;
   document.body.appendChild(v);
+  let url, blob;
   v.querySelector('[data-x]').onclick = () => { v.remove(); if (url) URL.revokeObjectURL(url); };
+  v.querySelector('[data-dl]').onclick = () => { if (blob) saveBlob(blob, name).catch((e) => toast(e.message, true)); };
   const body = v.querySelector('.vb');
-  let url;
   try {
-    const blob = await api('/file?path=' + encodeURIComponent(f.path), { raw: true });
+    blob = await getBlob();
     url = URL.createObjectURL(blob);
-    const dl = v.querySelector('[data-dl]');
-    dl.href = url;
-    dl.download = f.name;
-    if (blob.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
+    if (blob.type === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {
       const pdfjs = await loadPdfJs();
       const doc = await pdfjs.getDocument({ data: await blob.arrayBuffer() }).promise;
       body.innerHTML = '';
@@ -1079,7 +1103,8 @@ async function openFile(f) {
     } else if (blob.type.startsWith('image/')) {
       body.innerHTML = `<img src="${url}" alt="">`;
     } else {
-      body.innerHTML = `<div class="empty" style="color:#fff">Tento typ súboru sa nedá zobraziť.<br><br><a class="btn" href="${url}" download="${esc(f.name)}">${icon('download')}Stiahnuť</a></div>`;
+      body.innerHTML = `<div class="empty" style="color:#fff">Tento typ súboru sa nedá zobraziť.<br><br><button class="btn" data-dl2>${icon('download')}Stiahnuť</button></div>`;
+      body.querySelector('[data-dl2]').onclick = () => saveBlob(blob, name).catch((e) => toast(e.message, true));
     }
   } catch (e) {
     body.innerHTML = `<div class="empty" style="color:#fff">${esc(e.message)}</div>`;
@@ -1273,7 +1298,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.17</span></div>
+      <div class="r"><span>Verzia</span><span>1.18</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
