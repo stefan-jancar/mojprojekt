@@ -115,3 +115,27 @@ def reset(store):
         return data
 
     return mutate(store, STATS_PATH, _empty(), fn, "Elektro: vynulovanie štatistík")
+
+
+# ---------- rozvádzače (skrine s kartami a snímačmi) ----------
+CABINETS_PATH = "elektro/cabinets.json"
+MAX_CABINETS_BYTES = 300_000
+
+
+def cabinets(store):
+    data, _ = store.read_json(CABINETS_PATH, [])
+    return data if isinstance(data, list) else []
+
+
+def save_cabinets(store, body):
+    if not isinstance(body, list):
+        raise ValueError("Očakávam zoznam rozvádzačov")
+    if len(json.dumps(body)) > MAX_CABINETS_BYTES:
+        raise ValueError("Rozvádzače sú príliš veľké na uloženie")
+
+    def fn(data):
+        data.clear()
+        data.extend(body)
+        return body
+
+    return mutate(store, CABINETS_PATH, [], fn, "Elektro: rozvádzače")

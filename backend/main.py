@@ -241,6 +241,16 @@ def elektro_card(body: dict = Body(...)):
     return elektro.rate_card(repo.store, body)
 
 
+@app.get("/api/elektro/cabinets", dependencies=[Depends(auth)])
+def elektro_cabinets():
+    return elektro.cabinets(repo.store)
+
+
+@app.put("/api/elektro/cabinets", dependencies=[Depends(auth)])
+def elektro_save_cabinets(body: list = Body(...)):
+    return elektro.save_cabinets(repo.store, body)
+
+
 @app.delete("/api/elektro/stats", dependencies=[Depends(auth)])
 def elektro_reset():
     return elektro.reset(repo.store)
