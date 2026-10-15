@@ -1,5 +1,6 @@
 /* =========================================================
-   Elektro – nástroje: Ohmov zákon, výkon, farebný kód, prierez
+   Elektro – nástroje: Ohmov zákon, výkon, farebný kód, prierez,
+   impedancia slučky, delič napätia
    ========================================================= */
 let C;
 
@@ -8,6 +9,8 @@ export const TOOLS = [
   { id: 'vykon', name: 'Výkon a Ohmov zákon', sub: 'P, U, I, R – stačia ľubovoľné dve', icon: 'target', color: '#f59e0b' },
   { id: 'rezistor', name: 'Farebný kód rezistorov', sub: '4, 5 aj 6 prúžkov · aj naopak z hodnoty', icon: 'chip', color: '#10b981' },
   { id: 'prierez', name: 'Prierez vodiča', sub: 'Podľa prúdu, uloženia, ističa a úbytku napätia', icon: 'wrench', color: '#22d3ee' },
+  { id: 'slucka', name: 'Impedancia slučky', sub: 'Zs max pre istič/poistku · kontrola merania · max. dĺžka', icon: 'link', color: '#f43f5e' },
+  { id: 'delic', name: 'Delič napätia', sub: 'Uout z R1, R2 · návrh rezistorov z radu E24', icon: 'code', color: '#3b82f6' },
 ];
 
 export function renderTool(ctx, id) {
@@ -18,7 +21,7 @@ export function renderTool(ctx, id) {
     <div class="topbar"><a class="icon-btn" href="#/elektro" aria-label="Späť">${C.icon('back')}</a>
       <div class="sec-ic" style="--c:${t.color}">${C.icon(t.icon)}</div><h1>${C.esc(t.name)}</h1></div>
     <div id="tool"></div>`;
-  ({ ohm: ohmTool, vykon: powerTool, rezistor: resistorTool, prierez: cableTool })[id]($('#tool'));
+  ({ ohm: ohmTool, vykon: powerTool, rezistor: resistorTool, prierez: cableTool, slucka: loopTool, delic: dividerTool })[id]($('#tool'));
 }
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -401,6 +404,190 @@ function cableTool(root) {
           <span>${dec(r.S, 1)}</span><span class="${r.okI ? '' : 'bad'}">${sig(r.Iz)} A</span>
           <span class="${r.okD ? '' : 'bad'}">${dec(r.d, 2)} %</span><span>${r === pick ? '✔' : r.okI && r.okD ? '' : '✕'}</span></div>`).join('')}
       </div>`;
+  };
+  form.addEventListener('input', calc);
+  form.addEventListener('change', calc);
+  calc();
+}
+
+/* ---------- pole s jednotkou (všeobecné) ---------- */
+function uField(id, label, kind, def = '', unit) {
+  const u = unit || DEF_UNIT[kind];
+  return `<div class="tl-f"><label for="${id}"><span>${label}</span></label>
+    <div class="tl-in"><input id="${id}" inputmode="decimal" autocomplete="off" value="${def}" placeholder="–">
+      <select data-unit="${id}" aria-label="Jednotka">${UNITS[kind].map(([n, f]) => `<option value="${f}" ${n === u ? 'selected' : ''}>${n}</option>`).join('')}</select></div></div>`;
+}
+const uRead = (root, id) => { const v = num($('#' + id, root)?.value); return v == null ? null : v * Number($(`[data-unit="${id}"]`, root).value); };
+const segHTML = (name, opts, val) => `<div class="seg tl-seg" style="grid-template-columns:repeat(${opts.length},1fr)">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" value="${v}" ${v === val ? 'checked' : ''}><span><em class="tl-sl">${l}</em></span></label>`).join('')}</div>`;
+
+/* ---------- impedancia poruchovej slučky ---------- */
+const DEVICES = [['B', 'Istič B', 5], ['C', 'Istič C', 10], ['D', 'Istič D', 20], ['F', 'Poistka / iné', null]];
+const SECT_PE = [1.5, 2.5, 4, 6, 10, 16, 25, 35];
+
+function loopTool(root) {
+  const def = { mode: 'm', dev: 'B', In: '16', k: '5,625', U0: '230', Zs: '0,8', Ze: '0,3', L: '30', SL: '2.5', SPE: '2.5' };
+  const v = { ...def, ...C.store.get('tool:loop', {}) };
+  root.innerHTML = `
+    <div class="tl-card glass" id="lp-form">
+      ${segHTML('mode', [['m', 'Zmerané Zs'], ['c', 'Vypočítať z kábla']], v.mode)}
+      <div class="row">
+        <div class="field"><label>Ochranný prístroj</label><select name="dev">${DEVICES.map(([k, n, m]) => `<option value="${k}" ${v.dev === k ? 'selected' : ''}>${n}${m ? ` (${m}× I<sub>n</sub>)`.replace(/<\/?sub>/g, '') : ''}</option>`).join('')}</select></div>
+        <div class="field"><label>Menovitý prúd I<sub>n</sub></label><select name="In">${BREAKERS.slice(0, 13).map((b) => `<option value="${b}" ${String(b) === v.In ? 'selected' : ''}>${b} A</option>`).join('')}</select></div>
+      </div>
+      <div class="field" data-show-dev="F"><label>Násobok I<sub>a</sub> / I<sub>n</sub> pre 0,4 s (z vypínacej charakteristiky)</label><input name="k" inputmode="decimal" value="${v.k}"></div>
+      <div class="row">
+        <div class="field"><label>U<sub>0</sub> (fáza – zem) [V]</label><input name="U0" inputmode="decimal" value="${v.U0}"></div>
+        <div class="field" data-show-mode="m"><label>Zmerané Z<sub>s</sub> [Ω]</label><input name="Zs" inputmode="decimal" value="${v.Zs}"></div>
+        <div class="field" data-show-mode="c"><label>Z<sub>e</sub> siete pred obvodom [Ω]</label><input name="Ze" inputmode="decimal" value="${v.Ze}"></div>
+      </div>
+      <div class="row" data-show-mode="c">
+        <div class="field"><label>Dĺžka vedenia [m]</label><input name="L" inputmode="decimal" value="${v.L}"></div>
+        <div class="field"><label>Prierez L / PE [mm²]</label>
+          <div class="lp-two"><select name="SL">${SECT_PE.map((x) => `<option value="${x}" ${String(x) === v.SL ? 'selected' : ''}>${dec(x, 1)}</option>`).join('')}</select>
+          <select name="SPE">${SECT_PE.map((x) => `<option value="${x}" ${String(x) === v.SPE ? 'selected' : ''}>${dec(x, 1)}</option>`).join('')}</select></div></div>
+      </div>
+    </div>
+    <div id="lp-out"></div>
+    <div class="tl-note glass"><b>Ako sa to počíta</b>
+      <span>Z<sub>s</sub> · I<sub>a</sub> ≤ U<sub>0</sub></span><span>Z<sub>s,max</sub> = U<sub>0</sub> / I<sub>a</sub></span>
+      <div class="lp-note">I<sub>a</sub> = prúd, pri ktorom prístroj vypne do 0,4 s (TN, 230 V). Pri meraní za studena sa podľa STN 33 2000-6 porovnáva s ⅔ · Z<sub>s,max</sub> – vodiče sa pri poruche zohrejú a ich odpor stúpne.</div></div>
+    <p class="tl-disc">Pomôcka pri revízii a návrhu. Pre poistky odčítaj násobok z charakteristiky konkrétneho typu (napr. 16 A gG ≈ 5,625×).</p>`;
+  const form = $('#lp-form', root);
+  const calc = () => {
+    form.querySelectorAll('input[type=radio]:checked').forEach((r) => { v[r.name] = r.value; });
+    form.querySelectorAll('input:not([type=radio]), select').forEach((e) => { v[e.name] = e.value; });
+    C.store.set('tool:loop', v);
+    form.querySelectorAll('[data-show-mode]').forEach((e) => { e.hidden = e.dataset.showMode !== v.mode; });
+    form.querySelectorAll('[data-show-dev]').forEach((e) => { e.hidden = e.dataset.showDev !== v.dev; });
+    const out = $('#lp-out', root);
+    const dev = DEVICES.find((d) => d[0] === v.dev);
+    const k = dev[2] ?? num(v.k);
+    const In = Number(v.In), U0 = num(v.U0);
+    if (!(k > 0) || !(U0 > 0)) { out.innerHTML = '<div class="tl-card glass tl-muted">Doplň násobok a napätie.</div>'; return; }
+    const Ia = k * In, Zmax = U0 / Ia, Zcold = (2 / 3) * Zmax;
+    let Zs, extra = '', verdict;
+    if (v.mode === 'm') {
+      Zs = num(v.Zs);
+      if (!(Zs > 0)) { out.innerHTML = '<div class="tl-card glass tl-muted">Zadaj zmeranú impedanciu slučky.</div>'; return; }
+      verdict = Zs <= Zcold ? ['ok', 'Vyhovuje', `Zmerané ${sig(Zs)} Ω ≤ ⅔ · ${sig(Zmax)} Ω = ${sig(Zcold)} Ω`]
+        : Zs <= Zmax ? ['warn', 'Na hrane', `Je pod Z<sub>s,max</sub> ${sig(Zmax)} Ω, ale nad ⅔ hranicou ${sig(Zcold)} Ω – po zohriatí vodičov nemusí vypnúť včas.`]
+          : ['bad', 'Nevyhovuje', `Zmerané ${sig(Zs)} Ω > Z<sub>s,max</sub> ${sig(Zmax)} Ω – prístroj nevypne do 0,4 s.`];
+    } else {
+      const Ze = num(v.Ze) ?? 0, L = num(v.L);
+      if (!(L > 0)) { out.innerHTML = '<div class="tl-card glass tl-muted">Zadaj dĺžku vedenia.</div>'; return; }
+      const perM = RHO * (1 / Number(v.SL) + 1 / Number(v.SPE));
+      const R12 = perM * L;
+      Zs = Ze + R12;
+      const Lmax = Math.max(0, (Zmax - Ze) / perM);
+      verdict = Zs <= Zmax ? ['ok', 'Vyhovuje', `Z<sub>s</sub> = ${sig(Ze)} + ${sig(R12)} = ${sig(Zs)} Ω ≤ ${sig(Zmax)} Ω`]
+        : ['bad', 'Nevyhovuje', `Z<sub>s</sub> = ${sig(Ze)} + ${sig(R12)} = ${sig(Zs)} Ω > ${sig(Zmax)} Ω – skráť vedenie, zväčši prierez alebo použi menší istič / prúdový chránič.`];
+      extra = `<div class="lp-lmax"><span>Maximálna dĺžka tohto vedenia</span><b>${Ze >= Zmax ? '0 – už sieť je za limitom' : `${dec(Math.floor(Lmax), 0)} m`}</b>
+        <small>R<sub>1</sub>+R<sub>2</sub> = ${sig(perM * 1000)} mΩ/m (Cu pri 70 °C)</small></div>`;
+    }
+    const pos = Math.min(1, Zs / (Zmax * 1.25));
+    out.innerHTML = `<div class="cb-res glass lp-res ${verdict[0]}">
+        <div class="lp-verdict"><i>${verdict[0] === 'ok' ? '✓' : verdict[0] === 'warn' ? '!' : '✕'}</i><div><b>${verdict[1]}</b><span>${verdict[2]}</span></div></div>
+        <div class="lp-gauge"><div class="z" style="width:${(Zcold / (Zmax * 1.25)) * 100}%"></div><div class="w" style="width:${(Zmax / (Zmax * 1.25)) * 100}%"></div><i style="left:${pos * 100}%"></i></div>
+        <div class="lp-scale"><span>0</span><span style="left:${(Zcold / (Zmax * 1.25)) * 100}%">⅔ ${sig(Zcold)}</span><span style="left:${80}%">${sig(Zmax)} Ω</span></div>
+        <div class="cb-kpis">
+          <div><span>I<sub>a</sub> (0,4 s)</span><b>${sig(Ia)} A</b></div>
+          <div><span>Z<sub>s,max</sub></span><b>${sig(Zmax)} Ω</b></div>
+          <div><span>⅔ · Z<sub>s,max</sub></span><b>${sig(Zcold)} Ω</b></div>
+          <div><span>I<sub>k</sub> poruchový</span><b>${si(U0 / Zs, 'A')}</b></div>
+        </div>${extra}</div>`;
+  };
+  form.addEventListener('input', calc);
+  form.addEventListener('change', calc);
+  calc();
+}
+
+/* ---------- delič napätia ---------- */
+function e24near(x) {
+  const exp = Math.floor(Math.log10(x));
+  const cands = [];
+  for (const e of [exp - 1, exp, exp + 1]) E24.forEach((m) => cands.push(Math.round(m * 10 ** e * 1e6) / 1e6));
+  return cands.reduce((a, b) => (Math.abs(b - x) < Math.abs(a - x) ? b : a));
+}
+
+function dividerTool(root) {
+  const st = { mode: 'out', ...C.store.get('tool:divider', {}) };
+  root.innerHTML = `
+    <div class="tl-card glass" id="dv-form">
+      ${segHTML('mode', [['out', 'Vypočítať U<sub>out</sub>'], ['design', 'Navrhnúť R1']], st.mode)}
+      <div class="dv-wrap">
+        <svg class="dv-sch" viewBox="0 0 150 250" aria-hidden="true">
+          <circle cx="40" cy="14" r="5" class="pin"/><text x="52" y="19" class="lbl">U<tspan baseline-shift="sub" font-size="10">in</tspan></text>
+          <line x1="40" y1="19" x2="40" y2="44" class="w"/><rect x="28" y="44" width="24" height="56" rx="4" class="r"/><text x="60" y="78" class="lbl" id="dv-t1">R1</text>
+          <line x1="40" y1="100" x2="40" y2="150" class="w"/><circle cx="40" cy="125" r="4" class="dot"/>
+          <line x1="40" y1="125" x2="104" y2="125" class="w"/><circle cx="108" cy="125" r="5" class="pin out"/><text x="96" y="112" class="lbl out" id="dv-tout">U<tspan baseline-shift="sub" font-size="10">out</tspan></text>
+          <rect x="28" y="150" width="24" height="56" rx="4" class="r"/><text x="60" y="184" class="lbl" id="dv-t2">R2</text>
+          <line x1="40" y1="206" x2="40" y2="228" class="w"/><line x1="24" y1="228" x2="56" y2="228" class="w"/><line x1="30" y1="235" x2="50" y2="235" class="w"/><line x1="36" y1="242" x2="44" y2="242" class="w"/>
+        </svg>
+        <div class="dv-fields">
+          ${uField('dv-uin', 'U<sub>in</sub> vstup', 'U', st.uin ?? '12')}
+          <div data-show="out">${uField('dv-r1', 'R1 (horný)', 'R', st.r1 ?? '10', 'kΩ')}</div>
+          <div data-show="design">${uField('dv-uout', 'U<sub>out</sub> požadované', 'U', st.uout ?? '3,3')}</div>
+          ${uField('dv-r2', 'R2 (dolný, k zemi)', 'R', st.r2 ?? '4,7', 'kΩ')}
+          <div data-show="out">${uField('dv-rz', 'Záťaž na výstupe (nepovinné)', 'R', st.rz ?? '', 'kΩ')}</div>
+        </div>
+      </div>
+    </div>
+    <div id="dv-out"></div>
+    <div class="tl-note glass"><b>Vzorec</b><span>U<sub>out</sub> = U<sub>in</sub> · R2 / (R1 + R2)</span><span>R1 = R2 · (U<sub>in</sub> − U<sub>out</sub>) / U<sub>out</sub></span>
+      <div class="lp-note">Záťaž na výstupe je paralelne k R2 a napätie zníži. Delič nepoužívaj na napájanie – len na meranie / referenciu (prúd záťaže by mal byť ≪ prúd deličom).</div></div>`;
+  const form = $('#dv-form', root);
+  const calc = () => {
+    st.mode = form.querySelector('input[name=mode]:checked').value;
+    ['uin', 'r1', 'r2', 'rz', 'uout'].forEach((k) => { st[k] = $('#dv-' + k, root).value; });
+    C.store.set('tool:divider', st);
+    form.querySelectorAll('[data-show]').forEach((e) => { e.hidden = e.dataset.show !== st.mode; });
+    const out = $('#dv-out', root);
+    const Uin = uRead(root, 'dv-uin'), R2 = uRead(root, 'dv-r2');
+    const label = (id, t) => { $('#' + id, root).textContent = t; };
+    if (st.mode === 'out') {
+      const R1 = uRead(root, 'dv-r1'), Rz = uRead(root, 'dv-rz');
+      if (!(Uin > 0 && R1 > 0 && R2 > 0)) { out.innerHTML = '<div class="tl-card glass tl-muted">Doplň U<sub>in</sub>, R1 a R2.</div>'; return; }
+      const R2e = Rz > 0 ? (R2 * Rz) / (R2 + Rz) : R2;
+      const Uo = (Uin * R2e) / (R1 + R2e), Uo0 = (Uin * R2) / (R1 + R2);
+      const I = Uin / (R1 + R2e);
+      label('dv-t1', si(R1, 'Ω')); label('dv-t2', si(R2, 'Ω'));
+      out.innerHTML = `<div class="cb-res glass">
+        <div class="cb-main"><span>Výstupné napätie</span><b>${si(Uo, 'V')}</b><em>pomer ${dec((Uo / Uin) * 100, 1)} % · R2/(R1+R2) = ${sig(R2e / (R1 + R2e), 3)}</em></div>
+        <div class="cb-kpis">
+          <div><span>Prúd deličom</span><b>${si(I, 'A')}</b></div>
+          <div><span>P na R1</span><b>${si(I * I * R1, 'W')}</b></div>
+          <div><span>P na R2</span><b>${si((Uo * Uo) / R2, 'W')}</b></div>
+          <div><span>R vstupu</span><b>${si(R1 + R2e, 'Ω')}</b></div>
+        </div>
+        ${Rz > 0 ? `<div class="cb-why">So záťažou ${si(Rz, 'Ω')} kleslo napätie z ${si(Uo0, 'V')} na <b>${si(Uo, 'V')}</b> (${dec(((Uo - Uo0) / Uo0) * 100, 1)} %).</div>` : ''}
+      </div>`;
+    } else {
+      const Uout = uRead(root, 'dv-uout');
+      if (!(Uin > 0 && R2 > 0 && Uout > 0)) { out.innerHTML = '<div class="tl-card glass tl-muted">Doplň U<sub>in</sub>, požadované U<sub>out</sub> a R2.</div>'; return; }
+      if (Uout >= Uin) { out.innerHTML = '<div class="tl-card glass tl-err">Výstup deliča musí byť menší ako vstup.</div>'; return; }
+      const R1 = (R2 * (Uin - Uout)) / Uout;
+      const R1e = e24near(R1);
+      const UoE = (Uin * R2) / (R1e + R2);
+      // najlepší pár z E24 v okolí zvoleného R2
+      let best = null;
+      const exp2 = Math.floor(Math.log10(R2));
+      for (const e of [exp2 - 1, exp2, exp2 + 1]) for (const m of E24) {
+        const r2 = m * 10 ** e, r1 = e24near((r2 * (Uin - Uout)) / Uout);
+        const err = Math.abs((Uin * r2) / (r1 + r2) - Uout);
+        if (!best || err < best.err - 1e-12) best = { r1, r2, err };
+      }
+      label('dv-t1', si(R1e, 'Ω')); label('dv-t2', si(R2, 'Ω'));
+      out.innerHTML = `<div class="cb-res glass">
+        <div class="cb-main"><span>Potrebný R1</span><b>${si(R1, 'Ω')}</b><em>najbližší z radu E24: <strong>${si(R1e, 'Ω')}</strong> → U<sub>out</sub> = ${si(UoE, 'V')} (${dec(((UoE - Uout) / Uout) * 100, 2)} %)</em></div>
+        <div class="cb-kpis">
+          <div><span>Prúd deličom</span><b>${si(Uin / (R1e + R2), 'A')}</b></div>
+          <div><span>P na R1</span><b>${si(((Uin - UoE) ** 2) / R1e, 'W')}</b></div>
+          <div><span>P na R2</span><b>${si((UoE * UoE) / R2, 'W')}</b></div>
+          <div><span>Pomer</span><b>${dec((Uout / Uin) * 100, 1)} %</b></div>
+        </div>
+        <div class="cb-why">💡 Najpresnejší pár z E24: <b>R1 = ${si(best.r1, 'Ω')}</b>, <b>R2 = ${si(best.r2, 'Ω')}</b> → ${si((Uin * best.r2) / (best.r1 + best.r2), 'V')} (${dec((((Uin * best.r2) / (best.r1 + best.r2) - Uout) / Uout) * 100, 2)} %)</div>
+      </div>`;
+    }
   };
   form.addEventListener('input', calc);
   form.addEventListener('change', calc);
