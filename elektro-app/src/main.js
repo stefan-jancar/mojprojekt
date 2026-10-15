@@ -5,6 +5,8 @@
    ========================================================= */
 import { icon } from './icons.js';
 import { renderElektro } from './elektro.js';
+import { VERSION } from './version.js';
+
 
 const $app = document.getElementById('app');
 const $nav = document.getElementById('nav');
@@ -138,7 +140,30 @@ async function openViewer(name, getBlob) {
 }
 
 /* ---------- navigácia ---------- */
-const ctx = { $app, $nav, api, icon, esc, toast, store, plural, openViewer, saveBlob, nativeApp, canNativeShare, standalone: true };
+const ctx = { $app, $nav, api, icon, esc, toast, store, plural, openViewer, saveBlob, nativeApp, canNativeShare, standalone: true, version: VERSION, onHub: showUpdate };
+
+/* ---------- nová verzia na GitHube (len keď je internet) ---------- */
+let latest = store.get('el:latest', null);
+async function checkUpdate() {
+  if (!/^\d+$/.test(VERSION) || !navigator.onLine) return;
+  const last = store.get('el:checked', 0);
+  if (Date.now() - last < 6 * 3600 * 1000 && latest) return showUpdate();
+  try {
+    const r = await fetch('https://api.github.com/repos/stefan-jancar/mojprojekt/releases?per_page=30', { headers: { Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return;
+    const rel = (await r.json()).map((x) => ({ n: Number((x.tag_name.match(/^elektro-apk-(\d+)$/) || [])[1]), url: x.html_url })).filter((x) => x.n).sort((a, b) => b.n - a.n)[0];
+    if (rel) { latest = rel; store.set('el:latest', rel); }
+    store.set('el:checked', Date.now());
+    showUpdate();
+  } catch { /* offline – nevadí */ }
+}
+function showUpdate() {
+  if (!latest || !(latest.n > Number(VERSION)) || document.getElementById('el-update')) return;
+  const hero = document.querySelector('.ez-hero');
+  if (!hero) return;
+  hero.insertAdjacentHTML('afterend', `<a id="el-update" class="el-update glass" href="${latest.url}" target="_blank" rel="noopener">
+    ${icon('download')}<div><b>Nová verzia ${latest.n} je k dispozícii</b><span>Máš verziu ${esc(VERSION)} · ťukni, stiahni Elektro.apk a nainštaluj cez starú</span></div></a>`);
+}
 
 function renderNav(sub) {
   const links = [['#/elektro', 'bolt', 'Elektro', ''], ['#/elektro/rozvadzac', 'briefcase', 'Rozvádzač', 'rozvadzac'], ['#/elektro/beckhoff', 'chip', 'Svorky', 'beckhoff']];
@@ -164,3 +189,4 @@ function render() {
 }
 window.addEventListener('hashchange', render);
 render();
+checkUpdate();

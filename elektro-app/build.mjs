@@ -16,6 +16,8 @@ mkdirSync(join(WWW, 'vendor'), { recursive: true });
 
 cpSync(join(HERE, 'src/index.html'), join(WWW, 'index.html'));
 cpSync(join(HERE, 'src/main.js'), join(WWW, 'js/main.js'));
+const VERSION = process.env.ELEKTRO_VERSION || 'dev';
+writeFileSync(join(WWW, 'js/version.js'), `export const VERSION = ${JSON.stringify(VERSION)};\n`);
 for (const f of ['elektro.js', 'tools.js', 'beckhoff.js', 'cabinet.js', 'icons.js']) cpSync(join(ROOT, 'public/js', f), join(WWW, 'js', f));
 for (const f of ['theme.css', 'app.css']) cpSync(join(ROOT, 'public/css', f), join(WWW, 'css', f));
 cpSync(join(ROOT, 'public/data/beckhoff.json'), join(WWW, 'data/beckhoff.json'));
@@ -39,4 +41,4 @@ const pdf = join(HERE, 'node_modules/pdfjs-dist/build');
 if (existsSync(pdf)) for (const f of ['pdf.min.js', 'pdf.worker.min.js']) cpSync(join(pdf, f), join(WWW, 'vendor', f));
 else console.warn('⚠ pdfjs-dist nie je nainštalovaný – spusti npm install');
 
-console.log('www/ hotové:', index.map((x) => `${x.kind}:${x.id}`).join(', '));
+console.log(`www/ hotové (verzia ${VERSION}):`, index.map((x) => `${x.kind}:${x.id}`).join(', '));
