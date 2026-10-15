@@ -939,3 +939,4 @@ input[type=color] { width: 100%; height: 48px; border: 1px solid var(--border); 
 .cbs-item span i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid rgba(128, 128, 128, .5); margin-left: 4px; }
 .cbs-item.danger b { color: var(--danger); }
 a.cbs-item { text-decoration: none; }
+.cbs-note { font-size: 13px; color: var(--muted); padding: 10px 12px; border-radius: 12px; background: var(--surface-2); line-height: 1.4; }

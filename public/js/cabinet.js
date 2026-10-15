@@ -703,18 +703,18 @@ function editor(cb) {
     let blob;
     try { blob = await exportCabinetPdf(C, cb); } catch (e) { C.toast('PDF sa nepodarilo vytvoriť: ' + e.message, true); return; } finally { btn.disabled = false; btn.textContent = 'PDF'; }
     const fname = `zapojenie-${cb.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w-]+/g, '-').toLowerCase()}.pdf`;
-    const url = URL.createObjectURL(blob);
     const file = new File([blob], fname, { type: 'application/pdf' });
-    const canShare = !!navigator.canShare?.({ files: [file] });
+    const native = C.nativeApp(), share = C.canNativeShare();
     sheet(`<h2>PDF je pripravené</h2>
       <p class="tl-muted">${fname} · ${Math.max(1, Math.round(blob.size / 1024))} kB</p>
       <div class="cbs-list">
-        <button class="cbs-item" id="cbp-save"><b>💾 Uložiť do aplikácie</b><span>Do sekcie Dokumenty – uvidíš ho aj na mobile, uložené na GitHube</span></button>
-        <a class="cbs-item" href="${url}" download="${fname}"><b>⬇️ Stiahnuť</b><span>Do zariadenia (v prehliadači)</span></a>
-        <a class="cbs-item" href="${url}" target="_blank" rel="noopener"><b>👁️ Otvoriť</b><span>Zobraziť PDF v novom okne</span></a>
-        ${canShare ? '<button class="cbs-item" id="cbp-share"><b>📤 Zdieľať</b><span>E-mail, WhatsApp, Disk…</span></button>' : ''}
+        <button class="cbs-item" id="cbp-open"><b>👁️ Otvoriť</b><span>Zobraziť PDF priamo v aplikácii</span></button>
+        <button class="cbs-item" id="cbp-save"><b>💾 Uložiť do aplikácie</b><span>Do sekcie Dokumenty – uložené na GitHube, uvidíš ho všade</span></button>
+        ${!native || share ? `<button class="cbs-item" id="cbp-dl"><b>${native ? '📤 Stiahnuť / zdieľať' : '⬇️ Stiahnuť'}</b><span>${native ? 'Uložiť do Súborov, na Disk, poslať e-mailom či cez WhatsApp' : 'Uložiť do zariadenia'}</span></button>`
+          : '<div class="cbs-note">ℹ️ Sťahovanie a zdieľanie v mobile pôjde po nainštalovaní najnovšieho APK (Nastavenia → Odkazy → APK na stiahnutie).</div>'}
       </div>`, (el) => {
-      $('#cbp-share', el)?.addEventListener('click', () => navigator.share({ files: [file], title: `Zapojenie – ${cb.name}` }).catch(() => {}));
+      $('#cbp-open', el).onclick = () => { closeSheet(); C.openViewer(fname, async () => blob); };
+      $('#cbp-dl', el)?.addEventListener('click', () => C.saveBlob(blob, fname).catch((e) => C.toast(e.message, true)));
       $('#cbp-save', el).onclick = async (ev) => {
         const b = ev.currentTarget;
         b.disabled = true; b.querySelector('b').textContent = 'Ukladám…';
