@@ -26,11 +26,13 @@ SECTION_TYPES = {
     "tasks": "Práca / úlohy",
     "bills": "Účty a platby",
     "progress": "Pokroky",
+    "components": "Súčiastky",
     "notes": "Poznámky",
 }
 
 DEFAULT_SECTIONS = [
     {"id": "elektronika", "name": "Elektronika", "type": "projects", "icon": "chip", "color": "#22d3ee"},
+    {"id": "suciastky", "name": "Súčiastky", "type": "components", "icon": "bolt", "color": "#facc15"},
     {"id": "3d", "name": "3D projekty", "type": "projects", "icon": "cube", "color": "#a78bfa"},
     {"id": "web", "name": "Tvorba webov", "type": "projects", "icon": "globe", "color": "#34d399"},
     {"id": "dokumenty", "name": "Dokumenty", "type": "documents", "icon": "file", "color": "#f87171"},
@@ -44,7 +46,7 @@ ITEM_FIELDS = {
     "title": str, "note": str, "status": str, "tags": list, "date": str, "due": str,
     "amount": (int, float), "currency": str, "done": bool, "progress": (int, float),
     "links": list, "person": str, "priority": str, "recurring": str, "pinned": bool,
-    "kind": str, "category": str,
+    "kind": str, "category": str, "value": str, "qty": (int, float), "package": str,
 }
 
 

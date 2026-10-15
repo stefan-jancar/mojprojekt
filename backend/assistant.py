@@ -49,6 +49,9 @@ FIELDS_SCHEMA = {
         "person": {"type": "string"},
         "kind": {"type": "string", "description": "v účtoch: expense = výdavok, income = príjem"},
         "category": {"type": "string"},
+        "value": {"type": "string", "description": "v súčiastkach: hodnota alebo typ, napr. 220 Ω, BC547"},
+        "qty": {"type": "number", "description": "v súčiastkach: počet kusov"},
+        "package": {"type": "string", "description": "v súčiastkach: puzdro, napr. THT, SMD 0805, TO-92"},
         "tags": {"type": "array", "items": {"type": "string"}},
     },
 }
@@ -76,7 +79,8 @@ TOOLS = [
         "description": (
             "Pridá položku do sekcie. Polia: title (povinné), note, status, tags (zoznam), date, due, "
             "amount (číslo), currency, done (bool), progress (0-100), links (zoznam URL), person, priority, "
-            "kind (v sekcii účtov: 'expense' = výdavok, 'income' = príjem), category (kategória, napr. Energie, Výplata)."
+            "kind (v sekcii účtov: 'expense' = výdavok, 'income' = príjem), category (kategória, napr. Energie, Výplata; v súčiastkach napr. Rezistor, LED, Senzor), "
+            "value, qty, package (v sekcii súčiastok: hodnota/typ, počet kusov, puzdro)."
         ),
         "input_schema": {
             "type": "object",
@@ -196,17 +200,51 @@ def chat(repo, history):
     return _chat_claude(repo, messages)
 
 
+def _gemini_generate(client, contents, config, state):
+    """Volanie Gemini s opakovaním pri preťažení a prepnutím na záložný model."""
+    from google import genai
+
+    models = [state["model"]]
+    if GEMINI_FALLBACK_MODEL.lower() not in ("", "off", "none") and GEMINI_FALLBACK_MODEL != state["model"]:
+        models.append(GEMINI_FALLBACK_MODEL)
+    last = None
+    for m_index, model in enumerate(models):
+        waits = GEMINI_RETRY_WAIT if m_index == 0 else (2.0,)
+        for attempt in range(len(waits) + 1):
+            try:
+                resp = client.models.generate_content(model=model, contents=contents, config=config)
+                state["model"] = model  # v tejto konverzácii už ostaň na modeli, ktorý odpovedal
+                return resp
+            except genai.errors.ClientError as e:
+                # model nepozná nastavenie premýšľania (napr. starší model) → skús bez neho
+                if config.thinking_config is not None and e.code == 400 and "think" in str(e).lower():
+                    config.thinking_config = None
+                    continue
+                if e.code == 429:  # vyčerpaný limit – opakovanie nepomôže, skús záložný model
+                    last = e
+                    break
+                raise
+            except genai.errors.ServerError as e:  # 500/503 – preťaženie, chvíľu počkaj
+                last = e
+                if attempt < len(waits):
+                    time.sleep(waits[attempt])
+    raise last
+
+
+def _gemini_thinking(types):
+    if GEMINI_THINKING in ("minimal", "low", "medium", "high"):
+        return types.ThinkingConfig(thinking_level=GEMINI_THINKING.upper())
+    return None
+
+
 def _chat_gemini(repo, messages):
     from google import genai
     from google.genai import types
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-    thinking = None
-    if GEMINI_THINKING in ("minimal", "low", "medium", "high"):
-        thinking = types.ThinkingConfig(thinking_level=GEMINI_THINKING.upper())
     config = types.GenerateContentConfig(
         system_instruction=_system(repo),
-        thinking_config=thinking,
+        thinking_config=_gemini_thinking(types),
         tools=[types.Tool(function_declarations=[
             types.FunctionDeclaration(name=t["name"], description=t["description"],
                                       parameters_json_schema=t["input_schema"])
@@ -221,36 +259,8 @@ def _chat_gemini(repo, messages):
     changed = False
     state = {"model": GEMINI_MODEL}
 
-    def generate():
-        """Volanie Gemini s opakovaním pri preťažení a prepnutím na záložný model."""
-        models = [state["model"]]
-        if GEMINI_FALLBACK_MODEL.lower() not in ("", "off", "none") and GEMINI_FALLBACK_MODEL != state["model"]:
-            models.append(GEMINI_FALLBACK_MODEL)
-        last = None
-        for m_index, model in enumerate(models):
-            waits = GEMINI_RETRY_WAIT if m_index == 0 else (2.0,)
-            for attempt in range(len(waits) + 1):
-                try:
-                    resp = client.models.generate_content(model=model, contents=contents, config=config)
-                    state["model"] = model  # v tejto konverzácii už ostaň na modeli, ktorý odpovedal
-                    return resp
-                except genai.errors.ClientError as e:
-                    # model nepozná nastavenie premýšľania (napr. starší model) → skús bez neho
-                    if config.thinking_config is not None and e.code == 400 and "think" in str(e).lower():
-                        config.thinking_config = None
-                        continue
-                    if e.code == 429:  # vyčerpaný limit – opakovanie nepomôže, skús záložný model
-                        last = e
-                        break
-                    raise
-                except genai.errors.ServerError as e:  # 500/503 – preťaženie, chvíľu počkaj
-                    last = e
-                    if attempt < len(waits):
-                        time.sleep(waits[attempt])
-        raise last
-
     for _ in range(MAX_TOOL_ROUNDS):
-        response = generate()
+        response = _gemini_generate(client, contents, config, state)
         calls = response.function_calls or []
         if not calls:
             text = (response.text or "").strip()
