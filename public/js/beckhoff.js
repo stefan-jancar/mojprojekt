@@ -95,21 +95,25 @@ function geometry(t) {
 function pos(t, p) {
   const { rows } = geometry(t);
   if (p.col != null && p.row != null) return [p.col, p.row];
-  return [Math.floor((p.n - 1) / rows), (p.n - 1) % rows];
+  // 24 mm svorky majú druhý konektor s bodmi 1'–8'
+  const prime = String(p.n).endsWith("'");
+  const k = parseInt(p.n, 10);
+  return [Math.floor((k - 1) / rows) + (prime ? 2 : 0), (k - 1) % rows];
 }
 
 function drawTerminal(t) {
   const f = FAM[t.family] || FAM.system;
   const { cols, rows } = geometry(t);
   const CW = 46, top = 118, RH = 64;
-  const W = Math.max(cols * CW + 24, 116), H = top + rows * RH + 26;
-  const x0 = (W - cols * CW) / 2;
+  const gap = cols === 4 ? 14 : 0; // medzera medzi dvoma konektormi 24 mm svorky
+  const W = Math.max(cols * CW + 24 + gap, 116), H = top + rows * RH + 26;
+  const x0 = (W - cols * CW - gap) / 2;
   const leds = t.leds || [];
   const ledCols = Math.min(leds.length, cols * 2 > 4 ? cols * 2 : 4) || 1;
   const pcs = /24|0 ?V|PE/i.test(t.power_contacts || '') && !/nie |žiadne|no power/i.test(t.power_contacts || '');
   const P = (t.pins || []).map((p) => {
     const [c, r] = pos(t, p);
-    return { ...p, x: x0 + c * CW + CW / 2, y: top + r * RH + RH / 2 };
+    return { ...p, x: x0 + c * CW + CW / 2 + (c >= 2 ? gap : 0), y: top + r * RH + RH / 2 };
   });
   return `<svg class="bk-svg" viewBox="-4 -4 ${W + 30} ${H + 8}" role="img" aria-label="Svorka ${C.esc(t.id)}">
     <defs>
@@ -155,7 +159,8 @@ function detail(t, asked) {
       ${asked && asked !== t.id.toUpperCase() ? `<div class="bk-kl">Ekvivalent ${esc(asked)} má rovnaké zapojenie.</div>` : (t.kl || []).length ? `<div class="bk-kl">Rovnaké zapojenie: <b>${esc(t.kl.join(', '))}</b></div>` : ''}
       <p>${esc(t.desc || '')}</p>
       ${(t.specs || []).length ? `<div class="bk-specs">${t.specs.map((s) => `<span>${esc(s)}</span>`).join('')}</div>` : ''}
-      ${t.confidence && t.confidence !== 'high' ? `<div class="bk-warn">⚠️ Zapojenie nie je úplne overené – skontroluj potlač na svorke a dokumentáciu.</div>` : ''}
+      ${t.confidence === 'low' ? '<div class="bk-warn bad">⚠️ Zapojenie nie je overené v tabuľke výrobcu – pred zapojením ho určite skontroluj podľa potlače na svorke a dokumentácie.</div>'
+        : t.confidence === 'medium' ? '<div class="bk-warn">ℹ️ Časť údajov je odvodená – over potlač na boku svorky.</div>' : ''}
     </div>
     <div class="bk-stage">
       <div class="bk-draw">${drawTerminal(t)}</div>
@@ -164,7 +169,7 @@ function detail(t, asked) {
     <div class="bk-info glass" id="bk-info"><span class="tl-muted">👆 Ťukni na svorkovnicový bod, LED alebo napájacie kontakty na boku.</span></div>
     <div class="section-title">Všetky body</div>
     <div class="bk-table glass">${(t.pins || []).map((p) => `<button class="bk-row" data-n="${p.n}">
-      <b>${p.n}</b><i style="background:${kindOf(p.kind)[1]}"></i><span><strong>${esc(p.label)}</strong><small>${esc(p.desc || '')}</small></span></button>`).join('')}</div>
+      <b>${esc(String(p.n))}</b><i style="background:${kindOf(p.kind)[1]}"></i><span><strong>${esc(p.label)}</strong><small>${esc(p.desc || '')}</small></span></button>`).join('')}</div>
     ${(t.leds || []).length ? `<div class="section-title">LED kontrolky</div>
     <div class="bk-table glass">${t.leds.map((l, k) => `<button class="bk-row" data-led="${k}"><i class="led" style="background:${/červ|red/i.test(l.color) ? '#ff4d4f' : /oranž|orange|žlt|yellow/i.test(l.color) ? '#ffb020' : '#3ddc84'}"></i><span><strong>${esc(l.name)}</strong><small>${esc(l.desc || '')}</small></span></button>`).join('')}</div>` : ''}
     ${t.power_contacts ? `<div class="section-title">Napájacie kontakty</div><div class="bk-head glass"><p>${esc(t.power_contacts)}</p></div>` : ''}
@@ -178,15 +183,15 @@ function detail(t, asked) {
   const info = $('#bk-info');
   const clear = () => svg.querySelectorAll('.on,.same').forEach((e) => e.classList.remove('on', 'same'));
   const showPin = (n, scroll) => {
-    const p = t.pins.find((x) => x.n === n);
+    const p = t.pins.find((x) => String(x.n) === n);
     if (!p) return;
     clear();
     svg.querySelectorAll('.bk-pin').forEach((g) => {
-      if (Number(g.dataset.n) === n) g.classList.add('on');
+      if (g.dataset.n === n) g.classList.add('on');
       else if (g.dataset.kind === p.kind && ['+24V', '0V', 'PE', 'shield'].includes(p.kind)) g.classList.add('same');
     });
     const [kn, kc] = kindOf(p.kind);
-    const same = t.pins.filter((x) => x.kind === p.kind && x.n !== n && ['+24V', '0V', 'PE', 'shield'].includes(p.kind)).map((x) => x.n);
+    const same = t.pins.filter((x) => x.kind === p.kind && String(x.n) !== n && ['+24V', '0V', 'PE', 'shield'].includes(p.kind)).map((x) => x.n);
     info.innerHTML = `<div class="bk-sel"><div class="bk-num" style="--c:${kc}">${n}</div>
       <div><span class="bk-kind" style="--c:${kc}">${kn}</span><b>${esc(p.label)}</b></div></div>
       <p>${esc(p.desc || '')}</p>
@@ -203,14 +208,14 @@ function detail(t, asked) {
     info.classList.remove('pop'); void info.offsetWidth; info.classList.add('pop');
     if (scroll) info.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
-  svg.querySelectorAll('.bk-pin').forEach((g) => { g.onclick = () => showPin(Number(g.dataset.n)); });
+  svg.querySelectorAll('.bk-pin').forEach((g) => { g.onclick = () => showPin(g.dataset.n); });
   svg.querySelectorAll('.bk-led').forEach((g) => { g.onclick = () => showLed(Number(g.dataset.led)); });
   svg.querySelector('.bk-pc')?.addEventListener('click', () => {
     clear();
     svg.querySelector('.bk-pc').classList.add('on');
     info.innerHTML = `<div class="bk-sel"><div class="bk-num" style="--c:#e5484d">⚡</div><div><span class="bk-kind" style="--c:#e5484d">Napájacie kontakty</span><b>+24 V · 0 V · PE</b></div></div><p>${esc(t.power_contacts)}</p>`;
   });
-  C.$app.querySelectorAll('.bk-row[data-n]').forEach((b) => { b.onclick = () => { showPin(Number(b.dataset.n)); $('.bk-stage').scrollIntoView({ behavior: 'smooth' }); }; });
+  C.$app.querySelectorAll('.bk-row[data-n]').forEach((b) => { b.onclick = () => { showPin(b.dataset.n); $('.bk-stage').scrollIntoView({ behavior: 'smooth' }); }; });
   C.$app.querySelectorAll('.bk-row[data-led]').forEach((b) => { b.onclick = () => { showLed(Number(b.dataset.led)); $('.bk-stage').scrollIntoView({ behavior: 'smooth' }); }; });
   C.$app.querySelectorAll('.bk-lg').forEach((b) => {
     b.onclick = () => {
