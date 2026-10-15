@@ -54,9 +54,11 @@ jobs:
             echo "::warning::Chýba tajný údaj KEYSTORE_PASSWORD – APK sa podpíše náhodným kľúčom a aktualizácia bude vyžadovať odinštalovanie."
             exit 0
           fi
-          mkdir -p ~/.android
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ../.github/signing/debug.keystore.enc -out ~/.android/debug.keystore -pass env:KEYSTORE_PASSWORD
-          if [ -n "$ANDROID_USER_HOME" ]; then mkdir -p "$ANDROID_USER_HOME" && cp ~/.android/debug.keystore "$ANDROID_USER_HOME/"; fi
+          # kľúč sa nepodstrkuje Gradlu (ten si ho ignoroval a podpisoval náhodným) –
+          # hotové APK sa podpíše priamo nástrojom apksigner v kroku Build APK
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in ../.github/signing/debug.keystore.enc -out "$RUNNER_TEMP/app.keystore" -pass env:KEYSTORE_PASSWORD
+          keytool -list -v -keystore "$RUNNER_TEMP/app.keystore" -storepass android | grep -E "Alias name|SHA256:"
+          echo "APP_KEYSTORE=$RUNNER_TEMP/app.keystore" >> "$GITHUB_ENV"
           echo "Podpisový kľúč pripravený."
 
       - name: Build APK
@@ -64,7 +66,16 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../MojPriestor.apk
+          if [ -n "$APP_KEYSTORE" ]; then
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+            ALIAS=$(keytool -list -keystore "$APP_KEYSTORE" -storepass android | awk -F, '/PrivateKeyEntry/ {print $1; exit}')
+            "$BT/apksigner" sign --ks "$APP_KEYSTORE" --ks-pass pass:android --key-pass pass:android --ks-key-alias "$ALIAS" \
+              --v4-signing-enabled false --out ../MojPriestor.apk app/build/outputs/apk/debug/app-debug.apk
+            echo "Podpis APK (musí byť pri každom vydaní rovnaký):"
+            "$BT/apksigner" verify --print-certs ../MojPriestor.apk | grep -i "SHA-256"
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk ../MojPriestor.apk
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
