@@ -1,0 +1,5077 @@
+[
+ {
+  "id": "KL1002",
+  "desc_en": "2-channel digital input, 24 V DC, 3 ms input filter, 4-wire connection (input, +24 V, 0 V, PE per channel), EN 61131-2 type 1/3",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for input 1; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for input 1; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 8 and the PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for input 2; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for input 2; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 4 and the PE power contact"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal.",
+  "matches_el": "EL1002",
+  "source": "https://infosys.beckhoff.com/content/1033/kl1xxx/7617186187.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL1012",
+  "desc_en": "2-channel digital input, 24 V DC, 0.2 ms input filter (fast), 4-wire connection, EN 61131-2 type 1/3",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for input 1; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for input 1; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 8 and the PE power contact (note: Beckhoff product page lists no PE power contact for KL1012; points 4/8 described as earth/PE in Infosys)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for input 2; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for input 2; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 4 and the PE power contact (note: Beckhoff product page lists no PE power contact for KL1012; points 4/8 described as earth/PE in Infosys)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; PE power contact presence unclear (product page shows only +24 V / 0 V).",
+  "matches_el": "EL1012",
+  "source": "https://infosys.beckhoff.com/content/1033/kl1xxx/7617272971.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL1104",
+  "desc_en": "4-channel digital input, 24 V DC, 3 ms input filter, 2-/3-wire connection (shared +24 V / 0 V sensor supply points)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V sensor supply; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V sensor ground; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V sensor supply; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V sensor ground; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–4",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal.",
+  "matches_el": null,
+  "source": "https://infosys.beckhoff.com/content/1033/kl1xxx/7618894219.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL1114",
+  "desc_en": "4-channel digital input, 24 V DC, 0.2 ms input filter, 2-/3-wire connection (shared +24 V / 0 V sensor supply points) (same Infosys page as KL1104)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V sensor supply; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V sensor ground; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V sensor supply; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V sensor ground; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–4",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal.",
+  "matches_el": null,
+  "source": "https://infosys.beckhoff.com/content/1033/kl1xxx/7618894219.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL1408",
+  "desc_en": "8-channel digital input, 24 V DC, 3 ms input filter, 1-wire connection, reference ground = 0 V power contact",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 2,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Input 5",
+    "kind": "in",
+    "desc_en": "Input 5 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 4,
+    "label": "Input 7",
+    "kind": "in",
+    "desc_en": "Input 7 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 6,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Input 6",
+    "kind": "in",
+    "desc_en": "Input 6 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "in",
+    "desc_en": "Input 8 (1-wire, reference via power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–8",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; 0 V power contact is the reference for all inputs.",
+  "matches_el": "EL1008",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl1xxx-digital-input/kl1408.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL1418",
+  "desc_en": "8-channel digital input, 24 V DC, 0.2 ms input filter, 1-wire connection, reference ground = 0 V power contact",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 2,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Input 5",
+    "kind": "in",
+    "desc_en": "Input 5 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 4,
+    "label": "Input 7",
+    "kind": "in",
+    "desc_en": "Input 7 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 6,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Input 6",
+    "kind": "in",
+    "desc_en": "Input 6 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "in",
+    "desc_en": "Input 8 (1-wire, reference via power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–8",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input/output active)"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; 0 V power contact is the reference for all inputs.",
+  "matches_el": "EL1018",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl1xxx-digital-input/kl1418.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL1488",
+  "desc_en": "8-channel digital input, 24 V DC, 3 ms filter, ground switching (negative logic: '1' = 0…7 V, '0' = 18…30 V), 1-wire connection, reference = 24 V power contact",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 2,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Input 5",
+    "kind": "in",
+    "desc_en": "Input 5 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 4,
+    "label": "Input 7",
+    "kind": "in",
+    "desc_en": "Input 7 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 6,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Input 6",
+    "kind": "in",
+    "desc_en": "Input 6 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "in",
+    "desc_en": "Input 8 (1-wire, reference via power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–8",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = signal \"1\" (input pulled to 0 V)"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; +24 V power contact is the reference for all inputs.",
+  "matches_el": "EL1088",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl1xxx-digital-input/kl1488.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL1809",
+  "desc_en": "16-channel digital input HD (High Density), 24 V DC, 3 ms filter, 1-wire connection, 16 points in 12 mm housing; reference ground = 0 V power contact",
+  "width_mm": 12,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1 (point n = input n assumed, mirroring EL1809; product page only shows groups Signal 1…8 / 9…16)"
+   },
+   {
+    "n": 2,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 3,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3"
+   },
+   {
+    "n": 4,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4"
+   },
+   {
+    "n": 5,
+    "label": "Input 5",
+    "kind": "in",
+    "desc_en": "Input 5"
+   },
+   {
+    "n": 6,
+    "label": "Input 6",
+    "kind": "in",
+    "desc_en": "Input 6"
+   },
+   {
+    "n": 7,
+    "label": "Input 7",
+    "kind": "in",
+    "desc_en": "Input 7"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "in",
+    "desc_en": "Input 8"
+   },
+   {
+    "n": 9,
+    "label": "Input 9",
+    "kind": "in",
+    "desc_en": "Input 9"
+   },
+   {
+    "n": 10,
+    "label": "Input 10",
+    "kind": "in",
+    "desc_en": "Input 10"
+   },
+   {
+    "n": 11,
+    "label": "Input 11",
+    "kind": "in",
+    "desc_en": "Input 11"
+   },
+   {
+    "n": 12,
+    "label": "Input 12",
+    "kind": "in",
+    "desc_en": "Input 12"
+   },
+   {
+    "n": 13,
+    "label": "Input 13",
+    "kind": "in",
+    "desc_en": "Input 13"
+   },
+   {
+    "n": 14,
+    "label": "Input 14",
+    "kind": "in",
+    "desc_en": "Input 14"
+   },
+   {
+    "n": 15,
+    "label": "Input 15",
+    "kind": "in",
+    "desc_en": "Input 15"
+   },
+   {
+    "n": 16,
+    "label": "Input 16",
+    "kind": "in",
+    "desc_en": "Input 16"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–16",
+    "color": "green",
+    "desc_en": "One LED per channel; on = input signal \"1\""
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; 0 V power contact is the reference ground for all inputs.",
+  "matches_el": "EL1809",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl1xxx-digital-input/kl1809.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL1859",
+  "desc_en": "HD combi terminal: 8 digital inputs 24 V DC (3 ms) + 8 digital outputs 24 V DC 0.5 A (short-circuit proof), 1-wire, 16 points in 12 mm",
+  "width_mm": 12,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Input 1 (points 1–8 = inputs 1–8, 9–16 = outputs 1–8 assumed, mirroring EL1859; not confirmed by a contact table)"
+   },
+   {
+    "n": 2,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Input 2"
+   },
+   {
+    "n": 3,
+    "label": "Input 3",
+    "kind": "in",
+    "desc_en": "Input 3"
+   },
+   {
+    "n": 4,
+    "label": "Input 4",
+    "kind": "in",
+    "desc_en": "Input 4"
+   },
+   {
+    "n": 5,
+    "label": "Input 5",
+    "kind": "in",
+    "desc_en": "Input 5"
+   },
+   {
+    "n": 6,
+    "label": "Input 6",
+    "kind": "in",
+    "desc_en": "Input 6"
+   },
+   {
+    "n": 7,
+    "label": "Input 7",
+    "kind": "in",
+    "desc_en": "Input 7"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "in",
+    "desc_en": "Input 8"
+   },
+   {
+    "n": 9,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1"
+   },
+   {
+    "n": 10,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 11,
+    "label": "Output 3",
+    "kind": "out",
+    "desc_en": "Output 3"
+   },
+   {
+    "n": 12,
+    "label": "Output 4",
+    "kind": "out",
+    "desc_en": "Output 4"
+   },
+   {
+    "n": 13,
+    "label": "Output 5",
+    "kind": "out",
+    "desc_en": "Output 5"
+   },
+   {
+    "n": 14,
+    "label": "Output 6",
+    "kind": "out",
+    "desc_en": "Output 6"
+   },
+   {
+    "n": 15,
+    "label": "Output 7",
+    "kind": "out",
+    "desc_en": "Output 7"
+   },
+   {
+    "n": 16,
+    "label": "Output 8",
+    "kind": "out",
+    "desc_en": "Output 8"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Input LED 1–8",
+    "color": "green",
+    "desc_en": "On = input signal \"1\""
+   },
+   {
+    "name": "Output LED 1–8",
+    "color": "green",
+    "desc_en": "On = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; inputs referenced to 0 V power contact, outputs fed from +24 V power contact.",
+  "matches_el": "EL1859",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl1xxx-digital-input/kl1859.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL2022",
+  "desc_en": "2-channel digital output, 24 V DC, 2 A per channel (short-circuit proof), 4-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for output 1; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for output 1; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 8 and the PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for output 2; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for output 2; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 4 and the PE power contact"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal. Outputs are fed from the +24 V power contact.",
+  "matches_el": "EL2022",
+  "source": "https://infosys.beckhoff.com/content/1033/kl2xxx/7668176779.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL2032",
+  "desc_en": "2-channel digital output, 24 V DC, 0.5 A per channel, reverse-polarity protected, 4-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for output 1; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for output 1; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 8 and the PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for output 2; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V for output 2; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; internally connected to point 4 and the PE power contact"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal. Outputs are fed from the +24 V power contact.",
+  "matches_el": "EL2002",
+  "source": "https://infosys.beckhoff.com/content/1033/kl2xxx/7667424907.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL2134",
+  "desc_en": "4-channel digital output, 24 V DC, 0.5 A, reverse-polarity protected, 2-/3-wire (shared +24 V / 0 V points)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; internally connected to point 6 and the + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; internally connected to point 7 and the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "Output 3",
+    "kind": "out",
+    "desc_en": "Output 3"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; internally connected to point 2 and the + power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; internally connected to point 3 and the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "Output 4",
+    "kind": "out",
+    "desc_en": "Output 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–4",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V, 0 V, PE) looped through to the next terminal. Outputs are fed from the +24 V power contact.",
+  "matches_el": null,
+  "source": "https://infosys.beckhoff.com/content/1033/kl2xxx/7676353035.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL2408",
+  "desc_en": "8-channel digital output, 24 V DC, 0.5 A per channel (short-circuit proof), 1-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 2,
+    "label": "Output 3",
+    "kind": "out",
+    "desc_en": "Output 3 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Output 5",
+    "kind": "out",
+    "desc_en": "Output 5 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 4,
+    "label": "Output 7",
+    "kind": "out",
+    "desc_en": "Output 7 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 6,
+    "label": "Output 4",
+    "kind": "out",
+    "desc_en": "Output 4 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Output 6",
+    "kind": "out",
+    "desc_en": "Output 6 (1-wire, reference via power contact)"
+   },
+   {
+    "n": 8,
+    "label": "Output 8",
+    "kind": "out",
+    "desc_en": "Output 8 (1-wire, reference via power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–8",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; outputs fed from the +24 V power contact.",
+  "matches_el": "EL2008",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2408.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL2424",
+  "desc_en": "4-channel digital output, 24 V DC, 2 A per channel (short-circuit proof), 2-wire connection (output + 0 V)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1"
+   },
+   {
+    "n": 2,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V load return; internally connected to points 3, 6, 7 and the - power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V load return; internally connected to the - power contact"
+   },
+   {
+    "n": 4,
+    "label": "Output 3",
+    "kind": "out",
+    "desc_en": "Output 3"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 6,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V load return; internally connected to the - power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V load return; internally connected to the - power contact"
+   },
+   {
+    "n": 8,
+    "label": "Output 4",
+    "kind": "out",
+    "desc_en": "Output 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–4",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; outputs fed from the +24 V power contact.",
+  "matches_el": "EL2024",
+  "source": "https://infosys.beckhoff.com/content/1033/kl2xxx/7667506827.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL2488",
+  "desc_en": "8-channel digital output, 24 V DC, 0.5 A, ground switching (outputs switch to 0 V, load connected to +24 V), 1-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 1, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 2,
+    "label": "Output 3 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 3, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 3,
+    "label": "Output 5 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 5, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 4,
+    "label": "Output 7 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 7, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 5,
+    "label": "Output 2 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 2, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 6,
+    "label": "Output 4 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 4, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 7,
+    "label": "Output 6 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 6, switches to 0 V; load between this point and +24 V"
+   },
+   {
+    "n": 8,
+    "label": "Output 8 (0 V switching)",
+    "kind": "out",
+    "desc_en": "Output 8, switches to 0 V; load between this point and +24 V"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–8",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; outputs supplied via the 0 V power contact.",
+  "matches_el": "EL2088",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2488.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL2809",
+  "desc_en": "16-channel digital output HD, 24 V DC, 0.5 A per channel (short-circuit proof), 1-wire, 16 points in 12 mm housing",
+  "width_mm": 12,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Output 1 (point n = output n assumed, mirroring EL2809; product page only shows groups 1…8 / 9…16)"
+   },
+   {
+    "n": 2,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Output 2"
+   },
+   {
+    "n": 3,
+    "label": "Output 3",
+    "kind": "out",
+    "desc_en": "Output 3"
+   },
+   {
+    "n": 4,
+    "label": "Output 4",
+    "kind": "out",
+    "desc_en": "Output 4"
+   },
+   {
+    "n": 5,
+    "label": "Output 5",
+    "kind": "out",
+    "desc_en": "Output 5"
+   },
+   {
+    "n": 6,
+    "label": "Output 6",
+    "kind": "out",
+    "desc_en": "Output 6"
+   },
+   {
+    "n": 7,
+    "label": "Output 7",
+    "kind": "out",
+    "desc_en": "Output 7"
+   },
+   {
+    "n": 8,
+    "label": "Output 8",
+    "kind": "out",
+    "desc_en": "Output 8"
+   },
+   {
+    "n": 9,
+    "label": "Output 9",
+    "kind": "out",
+    "desc_en": "Output 9"
+   },
+   {
+    "n": 10,
+    "label": "Output 10",
+    "kind": "out",
+    "desc_en": "Output 10"
+   },
+   {
+    "n": 11,
+    "label": "Output 11",
+    "kind": "out",
+    "desc_en": "Output 11"
+   },
+   {
+    "n": 12,
+    "label": "Output 12",
+    "kind": "out",
+    "desc_en": "Output 12"
+   },
+   {
+    "n": 13,
+    "label": "Output 13",
+    "kind": "out",
+    "desc_en": "Output 13"
+   },
+   {
+    "n": 14,
+    "label": "Output 14",
+    "kind": "out",
+    "desc_en": "Output 14"
+   },
+   {
+    "n": 15,
+    "label": "Output 15",
+    "kind": "out",
+    "desc_en": "Output 15"
+   },
+   {
+    "n": 16,
+    "label": "Output 16",
+    "kind": "out",
+    "desc_en": "Output 16"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–16",
+    "color": "green",
+    "desc_en": "On = output switched on"
+   }
+  ],
+  "power_contacts_en": "Power contacts +24 V and 0 V looped through; outputs fed from the +24 V power contact.",
+  "matches_el": "EL2809",
+  "source": "https://www.beckhoff.com/en-en/products/i-o/bus-terminals/kl2xxx-digital-output/kl2809.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL2602",
+  "desc_en": "2-channel relay output, 2 make contacts connected to the power contacts, 230 V AC / 30 V DC, 5 A per channel (-0010 variant: zero-crossing switching)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "relay",
+    "desc_en": "Relay 1 switched output (assumed)"
+   },
+   {
+    "n": 2,
+    "label": "L / +",
+    "kind": "relay",
+    "desc_en": "Supply side of relay 1, from + / L power contact (assumed)"
+   },
+   {
+    "n": 3,
+    "label": "N",
+    "kind": "0V",
+    "desc_en": "N / 0 V, connected to power contact (assumed)"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE, connected to PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "relay",
+    "desc_en": "Relay 2 switched output (assumed)"
+   },
+   {
+    "n": 6,
+    "label": "L / +",
+    "kind": "relay",
+    "desc_en": "Supply side of relay 2 (assumed)"
+   },
+   {
+    "n": 7,
+    "label": "N",
+    "kind": "0V",
+    "desc_en": "N / 0 V (assumed)"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = relay contact closed"
+   }
+  ],
+  "power_contacts_en": "Relay contacts are connected to the power contacts (120/230 V AC or 24 V DC fed in via power contacts, N and PE). Do not mix with 24 V terminals without a separation terminal.",
+  "matches_el": null,
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2602-0010.html; https://download.beckhoff.com/download/document/io/bus-terminals/KL26xx_en.pdf",
+  "confidence": "low"
+ },
+ {
+  "id": "KL2612",
+  "desc_en": "2-channel relay output, 1 changeover contact per channel, potential-free, 125 V AC / 30 V DC, 0.5 A AC / 2 A DC",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Relay 1 NO",
+    "kind": "relay",
+    "desc_en": "Closed to point 2 when LED 1 on"
+   },
+   {
+    "n": 2,
+    "label": "Relay 1 COM",
+    "kind": "relay",
+    "desc_en": "Common contact of relay 1"
+   },
+   {
+    "n": 3,
+    "label": "Relay 1 NC",
+    "kind": "relay",
+    "desc_en": "Closed to point 2 when LED 1 off"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE (power contact PE)"
+   },
+   {
+    "n": 5,
+    "label": "Relay 2 NO",
+    "kind": "relay",
+    "desc_en": "Closed to point 6 when LED 2 on"
+   },
+   {
+    "n": 6,
+    "label": "Relay 2 COM",
+    "kind": "relay",
+    "desc_en": "Common contact of relay 2"
+   },
+   {
+    "n": 7,
+    "label": "Relay 2 NC",
+    "kind": "relay",
+    "desc_en": "Closed to point 6 when LED 2 off"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE (power contact PE)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "On = contact 2–1 (6–5) closed; off = contact 2–3 (6–7) closed. Goes off on 100 ms K-bus watchdog."
+   }
+  ],
+  "power_contacts_en": "+24 V / 0 V power contacts NOT looped through (feed in again after the KL2612); only PE contact present.",
+  "matches_el": "EL2612",
+  "source": "https://assets.euautomation.com/uploads/parts/datasheet/10/kl2612.pdf; https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2612.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL2622",
+  "desc_en": "2-channel relay output, 2 potential-free make contacts, 230 V AC / 30 V DC, 5 A per channel, no power contacts (-0010: zero-crossing switching)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "relay",
+    "desc_en": "Relay 1 contact (assumed)"
+   },
+   {
+    "n": 2,
+    "label": "Output 1'",
+    "kind": "relay",
+    "desc_en": "Relay 1 other contact side (assumed)"
+   },
+   {
+    "n": 3,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "not connected (assumed)"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE (assumed)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "relay",
+    "desc_en": "Relay 2 contact (assumed)"
+   },
+   {
+    "n": 6,
+    "label": "Output 2'",
+    "kind": "relay",
+    "desc_en": "Relay 2 other contact side (assumed)"
+   },
+   {
+    "n": 7,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "not connected (assumed)"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE (assumed)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–2",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = relay contact closed"
+   }
+  ],
+  "power_contacts_en": "No +24 V / 0 V power contacts (not looped through); product page shows only a PE power contact. Contacts potential-free.",
+  "matches_el": "EL2622",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2622.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL2634",
+  "desc_en": "4-channel relay output, 4 potential-free make contacts, 250 V AC / 30 V DC, 4 A ohmic / 2 A inductive per channel",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "13",
+    "kind": "relay",
+    "desc_en": "Relay 1 contact 13 (position assumed)"
+   },
+   {
+    "n": 2,
+    "label": "14",
+    "kind": "relay",
+    "desc_en": "Relay 1 contact 14"
+   },
+   {
+    "n": 3,
+    "label": "33",
+    "kind": "relay",
+    "desc_en": "Relay 3 contact 33 (position assumed)"
+   },
+   {
+    "n": 4,
+    "label": "34",
+    "kind": "relay",
+    "desc_en": "Relay 3 contact 34"
+   },
+   {
+    "n": 5,
+    "label": "23",
+    "kind": "relay",
+    "desc_en": "Relay 2 contact 23 (position assumed)"
+   },
+   {
+    "n": 6,
+    "label": "24",
+    "kind": "relay",
+    "desc_en": "Relay 2 contact 24"
+   },
+   {
+    "n": 7,
+    "label": "43",
+    "kind": "relay",
+    "desc_en": "Relay 4 contact 43 (position assumed)"
+   },
+   {
+    "n": 8,
+    "label": "44",
+    "kind": "relay",
+    "desc_en": "Relay 4 contact 44"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1–4",
+    "color": "green",
+    "desc_en": "One LED per channel; off = signal \"0\", on = relay contact closed"
+   }
+  ],
+  "power_contacts_en": "Power contacts not looped through (potential-free relay terminal); feed again after it.",
+  "matches_el": "EL2624",
+  "source": "https://www.beckhoff.com/en-au/products/i-o/bus-terminals/kl2xxx-digital-output/kl2634.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL3002",
+  "desc_en": "2-channel analog input, -10...+10 V, 12 bit, differential inputs with common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+Input 1",
+    "kind": "ain",
+    "desc_en": "Positive input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "-Input 1",
+    "kind": "ain",
+    "desc_en": "Negative input channel 1"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+Input 2",
+    "kind": "ain",
+    "desc_en": "Positive input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "-Input 2",
+    "kind": "ain",
+    "desc_en": "Negative input channel 2"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3102",
+  "source": "https://download.beckhoff.com/download/Document/io/bus-terminals/kl300xen.pdf ; https://infosys.beckhoff.com/content/1033/kl300x/index.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3404",
+  "desc_en": "4-channel analog input, -10...+10 V, 12 bit, single-ended, 2-wire, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "ain",
+    "desc_en": "Signal input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 1 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 3,
+    "label": "Input 3",
+    "kind": "ain",
+    "desc_en": "Signal input channel 3"
+   },
+   {
+    "n": 4,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 3 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "ain",
+    "desc_en": "Signal input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 2 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 7,
+    "label": "Input 4",
+    "kind": "ain",
+    "desc_en": "Signal input channel 4"
+   },
+   {
+    "n": 8,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 4 (common internal reference ground of all inputs)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts looped through; the inputs' reference ground is electrically isolated from the 0 V power contact.",
+  "matches_el": "EL3004",
+  "source": "https://infosys.beckhoff.com/content/1033/kl340x_kl346x/4243342475.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3408",
+  "desc_en": "8-channel analog input, -10...+10 V, 12 bit, single-ended, 1-wire connection (no ground terminal points)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "ain",
+    "desc_en": "Signal input channel 1 (1-wire, single-ended)"
+   },
+   {
+    "n": 2,
+    "label": "Input 3",
+    "kind": "ain",
+    "desc_en": "Signal input channel 3 (1-wire, single-ended)"
+   },
+   {
+    "n": 3,
+    "label": "Input 5",
+    "kind": "ain",
+    "desc_en": "Signal input channel 5 (1-wire, single-ended)"
+   },
+   {
+    "n": 4,
+    "label": "Input 7",
+    "kind": "ain",
+    "desc_en": "Signal input channel 7 (1-wire, single-ended)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "ain",
+    "desc_en": "Signal input channel 2 (1-wire, single-ended)"
+   },
+   {
+    "n": 6,
+    "label": "Input 4",
+    "kind": "ain",
+    "desc_en": "Signal input channel 4 (1-wire, single-ended)"
+   },
+   {
+    "n": 7,
+    "label": "Input 6",
+    "kind": "ain",
+    "desc_en": "Signal input channel 6 (1-wire, single-ended)"
+   },
+   {
+    "n": 8,
+    "label": "Input 8",
+    "kind": "ain",
+    "desc_en": "Signal input channel 8 (1-wire, single-ended)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run5",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 5; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run6",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 6; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run7",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 7; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run8",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 8; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Reference ground of all inputs is the 0 V power contact (per Beckhoff product page); +24 V power contact looped through.",
+  "matches_el": "EL3008",
+  "source": "https://infosys.beckhoff.com/content/1033/kl340x_kl346x/4243341451.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3052",
+  "desc_en": "2-channel analog input, 4...20 mA, 12 bit, single-ended; 2-wire sensors supplied from +24 V points",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+Input 1",
+    "kind": "ain",
+    "desc_en": "Current input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply, internally connected to terminal point 6 and the +24 V power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Reference ground, internally connected to terminal point 7 and the 0 V power contact"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+Input 2",
+    "kind": "ain",
+    "desc_en": "Current input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply, internally connected to terminal point 2 and the +24 V power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Reference ground, internally connected to terminal point 3 and the 0 V power contact"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on when A/D converter limit reached (current > 21.5 mA) / overload or wire break"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on when A/D converter limit reached (current > 21.5 mA) / overload or wire break"
+   }
+  ],
+  "power_contacts_en": "Used: +24 V and 0 V power contacts feed terminal points 2/6 and 3/7; 0 V is the input reference; contacts looped through.",
+  "matches_el": "EL3052",
+  "source": "https://infosys.beckhoff.com/content/1033/kl304x_kl305x/4338319755.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3454",
+  "desc_en": "4-channel analog input, 4...20 mA, 12 bit, single-ended, 2-wire sensors supplied from the terminal, common ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "ain",
+    "desc_en": "Current input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply for input 1, from +24 V power contact"
+   },
+   {
+    "n": 3,
+    "label": "Input 3",
+    "kind": "ain",
+    "desc_en": "Current input channel 3"
+   },
+   {
+    "n": 4,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply for input 3, from +24 V power contact"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "ain",
+    "desc_en": "Current input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply for input 2, from +24 V power contact"
+   },
+   {
+    "n": 7,
+    "label": "Input 4",
+    "kind": "ain",
+    "desc_en": "Current input channel 4"
+   },
+   {
+    "n": 8,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Sensor supply for input 4, from +24 V power contact"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on when current > 20.8 mA (overload); wire break reported in status byte"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on when current > 20.8 mA (overload); wire break reported in status byte"
+   },
+   {
+    "name": "Error3",
+    "color": "red",
+    "desc_en": "Channel 3: on when current > 20.8 mA (overload); wire break reported in status byte"
+   },
+   {
+    "name": "Error4",
+    "color": "red",
+    "desc_en": "Channel 4: on when current > 20.8 mA (overload); wire break reported in status byte"
+   }
+  ],
+  "power_contacts_en": "Used: +24 V power contact feeds the +24 V points; 0 V power contact is the reference ground of all inputs; looped through.",
+  "matches_el": "EL3054",
+  "source": "https://infosys.beckhoff.com/content/1033/kl344x_kl345x/4307002763.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3062",
+  "desc_en": "2-channel analog input, 0...10 V, 12 bit, single-ended, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+Input 1",
+    "kind": "ain",
+    "desc_en": "Input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+Input 2",
+    "kind": "ain",
+    "desc_en": "Input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": null,
+  "source": "https://infosys.beckhoff.com/content/1033/kl306x/4346093195.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3464",
+  "desc_en": "4-channel analog input, 0...10 V, 12 bit, single-ended, 2-wire, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Input 1",
+    "kind": "ain",
+    "desc_en": "Signal input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 1 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 3,
+    "label": "Input 3",
+    "kind": "ain",
+    "desc_en": "Signal input channel 3"
+   },
+   {
+    "n": 4,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 3 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 5,
+    "label": "Input 2",
+    "kind": "ain",
+    "desc_en": "Signal input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 2 (common internal reference ground of all inputs)"
+   },
+   {
+    "n": 7,
+    "label": "Input 4",
+    "kind": "ain",
+    "desc_en": "Signal input channel 4"
+   },
+   {
+    "n": 8,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for input 4 (common internal reference ground of all inputs)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts looped through; the inputs' reference ground is electrically isolated from the 0 V power contact.",
+  "matches_el": "EL3064",
+  "source": "https://infosys.beckhoff.com/content/1033/kl340x_kl346x/4243342475.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3102",
+  "desc_en": "2-channel analog input, -10...+10 V, 16 bit, differential, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+Input 1",
+    "kind": "ain",
+    "desc_en": "Positive input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "-Input 1",
+    "kind": "ain",
+    "desc_en": "Negative input channel 1"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+Input 2",
+    "kind": "ain",
+    "desc_en": "Positive input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "-Input 2",
+    "kind": "ain",
+    "desc_en": "Negative input channel 2"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3102",
+  "source": "https://infosys.beckhoff.com/content/1033/kl3102_kl3112_kl3122/5224905739.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3122",
+  "desc_en": "2-channel analog input, 4...20 mA, 16 bit, differential, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+Input 1",
+    "kind": "ain",
+    "desc_en": "Positive input channel 1"
+   },
+   {
+    "n": 2,
+    "label": "-Input 1",
+    "kind": "ain",
+    "desc_en": "Negative input channel 1"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+Input 2",
+    "kind": "ain",
+    "desc_en": "Positive input channel 2"
+   },
+   {
+    "n": 6,
+    "label": "-Input 2",
+    "kind": "ain",
+    "desc_en": "Negative input channel 2"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on when measured current outside measuring range (> 20 mA)"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on when measured current outside measuring range (> 20 mA)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3122",
+  "source": "https://infosys.beckhoff.com/content/1033/kl3102_kl3112_kl3122/5224794379.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3202",
+  "desc_en": "2-channel RTD input (Pt100, Ni100 etc.), 16 bit (0.1 C), 2- or 3-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+R1",
+    "kind": "rtd",
+    "desc_en": "RTD input +R1"
+   },
+   {
+    "n": 2,
+    "label": "RL1",
+    "kind": "rtd",
+    "desc_en": "Line-compensation input RL1 (3-wire); bridge to +R1 for 2-wire"
+   },
+   {
+    "n": 3,
+    "label": "-R1",
+    "kind": "rtd",
+    "desc_en": "RTD input -R1 (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield, FE (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+R2",
+    "kind": "rtd",
+    "desc_en": "RTD input +R2"
+   },
+   {
+    "n": 6,
+    "label": "RL2",
+    "kind": "rtd",
+    "desc_en": "Line-compensation input RL2 (3-wire); bridge to +R2 for 2-wire"
+   },
+   {
+    "n": 7,
+    "label": "-R2",
+    "kind": "rtd",
+    "desc_en": "RTD input -R2 (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield, FE (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on at short circuit or wire break (resistance outside valid characteristic range)"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on at short circuit or wire break (resistance outside valid characteristic range)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3202",
+  "source": "https://infosys.beckhoff.com/content/1033/kl320x/1546072459.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3204",
+  "desc_en": "4-channel RTD input (Pt100 etc.; -0030 variant NTC), 16 bit (0.1 C), 2-wire connection",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+R1",
+    "kind": "rtd",
+    "desc_en": "RTD input +R1"
+   },
+   {
+    "n": 2,
+    "label": "-R1",
+    "kind": "rtd",
+    "desc_en": "RTD input -R1"
+   },
+   {
+    "n": 3,
+    "label": "+R3",
+    "kind": "rtd",
+    "desc_en": "RTD input +R3"
+   },
+   {
+    "n": 4,
+    "label": "-R3",
+    "kind": "rtd",
+    "desc_en": "RTD input -R3"
+   },
+   {
+    "n": 5,
+    "label": "+R2",
+    "kind": "rtd",
+    "desc_en": "RTD input +R2"
+   },
+   {
+    "n": 6,
+    "label": "-R2",
+    "kind": "rtd",
+    "desc_en": "RTD input -R2"
+   },
+   {
+    "n": 7,
+    "label": "+R4",
+    "kind": "rtd",
+    "desc_en": "RTD input +R4"
+   },
+   {
+    "n": 8,
+    "label": "-R4",
+    "kind": "rtd",
+    "desc_en": "RTD input -R4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on at short circuit or wire break (sensor fault)"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on at short circuit or wire break (sensor fault)"
+   },
+   {
+    "name": "Error3",
+    "color": "red",
+    "desc_en": "Channel 3: on at short circuit or wire break (sensor fault)"
+   },
+   {
+    "name": "Error4",
+    "color": "red",
+    "desc_en": "Channel 4: on at short circuit or wire break (sensor fault)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3204",
+  "source": "https://infosys.beckhoff.com/content/1033/kl320x/1546072459.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3312",
+  "desc_en": "2-channel thermocouple input (types J, K, L, B, E, N, R, S, T, U; mV), 16 bit, cold-junction compensation",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+TC1",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 1"
+   },
+   {
+    "n": 2,
+    "label": "-TC1",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 1"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7); for non-earthed TC bridge GND, Shield and -TC"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "+TC2",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 2"
+   },
+   {
+    "n": 6,
+    "label": "-TC2",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 2"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3); for non-earthed TC bridge GND, Shield and -TC"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on at wire break (resistance outside valid range of thermocouple characteristic)"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on at wire break (resistance outside valid range of thermocouple characteristic)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": null,
+  "source": "https://infosys.beckhoff.com/content/1033/kl331x_kl3302/4367196043.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3314",
+  "desc_en": "4-channel thermocouple input, 16 bit, cold-junction compensation; shield via extra KL9195 shield terminal",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+TC1",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 1"
+   },
+   {
+    "n": 2,
+    "label": "-TC1",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 1"
+   },
+   {
+    "n": 3,
+    "label": "+TC3",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 3"
+   },
+   {
+    "n": 4,
+    "label": "-TC3",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 3"
+   },
+   {
+    "n": 5,
+    "label": "+TC2",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 2"
+   },
+   {
+    "n": 6,
+    "label": "-TC2",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 2"
+   },
+   {
+    "n": 7,
+    "label": "+TC4",
+    "kind": "tc",
+    "desc_en": "Thermocouple input + channel 4"
+   },
+   {
+    "n": 8,
+    "label": "-TC4",
+    "kind": "tc",
+    "desc_en": "Thermocouple input - channel 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Error1",
+    "color": "red",
+    "desc_en": "Channel 1: on at wire break (resistance outside valid range of thermocouple characteristic); Run LEDs not applicable on KL3314"
+   },
+   {
+    "name": "Error2",
+    "color": "red",
+    "desc_en": "Channel 2: on at wire break (resistance outside valid range of thermocouple characteristic); Run LEDs not applicable on KL3314"
+   },
+   {
+    "name": "Error3",
+    "color": "red",
+    "desc_en": "Channel 3: on at wire break (resistance outside valid range of thermocouple characteristic); Run LEDs not applicable on KL3314"
+   },
+   {
+    "name": "Error4",
+    "color": "red",
+    "desc_en": "Channel 4: on at wire break (resistance outside valid range of thermocouple characteristic); Run LEDs not applicable on KL3314"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL3314",
+  "source": "https://infosys.beckhoff.com/content/1033/kl331x_kl3302/4367307147.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL3403",
+  "desc_en": "3-phase power measurement, 500 V AC, 1 A via current transformers (-0010: 5 A), 16 bit; LED table not found in sources",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "L1",
+    "kind": "ain",
+    "desc_en": "Voltage measurement phase L1"
+   },
+   {
+    "n": 2,
+    "label": "L2",
+    "kind": "ain",
+    "desc_en": "Voltage measurement phase L2"
+   },
+   {
+    "n": 3,
+    "label": "L3",
+    "kind": "ain",
+    "desc_en": "Voltage measurement phase L3"
+   },
+   {
+    "n": 4,
+    "label": "N",
+    "kind": "ain",
+    "desc_en": "Neutral; internally connected to I_N, capacitively coupled to DIN-rail earth contact; earth N if not connected to mains neutral"
+   },
+   {
+    "n": 5,
+    "label": "I_L1",
+    "kind": "ain",
+    "desc_en": "Current transformer input phase L1 (1 A secondary)"
+   },
+   {
+    "n": 6,
+    "label": "I_L2",
+    "kind": "ain",
+    "desc_en": "Current transformer input phase L2"
+   },
+   {
+    "n": 7,
+    "label": "I_L3",
+    "kind": "ain",
+    "desc_en": "Current transformer input phase L3"
+   },
+   {
+    "n": 8,
+    "label": "I_N",
+    "kind": "ain",
+    "desc_en": "Star point of current transformers; internally connected to N"
+   }
+  ],
+  "leds": [],
+  "power_contacts_en": "Not documented in found sources (mains-voltage terminal; signal side independent of power contacts).",
+  "matches_el": "EL3403",
+  "source": "https://infosys.beckhoff.com/content/1031/kl3403/4197140235.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4002",
+  "desc_en": "2-channel analog output, 0...10 V, 12 bit, single-ended, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "+ Output 1"
+   },
+   {
+    "n": 2,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 7)"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "+ Output 2"
+   },
+   {
+    "n": 6,
+    "label": "n.c.",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Internal ground (internally connected to terminal point 3)"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL4002",
+  "source": "https://infosys.beckhoff.com/content/1033/kl400x/4379014283.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4004",
+  "desc_en": "4-channel analog output, 0...10 V, 12 bit, single-ended, common ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "+ Output 1"
+   },
+   {
+    "n": 2,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 1 (internally connected to terminal point 6)"
+   },
+   {
+    "n": 3,
+    "label": "Output 3",
+    "kind": "aout",
+    "desc_en": "+ Output 3"
+   },
+   {
+    "n": 4,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 3 (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "+ Output 2"
+   },
+   {
+    "n": 6,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 2 (internally connected to terminal point 2)"
+   },
+   {
+    "n": 7,
+    "label": "Output 4",
+    "kind": "aout",
+    "desc_en": "+ Output 4"
+   },
+   {
+    "n": 8,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 4 (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL4004",
+  "source": "https://infosys.beckhoff.com/content/1033/kl400x/4379086347.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4408",
+  "desc_en": "8-channel analog output, 0...10 V, 12 bit, single-ended, 1-wire (no ground terminal points)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "Output 1 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 2,
+    "label": "Output 3",
+    "kind": "aout",
+    "desc_en": "Output 3 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Output 5",
+    "kind": "aout",
+    "desc_en": "Output 5 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 4,
+    "label": "Output 7",
+    "kind": "aout",
+    "desc_en": "Output 7 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "Output 2 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 6,
+    "label": "Output 4",
+    "kind": "aout",
+    "desc_en": "Output 4 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Output 6",
+    "kind": "aout",
+    "desc_en": "Output 6 signal (1-wire; reference is 0 V power contact)"
+   },
+   {
+    "n": 8,
+    "label": "Output 8",
+    "kind": "aout",
+    "desc_en": "Output 8 signal (1-wire; reference is 0 V power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run5",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 5; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run6",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 6; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run7",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 7; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run8",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 8; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Used: reference ground of the outputs is the 0 V power contact; contacts looped through.",
+  "matches_el": "EL4008",
+  "source": "https://infosys.beckhoff.com/content/1033/kl440x_kl443x/4246504715.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4012",
+  "desc_en": "2-channel analog output, 0...20 mA, 12 bit, single-ended",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "+ Output 1 (0...20 mA)"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Internally connected to terminal point 6 and +24 V power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Internally connected to terminal point 7 and 0 V power contact"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "+ Output 2 (0...20 mA)"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Internally connected to terminal point 2 and +24 V power contact"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Internally connected to terminal point 3 and 0 V power contact"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield / PE contact (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Used: output stage supplied with 24 V DC via power contacts (alt. 15 V with KL9515); +24 V / 0 V available at points 2/6, 3/7.",
+  "matches_el": "EL4012",
+  "source": "https://infosys.beckhoff.com/content/1033/kl401x_kl402x/4383915403.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4424",
+  "desc_en": "4-channel analog output, 4...20 mA, 12 bit, single-ended, 2-wire, common ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "+ Output 1"
+   },
+   {
+    "n": 2,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Ground for output 1 (0 V, connected to 0 V power contact)"
+   },
+   {
+    "n": 3,
+    "label": "Output 3",
+    "kind": "aout",
+    "desc_en": "+ Output 3"
+   },
+   {
+    "n": 4,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Ground for output 3 (0 V, connected to 0 V power contact)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "+ Output 2"
+   },
+   {
+    "n": 6,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Ground for output 2 (0 V, connected to 0 V power contact)"
+   },
+   {
+    "n": 7,
+    "label": "Output 4",
+    "kind": "aout",
+    "desc_en": "+ Output 4"
+   },
+   {
+    "n": 8,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Ground for output 4 (0 V, connected to 0 V power contact)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Used: reference ground of the outputs is the 0 V power contact; output supply from 24 V power contacts; looped through.",
+  "matches_el": "EL4024",
+  "source": "https://infosys.beckhoff.com/content/1033/kl441x_kl442x/4246995851.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL4034",
+  "desc_en": "4-channel analog output, -10...+10 V, 12 bit, single-ended, common internal ground",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "aout",
+    "desc_en": "+ Output 1"
+   },
+   {
+    "n": 2,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 1 (internally connected to terminal point 6)"
+   },
+   {
+    "n": 3,
+    "label": "Output 3",
+    "kind": "aout",
+    "desc_en": "+ Output 3"
+   },
+   {
+    "n": 4,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 3 (internally connected to terminal point 8)"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "aout",
+    "desc_en": "+ Output 2"
+   },
+   {
+    "n": 6,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 2 (internally connected to terminal point 2)"
+   },
+   {
+    "n": 7,
+    "label": "Output 4",
+    "kind": "aout",
+    "desc_en": "+ Output 4"
+   },
+   {
+    "n": 8,
+    "label": "GND",
+    "kind": "gnd",
+    "desc_en": "Ground for output 4 (internally connected to terminal point 4)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run1",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 1; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run2",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 2; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run3",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 3; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   },
+   {
+    "name": "Run4",
+    "color": "green",
+    "desc_en": "On: normal operation of channel 4; off: watchdog timeout (no process data from Bus Coupler for 100 ms)"
+   }
+  ],
+  "power_contacts_en": "Power contacts (+24 V / 0 V) are only looped through to the next terminal; no connection to the signal side documented.",
+  "matches_el": "EL4034",
+  "source": "https://infosys.beckhoff.com/content/1033/kl403x/4388739467.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL1501",
+  "desc_en": "1-channel up/down counter terminal 24 V DC, 100 kHz, 2 outputs (added as the probable intended type instead of KL1502)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Up/Down / Gate / Clock1",
+    "kind": "in",
+    "desc_en": "Up/down input (up/down mode), gate input (gate mode) or CLOCK1 (two-counter mode)"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 6 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 7 and − power contact"
+   },
+   {
+    "n": 4,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "Digital output 1 (24 V)"
+   },
+   {
+    "n": 5,
+    "label": "Clock",
+    "kind": "in",
+    "desc_en": "Clock (counting) input"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "Digital output 2 (24 V)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "LED1",
+    "color": "green",
+    "desc_en": "Up/down, gate or CLOCK1 input active (by mode)"
+   },
+   {
+    "name": "LED2",
+    "color": "green",
+    "desc_en": "Clock input active"
+   },
+   {
+    "name": "LED3",
+    "color": "green",
+    "desc_en": "Output 1 on"
+   },
+   {
+    "name": "LED4",
+    "color": "green",
+    "desc_en": "Output 2 on"
+   }
+  ],
+  "power_contacts_en": "24 V / 0 V taken from power contacts and passed through; (KL1512 uses 1=Input 1, 5=Input 2, 2/6 +24 V, 3/7 0 V, 4/8 n.c.)",
+  "matches_el": "EL1502",
+  "source": "https://infosys.beckhoff.com/content/1033/kl1501_kl1512/3531675019.html ; https://infosys.beckhoff.com/content/1033/kl1501_kl1512/3531668107.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL2502",
+  "desc_en": "2-channel PWM output terminal 24 V DC, 0.1 A",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Output 1",
+    "kind": "out",
+    "desc_en": "PWM output channel 1"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 6 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 7 and − power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Output 2",
+    "kind": "out",
+    "desc_en": "PWM output channel 2"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Signal LED 1",
+    "color": "green",
+    "desc_en": "Output 1 state; brightness follows duty cycle"
+   },
+   {
+    "name": "Signal LED 2",
+    "color": "green",
+    "desc_en": "Output 2 state; brightness follows duty cycle"
+   }
+  ],
+  "power_contacts_en": "+24 V, 0 V and PE power contacts passed through; outputs supplied from power contacts",
+  "matches_el": "EL2502",
+  "source": "https://infosys.beckhoff.com/content/1033/kl2502_kl2512/4955343755.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL5101",
+  "desc_en": "Incremental encoder interface 5 V (RS422 differential / TTL), 1 MHz, with 24 V latch and gate inputs and status input",
+  "width_mm": 24,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "A",
+    "kind": "enc",
+    "desc_en": "Encoder track A"
+   },
+   {
+    "n": 2,
+    "label": "B",
+    "kind": "enc",
+    "desc_en": "Encoder track B"
+   },
+   {
+    "n": 3,
+    "label": "C",
+    "kind": "enc",
+    "desc_en": "Encoder zero pulse C"
+   },
+   {
+    "n": 4,
+    "label": "Latch",
+    "kind": "in",
+    "desc_en": "External latch input 24 V (latches on 0→24 V edge)"
+   },
+   {
+    "n": 5,
+    "label": "/A",
+    "kind": "enc",
+    "desc_en": "Track A inverted"
+   },
+   {
+    "n": 6,
+    "label": "/B",
+    "kind": "enc",
+    "desc_en": "Track B inverted"
+   },
+   {
+    "n": 7,
+    "label": "/C",
+    "kind": "enc",
+    "desc_en": "Zero pulse C inverted"
+   },
+   {
+    "n": 8,
+    "label": "Gate",
+    "kind": "in",
+    "desc_en": "Gate input 24 V; high level stops counting"
+   },
+   {
+    "n": "1'",
+    "label": "Ue (+5 V)",
+    "kind": "+24V",
+    "desc_en": "+5 V encoder supply output (not 24 V)"
+   },
+   {
+    "n": "2'",
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from + power contact; bridged to 6'"
+   },
+   {
+    "n": "3'",
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from − power contact; bridged to 7'"
+   },
+   {
+    "n": "4'",
+    "label": "Status",
+    "kind": "in",
+    "desc_en": "Status input 5 V (encoder error output, active low, pull-up)"
+   },
+   {
+    "n": "5'",
+    "label": "Uo (0 V)",
+    "kind": "0V",
+    "desc_en": "Encoder supply 0 V"
+   },
+   {
+    "n": "6'",
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 2'"
+   },
+   {
+    "n": "7'",
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 3'"
+   },
+   {
+    "n": "8'",
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield (presumed, as on EL5101)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "RUN",
+    "color": "green",
+    "desc_en": "Cyclic data exchange; off if no process data for 100 ms"
+   },
+   {
+    "name": "A",
+    "color": "green",
+    "desc_en": "Input A active"
+   },
+   {
+    "name": "B",
+    "color": "green",
+    "desc_en": "Input B active"
+   },
+   {
+    "name": "C",
+    "color": "green",
+    "desc_en": "Input C active"
+   },
+   {
+    "name": "Latch",
+    "color": "green",
+    "desc_en": "24 V at latch input"
+   },
+   {
+    "name": "Gate",
+    "color": "green",
+    "desc_en": "24 V at gate input"
+   },
+   {
+    "name": "Status",
+    "color": "green",
+    "desc_en": "Status input state"
+   },
+   {
+    "name": "Power UE",
+    "color": "green",
+    "desc_en": "5 V encoder supply present"
+   }
+  ],
+  "power_contacts_en": "Terminal operating voltage 24 V via power contacts; generates 5 V encoder supply (Ue/Uo)",
+  "matches_el": "EL5101",
+  "source": "https://infosys.beckhoff.com/content/1033/kl5101/4981635211.html ; https://www.beckhoff.com/en-ca/products/i-o/bus-terminals/kl5xxx-position-measurement/kl5101.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL5001",
+  "desc_en": "SSI absolute encoder interface (D+/D− data in, Cl+/Cl− clock out, RS422)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "D+",
+    "kind": "enc",
+    "desc_en": "SSI data input +"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V encoder supply; bridged to 6 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V encoder supply; bridged to 7 and − power contact"
+   },
+   {
+    "n": 4,
+    "label": "CL+",
+    "kind": "enc",
+    "desc_en": "SSI clock output +"
+   },
+   {
+    "n": 5,
+    "label": "D−",
+    "kind": "enc",
+    "desc_en": "SSI data input −"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V; bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "CL−",
+    "kind": "enc",
+    "desc_en": "SSI clock output −"
+   }
+  ],
+  "leds": [
+   {
+    "name": "RUN",
+    "color": "green",
+    "desc_en": "On in normal operation; off on watchdog overflow / no process data for 100 ms"
+   }
+  ],
+  "power_contacts_en": "24 V encoder supply via power contacts (optional 5 V via KL9505)",
+  "matches_el": "EL5001",
+  "source": "https://infosys.beckhoff.com/content/1033/kl5001/4401144843.html ; https://infosys.beckhoff.com/content/1033/kl5001/4401303307.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL6001",
+  "desc_en": "Serial interface RS232, TxD/RxD with RTS/CTS handshake, 1200–19200 baud",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "TxD",
+    "kind": "com",
+    "desc_en": "Transmit data"
+   },
+   {
+    "n": 2,
+    "label": "RTS",
+    "kind": "com",
+    "desc_en": "Request to send"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "0V",
+    "desc_en": "Signal ground; bridged to 7"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield; bridged to 8"
+   },
+   {
+    "n": 5,
+    "label": "RxD",
+    "kind": "com",
+    "desc_en": "Receive data"
+   },
+   {
+    "n": 6,
+    "label": "CTS",
+    "kind": "com",
+    "desc_en": "Clear to send"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "0V",
+    "desc_en": "Signal ground; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "RUN",
+    "color": "green",
+    "desc_en": "Communication/operation"
+   },
+   {
+    "name": "TxD",
+    "color": "green",
+    "desc_en": "Transmitting"
+   },
+   {
+    "name": "RxD",
+    "color": "green",
+    "desc_en": "Receiving"
+   }
+  ],
+  "power_contacts_en": "Electronics supplied from K-bus, signals isolated (500 V); power-contact pass-through not confirmed",
+  "matches_el": "EL6001",
+  "source": "https://infosys.beckhoff.com/content/1033/tcsmssmtpsrvce/11386351755.html ; https://www.beckhoff.com/KL6001",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL6021",
+  "desc_en": "Serial interface RS422/RS485, 1200–19200 baud",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "TxD+",
+    "kind": "com",
+    "desc_en": "Transmit +  (RS485: Data+)"
+   },
+   {
+    "n": 2,
+    "label": "RxD+",
+    "kind": "com",
+    "desc_en": "Receive +"
+   },
+   {
+    "n": 3,
+    "label": "GND",
+    "kind": "0V",
+    "desc_en": "Signal ground; bridged to 7"
+   },
+   {
+    "n": 4,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield; bridged to 8"
+   },
+   {
+    "n": 5,
+    "label": "TxD−",
+    "kind": "com",
+    "desc_en": "Transmit −  (RS485: Data−)"
+   },
+   {
+    "n": 6,
+    "label": "RxD−",
+    "kind": "com",
+    "desc_en": "Receive −"
+   },
+   {
+    "n": 7,
+    "label": "GND",
+    "kind": "0V",
+    "desc_en": "Signal ground; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "Shield",
+    "kind": "PE",
+    "desc_en": "Shield; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "RUN",
+    "color": "green",
+    "desc_en": "Operation"
+   },
+   {
+    "name": "TxD",
+    "color": "green",
+    "desc_en": "Transmitting"
+   },
+   {
+    "name": "RxD",
+    "color": "green",
+    "desc_en": "Receiving"
+   }
+  ],
+  "power_contacts_en": "Supplied via K-bus, signals isolated (500 V); no power contacts used (per product-page summary)",
+  "matches_el": "EL6021",
+  "source": "https://www.beckhoff.com/fr-ch/products/i-o/bus-terminals/kl6xxx-communication/kl6021.html ; https://infosys.beckhoff.com/content/1033/kl6021-0023/4284546699.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL2531",
+  "desc_en": "Stepper motor terminal 24 V, 1.5 A, 2 digital inputs; motor supply from power contacts",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "A1",
+    "kind": "motor",
+    "desc_en": "Motor winding A (pair with A2)"
+   },
+   {
+    "n": 2,
+    "label": "B1",
+    "kind": "motor",
+    "desc_en": "Motor winding B (pair with B2)"
+   },
+   {
+    "n": 3,
+    "label": "Sense A",
+    "kind": "none",
+    "desc_en": "Sense, winding A (no external load described)"
+   },
+   {
+    "n": 4,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Digital input 24 V (limit switch / latch)"
+   },
+   {
+    "n": 5,
+    "label": "A2",
+    "kind": "motor",
+    "desc_en": "Motor winding A"
+   },
+   {
+    "n": 6,
+    "label": "B2",
+    "kind": "motor",
+    "desc_en": "Motor winding B"
+   },
+   {
+    "n": 7,
+    "label": "Sense B",
+    "kind": "none",
+    "desc_en": "Sense, winding B"
+   },
+   {
+    "n": 8,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Digital input 24 V (limit switch / latch)"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run",
+    "color": "green",
+    "desc_en": "K-bus data exchange active"
+   },
+   {
+    "name": "Power",
+    "color": "green",
+    "desc_en": "24 V supply present and motor control enabled"
+   },
+   {
+    "name": "Enable",
+    "color": "green",
+    "desc_en": "Motor control enabled, ready"
+   },
+   {
+    "name": "Turn CW",
+    "color": "green",
+    "desc_en": "Motor turning clockwise"
+   },
+   {
+    "name": "Turn CCW",
+    "color": "green",
+    "desc_en": "Motor turning counter-clockwise"
+   },
+   {
+    "name": "Stall detect",
+    "color": "yellow",
+    "desc_en": "On: control disabled; 1 Hz: load angle above threshold"
+   },
+   {
+    "name": "Error A",
+    "color": "red",
+    "desc_en": "1 Hz: configuration error"
+   },
+   {
+    "name": "Error B",
+    "color": "red",
+    "desc_en": "1 Hz: supply too low, open load or overcurrent"
+   }
+  ],
+  "power_contacts_en": "+24 V / 0 V power contacts supply the output stage and inputs (8–24 V DC); passed through",
+  "matches_el": "EL7031 (partial: EL7031 has +24 V/0 V on 3/7 instead of Sense A/B)",
+  "source": "https://infosys.beckhoff.com/content/1031/kl2531_kl2541/3426233867.html ; https://infosys.beckhoff.com/content/1033/kl2531_kl2541/3426221707.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL2541",
+  "desc_en": "Stepper motor terminal 48 V, 5 A, with incremental encoder interface and 2 digital inputs",
+  "width_mm": 24,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "A",
+    "kind": "enc",
+    "desc_en": "Encoder input A"
+   },
+   {
+    "n": 2,
+    "label": "C",
+    "kind": "enc",
+    "desc_en": "Encoder zero input C (latch with CW.0)"
+   },
+   {
+    "n": 3,
+    "label": "Enc +",
+    "kind": "+24V",
+    "desc_en": "Encoder supply + (24 V from power contact; 5 V on KL2541-0006)"
+   },
+   {
+    "n": 4,
+    "label": "Input 1",
+    "kind": "in",
+    "desc_en": "Digital input 24 V"
+   },
+   {
+    "n": 5,
+    "label": "B",
+    "kind": "enc",
+    "desc_en": "Encoder input B"
+   },
+   {
+    "n": 6,
+    "label": "Latch/Gate",
+    "kind": "in",
+    "desc_en": "Latch input or counter gate (feature bits)"
+   },
+   {
+    "n": 7,
+    "label": "Enc 0 V",
+    "kind": "0V",
+    "desc_en": "Encoder supply 0 V from − power contact"
+   },
+   {
+    "n": 8,
+    "label": "Input 2",
+    "kind": "in",
+    "desc_en": "Digital input 24 V"
+   },
+   {
+    "n": "1'",
+    "label": "A1",
+    "kind": "motor",
+    "desc_en": "Motor winding A"
+   },
+   {
+    "n": "2'",
+    "label": "B1",
+    "kind": "motor",
+    "desc_en": "Motor winding B"
+   },
+   {
+    "n": "3'",
+    "label": "Sense A",
+    "kind": "none",
+    "desc_en": "Sense winding A"
+   },
+   {
+    "n": "4'",
+    "label": "Motor supply +",
+    "kind": "+24V",
+    "desc_en": "Output-stage supply, max ~48–50 V DC"
+   },
+   {
+    "n": "5'",
+    "label": "A2",
+    "kind": "motor",
+    "desc_en": "Motor winding A"
+   },
+   {
+    "n": "6'",
+    "label": "B2",
+    "kind": "motor",
+    "desc_en": "Motor winding B"
+   },
+   {
+    "n": "7'",
+    "label": "Sense B",
+    "kind": "none",
+    "desc_en": "Sense winding B"
+   },
+   {
+    "n": "8'",
+    "label": "Motor supply 0 V",
+    "kind": "0V",
+    "desc_en": "Output-stage supply 0 V"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Run",
+    "color": "green",
+    "desc_en": "K-bus data exchange"
+   },
+   {
+    "name": "Power",
+    "color": "green",
+    "desc_en": "48 V motor supply present, control enabled"
+   },
+   {
+    "name": "Enable",
+    "color": "green",
+    "desc_en": "Motor control enabled"
+   },
+   {
+    "name": "Turn CW",
+    "color": "green",
+    "desc_en": "Clockwise"
+   },
+   {
+    "name": "Turn CCW",
+    "color": "green",
+    "desc_en": "Counter-clockwise"
+   },
+   {
+    "name": "Stall detect",
+    "color": "yellow",
+    "desc_en": "On: disabled; 1 Hz: load angle above threshold"
+   },
+   {
+    "name": "Error A",
+    "color": "red",
+    "desc_en": "Configuration error"
+   },
+   {
+    "name": "Error B",
+    "color": "red",
+    "desc_en": "Supply/open load/overcurrent"
+   },
+   {
+    "name": "Input 1",
+    "color": "green",
+    "desc_en": "Signal at input 1"
+   },
+   {
+    "name": "Input 2",
+    "color": "green",
+    "desc_en": "Signal at input 2"
+   }
+  ],
+  "power_contacts_en": "24 V power contacts feed encoder and inputs; motor stage fed separately on 4'/8'",
+  "matches_el": "EL7041 (left block identical except EL7041 labels; right block differs: EL7041 3'/4' Up, 7'/8' 0 V)",
+  "source": "https://infosys.beckhoff.com/content/1033/kl2531_kl2541/3426235915.html ; https://infosys.beckhoff.com/content/1033/kl2531_kl2541/3426224779.html",
+  "confidence": "high"
+ },
+ {
+  "id": "KL9100",
+  "desc_en": "Potential supply (power feed) terminal 24 V DC, starts a new potential group",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "—",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Infeed +24 V; bridged to 6 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Infeed 0 V; bridged to 7 and − power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "—",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Infeed +24 V; bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Infeed 0 V; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Power",
+    "color": "green",
+    "desc_en": "24 V present at infeed"
+   }
+  ],
+  "power_contacts_en": "Breaks the power contacts from the left and feeds new +24 V/0 V/PE to the right; max 10 A; no process image",
+  "matches_el": "EL9100",
+  "source": "https://www.beckhoff.com/KL9100 ; https://infosys.beckhoff.com/content/1033/el9xxx/1246711051.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL9110",
+  "desc_en": "Potential supply terminal 24 V DC with diagnostics (2 status bits to coupler)",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "—",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Infeed +24 V; bridged to 6 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Infeed 0 V; bridged to 7 and − power contact"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "—",
+    "kind": "none",
+    "desc_en": "Not used"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Infeed +24 V; bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Infeed 0 V; bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Power",
+    "color": "green",
+    "desc_en": "24 V present at infeed"
+   }
+  ],
+  "power_contacts_en": "New potential group to the right, max 10 A, integrated fuse; voltage status reported in process image",
+  "matches_el": "EL9110",
+  "source": "https://www.beckhoff.com/KL9110 ; https://infosys.beckhoff.com/content/1033/el9xxx/1246711051.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL9186",
+  "desc_en": "Potential distribution terminal 8 x 24 V DC",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 3,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 4,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 5,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 7,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 8,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   }
+  ],
+  "leds": [],
+  "power_contacts_en": "Points connected to the +24 V power contact; all power contacts passed through",
+  "matches_el": "EL9186",
+  "source": "https://www.beckhoff.com/KL9186",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL9187",
+  "desc_en": "Potential distribution terminal 8 x 0 V DC",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 2,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 4,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 5,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 6,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 8,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   }
+  ],
+  "leds": [],
+  "power_contacts_en": "Points connected to the 0 V power contact; all power contacts passed through",
+  "matches_el": "EL9187",
+  "source": "https://www.beckhoff.com/en-gb/products/i-o/bus-terminals/kl9xxx-system/kl9187.html",
+  "confidence": "low"
+ },
+ {
+  "id": "KL9188",
+  "desc_en": "Potential distribution terminal 16 x 24 V DC (HD housing)",
+  "width_mm": 12,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 3,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 4,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 5,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 7,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 8,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 9,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 10,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 11,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 12,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 13,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 14,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 15,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   },
+   {
+    "n": 16,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V from power contact (all points same potential)"
+   }
+  ],
+  "leds": [],
+  "power_contacts_en": "Points connected to the +24 V power contact; all power contacts passed through",
+  "matches_el": "EL9188",
+  "source": "https://www.beckhoff.com/en-us/products/i-o/bus-terminals/kl9xxx-system/kl9188.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL9189",
+  "desc_en": "Potential distribution terminal 16 x 0 V DC (HD housing)",
+  "width_mm": 12,
+  "points": 16,
+  "pins": [
+   {
+    "n": 1,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 2,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 4,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 5,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 6,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 8,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 9,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 10,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 11,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 12,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 13,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 14,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 15,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   },
+   {
+    "n": 16,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "0 V from power contact (all points same potential)"
+   }
+  ],
+  "leds": [],
+  "power_contacts_en": "Points connected to the 0 V power contact; all power contacts passed through",
+  "matches_el": "EL9189",
+  "source": "https://www.beckhoff.com/en-gb/products/i-o/bus-terminals/kl9xxx-system/kl9189.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "KL9400",
+  "desc_en": "K-bus power supply (refresh) terminal: adds 2 A to K-bus and starts a new power-contact group",
+  "width_mm": 12,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us +24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply for K-bus refresh"
+   },
+   {
+    "n": 2,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "Infeed +24 V power contacts; bridged to 6"
+   },
+   {
+    "n": 3,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "Infeed 0 V power contacts; bridged to 7"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "Infeed PE; bridged to 8"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply for K-bus refresh"
+   },
+   {
+    "n": 6,
+    "label": "+24 V",
+    "kind": "+24V",
+    "desc_en": "bridged to 2"
+   },
+   {
+    "n": 7,
+    "label": "0 V",
+    "kind": "0V",
+    "desc_en": "bridged to 3"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "K-bus supply present (presumed)"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "Power-contact supply present (presumed)"
+   }
+  ],
+  "power_contacts_en": "Feeds new 24 V/0 V/PE power contacts, max 24 V, 10 A",
+  "matches_el": "EL9410",
+  "source": "https://www.beckhoff.com/KL9400",
+  "confidence": "low"
+ },
+ {
+  "id": "KL9010",
+  "desc_en": "K-bus end terminal; required at the right end of every station",
+  "width_mm": 12,
+  "points": 0,
+  "pins": [],
+  "leds": [],
+  "power_contacts_en": "None; no connections",
+  "matches_el": "EL9011",
+  "source": "https://www.beckhoff.com/KL9010",
+  "confidence": "high"
+ },
+ {
+  "id": "BK9000",
+  "desc_en": "Ethernet TCP/IP Bus Coupler (1x RJ45, ADS / Modbus TCP)",
+  "width_mm": 51,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "LINK",
+    "color": "green",
+    "desc_en": "Physical Ethernet link"
+   },
+   {
+    "name": "ACT",
+    "color": "green",
+    "desc_en": "Bus traffic"
+   },
+   {
+    "name": "ERROR",
+    "color": "red",
+    "desc_en": "Flashes slowly: DHCP/BootP active without IP; on: DIP settings invalid"
+   },
+   {
+    "name": "WDG",
+    "color": "green",
+    "desc_en": "Watchdog state"
+   },
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "K-bus running without error"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus/terminal error; blink code = error type and terminal position"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://infosys.beckhoff.com/content/1033/bk9000/2802239371.html ; https://www.beckhoff.com/en-ae/products/i-o/bus-terminals/bkxxxx-bus-coupler/bk9000.html",
+  "confidence": "medium"
+ },
+ {
+  "id": "BK9050",
+  "desc_en": "Ethernet TCP/IP Compact Bus Coupler (1x RJ45)",
+  "width_mm": 44,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Link/Act",
+    "color": "green",
+    "desc_en": "Link / traffic"
+   },
+   {
+    "name": "ERROR",
+    "color": "red",
+    "desc_en": "Network/config error"
+   },
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "K-bus running without error"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus/terminal error; blink code = error type and terminal position"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://www.beckhoff.com/BK9050 ; https://infosys.beckhoff.com/content/1033/bk9000/2802168203.html",
+  "confidence": "low"
+ },
+ {
+  "id": "BK9100",
+  "desc_en": "Ethernet TCP/IP Bus Coupler with 2-port switch (2x RJ45)",
+  "width_mm": 51,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "Link/Act X1",
+    "color": "green",
+    "desc_en": "Port 1 link/traffic"
+   },
+   {
+    "name": "Link/Act X2",
+    "color": "green",
+    "desc_en": "Port 2 link/traffic"
+   },
+   {
+    "name": "COM",
+    "color": "green",
+    "desc_en": "Data received from controller"
+   },
+   {
+    "name": "ERROR",
+    "color": "red",
+    "desc_en": "Network/config error"
+   },
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "K-bus running without error"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus/terminal error; blink code = error type and terminal position"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://infosys.beckhoff.com/content/1033/bk9000/2802169227.html",
+  "confidence": "low"
+ },
+ {
+  "id": "BK3150",
+  "desc_en": "PROFIBUS DP Compact Bus Coupler (D-sub 9, up to 12 Mbaud)",
+  "width_mm": 44,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "PROFIBUS data exchange"
+   },
+   {
+    "name": "BF",
+    "color": "red",
+    "desc_en": "Bus fault / no bus activity"
+   },
+   {
+    "name": "DIA",
+    "color": "red",
+    "desc_en": "Parameter/config error (blinks)"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus error blink code"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://infosys.beckhoff.com/content/1033/bk3xx0/3028177803.html ; https://infosys.beckhoff.com/content/1033/bk3xx0/6523891595.html",
+  "confidence": "low"
+ },
+ {
+  "id": "BC9000",
+  "desc_en": "Ethernet TCP/IP Bus Terminal Controller (coupler with PLC, TwinCAT 2)",
+  "width_mm": 51,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "LINK",
+    "color": "green",
+    "desc_en": "Physical Ethernet link"
+   },
+   {
+    "name": "ACT",
+    "color": "green",
+    "desc_en": "Bus traffic"
+   },
+   {
+    "name": "ERROR",
+    "color": "red",
+    "desc_en": "Flashes slowly: DHCP/BootP active without IP; on: DIP settings invalid"
+   },
+   {
+    "name": "PLC / WD",
+    "color": "?",
+    "desc_en": "PLC state / watchdog (exact naming unconfirmed)"
+   },
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "K-bus running without error"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus/terminal error; blink code = error type and terminal position"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://infosys.beckhoff.com/content/1033/bc9000/11762956555.html ; https://www.beckhoff.com/bc9000",
+  "confidence": "low"
+ },
+ {
+  "id": "BK1120",
+  "desc_en": "EtherCAT Bus Coupler for K-bus (KLxxxx) terminals, 2x RJ45",
+  "width_mm": 51,
+  "points": 8,
+  "pins": [
+   {
+    "n": 1,
+    "label": "Us 24 V",
+    "kind": "+24V",
+    "desc_en": "+24 V supply of coupler electronics and K-bus (Us)"
+   },
+   {
+    "n": 2,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 3 and + power contact"
+   },
+   {
+    "n": 3,
+    "label": "Up +",
+    "kind": "+24V",
+    "desc_en": "+24 V feed for power contacts (Up); bridged to 2"
+   },
+   {
+    "n": 4,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 8 and PE power contact"
+   },
+   {
+    "n": 5,
+    "label": "Us 0 V",
+    "kind": "0V",
+    "desc_en": "0 V supply of coupler electronics (Us)"
+   },
+   {
+    "n": 6,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 7 and − power contact"
+   },
+   {
+    "n": 7,
+    "label": "Up −",
+    "kind": "0V",
+    "desc_en": "0 V feed for power contacts (Up); bridged to 6"
+   },
+   {
+    "n": 8,
+    "label": "PE",
+    "kind": "PE",
+    "desc_en": "PE; bridged to 4"
+   }
+  ],
+  "leds": [
+   {
+    "name": "RUN",
+    "color": "green",
+    "desc_en": "EtherCAT state machine"
+   },
+   {
+    "name": "ERROR",
+    "color": "red",
+    "desc_en": "EtherCAT error"
+   },
+   {
+    "name": "L/A IN",
+    "color": "green",
+    "desc_en": "Link/activity input port"
+   },
+   {
+    "name": "L/A OUT",
+    "color": "green",
+    "desc_en": "Link/activity output port"
+   },
+   {
+    "name": "I/O RUN",
+    "color": "green",
+    "desc_en": "K-bus running without error"
+   },
+   {
+    "name": "I/O ERR",
+    "color": "red",
+    "desc_en": "K-bus/terminal error; blink code = error type and terminal position"
+   },
+   {
+    "name": "Us",
+    "color": "green",
+    "desc_en": "24 V supply of coupler electronics present"
+   },
+   {
+    "name": "Up",
+    "color": "green",
+    "desc_en": "24 V supply of power contacts present"
+   }
+  ],
+  "power_contacts_en": "Lower six points feed the + / − / PE power contacts (max 24 V DC, 10 A); Up is electrically isolated from Us. Power contacts are passed to the first terminal on the right.",
+  "matches_el": "EK1100",
+  "source": "https://infosys.beckhoff.com/content/1033/bk11x0_bk1250/2204096267.html ; https://infosys.beckhoff.com/content/1033/bk11x0_bk1250/2180714763.html",
+  "confidence": "high"
+ }
+]

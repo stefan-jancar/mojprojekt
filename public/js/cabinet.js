@@ -12,30 +12,40 @@ const $ = (s, r = document) => r.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = (s) => C.esc(s);
 const card = (id) => CAT.find((c) => c.id === id);
+// K-bus (KL karty so spojkou BK) alebo EtherCAT (EL karty so spojkou EK)
+const isK = (id) => /^(KL|BK|BC)/.test(id);
+const busOf = (cb) => (isK(cb.cards[0]?.type || '') ? 'KL' : 'EL');
+// náhrada karty pre zbernicu skrine (EL1002 → KL1002 a naopak)
+function equiv(id, bus) {
+  if (isK(id) === (bus === 'KL')) return id;
+  const c = card(id);
+  const alt = bus === 'KL' ? (c?.kl || []).find((k) => card(k)) : (c?.el || []).find((k) => card(k));
+  return alt || id;
+}
 
 /* ---------- pravidlá zapojenia ---------- */
 const isNeg = (c) => /negat/i.test(c.name);
-const sysBlocked = (c) => c.family === 'system' && !['EL9186', 'EL9187'].includes(c.id);
+const sysBlocked = (c) => c.family === 'system' && !['EL9186', 'EL9187', 'KL9186', 'KL9187'].includes(c.id);
 const ROLES = {
   'di+': { name: 'vstup digitálnej karty (PNP, pozitívne spínanie)', ok: (c, p) => p.kind === 'in' && c.family === 'di' && !isNeg(c) && /^Input \d+$/i.test(p.label) },
   'di-': { name: 'vstup karty s negatívnym spínaním (napr. EL1088)', ok: (c, p) => p.kind === 'in' && c.family === 'di' && isNeg(c) && /^Input \d+$/i.test(p.label) },
   24: { name: '+24 V', ok: (c, p) => p.kind === '+24V' && !sysBlocked(c) && !/Us|E-bus/.test(p.label) },
   0: { name: '0 V', ok: (c, p) => p.kind === '0V' && /^0 ?V$/i.test(p.label.trim()) && !sysBlocked(c) },
   gnd: { name: '0 V / GND analógovej karty', ok: (c, p) => p.kind === '0V' && !sysBlocked(c) && !/motor|Us|E-bus/.test(p.label) },
-  ai_v: { name: 'napäťový vstup analógovej karty (0…10 V)', ok: (c, p) => p.kind === 'ain' && /10 ?V/.test(c.name) && !/diferenc/i.test(c.name) && /^Input \d+$/.test(p.label) },
-  ai_i: { name: 'prúdový vstup analógovej karty (4…20 mA)', ok: (c, p) => p.kind === 'ain' && /mA/.test(c.name) && !/diferenc/i.test(c.name) && /^Input \d+$/.test(p.label) },
+  ai_v: { name: 'napäťový vstup analógovej karty (0…10 V)', ok: (c, p) => p.kind === 'ain' && /10 ?V/.test(c.name) && !/diferenc/i.test(c.name) && /^\+?Input \d+$/.test(p.label) },
+  ai_i: { name: 'prúdový vstup analógovej karty (4…20 mA)', ok: (c, p) => p.kind === 'ain' && /mA/.test(c.name) && !/diferenc/i.test(c.name) && /^\+?Input \d+$/.test(p.label) },
   'r+': { name: '+R svorka PT100 karty', ok: (c, p) => /^\+R\d+$/.test(p.label), ch: true },
   rl: { name: '+RL svorka PT100 karty (3-vodičové zapojenie)', ok: (c, p) => /^\+RL\d+$/.test(p.label), ch: true },
   'r-': { name: '−R svorka PT100 karty', ok: (c, p) => /^[−-]R\d+$/.test(p.label), ch: true },
   'tc+': { name: '+TC svorka karty pre termočlánky', ok: (c, p) => /^\+TC\d+$/.test(p.label), ch: true },
   'tc-': { name: '−TC svorka karty pre termočlánky', ok: (c, p) => /^[−-]TC\d+$/.test(p.label), ch: true },
-  encA: { name: 'svorka A karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'A' && c.id === 'EL5101' },
-  encAn: { name: 'svorka /A karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/A' && c.id === 'EL5101' },
-  encB: { name: 'svorka B karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'B' && c.id === 'EL5101' },
-  encBn: { name: 'svorka /B karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/B' && c.id === 'EL5101' },
+  encA: { name: 'svorka A karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'A' && ['EL5101', 'KL5101'].includes(c.id) },
+  encAn: { name: 'svorka /A karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/A' && ['EL5101', 'KL5101'].includes(c.id) },
+  encB: { name: 'svorka B karty pre enkodér (EL5101)', ok: (c, p) => p.label === 'B' && ['EL5101', 'KL5101'].includes(c.id) },
+  encBn: { name: 'svorka /B karty pre enkodér (EL5101)', ok: (c, p) => p.label === '/B' && ['EL5101', 'KL5101'].includes(c.id) },
   enc5: { name: 'napájanie snímača +5 V (Ue) na EL5101', ok: (c, p) => /^Ue/.test(p.label) },
   enc0: { name: '0 V napájania snímača (Uo) na EL5101', ok: (c, p) => /^Uo/.test(p.label) },
-  'do+': { name: 'výstup digitálnej karty (Output)', ok: (c, p) => p.kind === 'out' && (c.family === 'do' || c.id === 'EL1859') && !isNeg(c) && /^Output \d+$/.test(p.label) },
+  'do+': { name: 'výstup digitálnej karty (Output)', ok: (c, p) => p.kind === 'out' && (c.family === 'do' || ['EL1859', 'KL1859'].includes(c.id)) && !isNeg(c) && /^Output \d+$/.test(p.label) },
 };
 const SUPPLY = new Set(['24', '0', 'gnd', 'enc5', 'enc0']);
 const chOf = (p) => { const m = String(p.label).match(/(\d+)\s*$/); return m ? Number(m[1]) : null; };
@@ -144,16 +154,19 @@ function list() {
       <a class="cbn-item glass" href="#/elektro/rozvadzac/${encodeURIComponent(cb.id)}">
         <div class="sec-ic" style="--c:#14b8a6">${icon('briefcase')}</div>
         <div><b>${esc(cb.name)}</b><span>${C.plural(cb.cards.length, 'karta', 'karty', 'kariet')} · ${C.plural(cb.sensors.length, 'snímač', 'snímače', 'snímačov')}</span></div>${icon('chevron')}</a>`).join('')}
-      <button class="btn block" id="cbn-new">${icon('plus')}Nová skriňa</button>
+      <button class="btn block" id="cbn-new">${icon('plus')}Nová skriňa – EL (EtherCAT)</button>
+      <button class="btn ghost block" id="cbn-new-kl">${icon('plus')}Nová skriňa – KL (K-bus)</button>
       ${CABS.length ? '' : '<button class="btn ghost block" id="cbn-demo">Vyskúšať ukážkový rozvádzač</button>'}
     </div>`;
-  $('#cbn-new').onclick = () => {
+  const create = (head) => {
     const name = prompt('Názov rozvádzača', `Rozvádzač ${CABS.length + 1}`);
     if (name == null) return;
-    const cb = { id: uid(), name: name.trim() || 'Rozvádzač', cards: [{ uid: uid(), type: 'EK1100' }], sensors: [] };
+    const cb = { id: uid(), name: name.trim() || 'Rozvádzač', cards: [{ uid: uid(), type: head }], sensors: [] };
     CABS.push(cb); save();
     location.hash = '#/elektro/rozvadzac/' + cb.id;
   };
+  $('#cbn-new').onclick = () => create('EK1100');
+  $('#cbn-new-kl').onclick = () => create('BK9100');
   $('#cbn-demo')?.addEventListener('click', () => {
     const cb = { id: uid(), name: 'Ukážka – dopravník', cards: ['EK1100', 'EL1002', 'EL1004', 'EL2002', 'EL3202'].map((t) => ({ uid: uid(), type: t })),
       sensors: [{ uid: uid(), type: 'ind_pnp', name: 'B1', wires: {} }, { uid: uid(), type: 'limit', name: 'S1', wires: {} }, { uid: uid(), type: 'pt100_3', name: 'B2', wires: {} }, { uid: uid(), type: 'coil', name: 'K1', wires: {} }] };
@@ -641,7 +654,8 @@ function editor(cb) {
   };
 
   function offerCards(s) {
-    const def = SENSORS[s.type];
+    const def0 = SENSORS[s.type];
+    const def = { ...def0, suggest: def0.suggest.map((id) => equiv(id, busOf(cb))).filter((id) => card(id)) };
     sheet(`<h2>Chýba vhodná karta</h2>
       <p class="tl-muted">Pre <b>${esc(def.name)}</b> v rozvádzači nie je voľná vhodná karta. Odporúčam pridať:</p>
       <div class="cbs-list">${def.suggest.map((id) => `<div class="cbs-item"><b>${id}</b><span>${esc(card(id).name)}</span></div>`).join('')}</div>
@@ -667,11 +681,12 @@ function editor(cb) {
 
   $('#cb-add-card').onclick = () => {
     const fams = [['di', 'Digitálne vstupy'], ['do', 'Digitálne výstupy'], ['ai', 'Analógové vstupy'], ['ao', 'Analógové výstupy'], ['system', 'Napájanie a potenciál'], ['special', 'Špeciálne']];
-    sheet(`<h2>Pridať kartu</h2><div class="search glass bk-search">${icon('search')}<input id="cbs-q" placeholder="EL1008, PT100, 4…20 mA…" autocomplete="off"></div><div id="cbs-cards"></div>`, (el) => {
+    const kbus = busOf(cb) === 'KL';
+    sheet(`<h2>Pridať kartu ${kbus ? 'KL (K-bus)' : 'EL (EtherCAT)'}</h2><div class="search glass bk-search">${icon('search')}<input id="cbs-q" placeholder="${kbus ? 'KL1408' : 'EL1008'}, PT100, 4…20 mA…" autocomplete="off"></div><div id="cbs-cards"></div>`, (el) => {
       const paint = () => {
         const q = $('#cbs-q', el).value.trim().toLowerCase();
         $('#cbs-cards', el).innerHTML = fams.map(([f, n]) => {
-          const arr = CAT.filter((c) => c.family === f && c.pins.length && !/^(EK|BK)/.test(c.id) && (!q || (c.id + ' ' + c.name + ' ' + (c.kl || []).join(' ')).toLowerCase().includes(q)));
+          const arr = CAT.filter((c) => c.family === f && c.pins.length && !/^(EK|BK|BC)/.test(c.id) && isK(c.id) === kbus && (!q || (c.id + ' ' + c.name + ' ' + [...(c.kl || []), ...(c.el || [])].join(' ')).toLowerCase().includes(q)));
           return arr.length ? `<div class="section-title">${n}</div><div class="cbs-list">${arr.map((c) => `<button class="cbs-item" data-id="${c.id}"><b>${c.id}</b><span>${esc(c.name)}</span></button>`).join('')}</div>` : '';
         }).join('') || '<p class="tl-muted">Nič sa nenašlo.</p>';
         el.querySelectorAll('[data-id]').forEach((b) => { b.onclick = () => { cb.cards.push({ uid: uid(), type: b.dataset.id }); save(); closeSheet(); sel = { card: cb.cards[cb.cards.length - 1].uid }; render(); C.toast(`${b.dataset.id} pridaná`); }; });
