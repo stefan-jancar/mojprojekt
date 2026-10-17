@@ -147,7 +147,8 @@ let latest = store.get('el:latest', null);
 async function checkUpdate() {
   if (!/^\d+$/.test(VERSION) || !navigator.onLine) return;
   const last = store.get('el:checked', 0);
-  if (Date.now() - last < 6 * 3600 * 1000 && latest) return showUpdate();
+  // keď už vieme o novšej verzii, netreba sa pýtať znova; inak kontrola najviac raz za 20 minút
+  if (latest?.n > Number(VERSION) || (Date.now() - last < 20 * 60 * 1000 && latest)) return showUpdate();
   try {
     const r = await fetch('https://api.github.com/repos/stefan-jancar/mojprojekt/releases?per_page=30', { headers: { Accept: 'application/vnd.github+json' } });
     if (!r.ok) return;
@@ -166,8 +167,8 @@ function showUpdate() {
 }
 
 function renderNav(sub) {
-  const links = [['#/elektro', 'bolt', 'Elektro', ''], ['#/elektro/rozvadzac', 'briefcase', 'Rozvádzač', 'rozvadzac'], ['#/elektro/beckhoff', 'chip', 'Svorky', 'beckhoff']];
-  $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${sub === v || (v === '' && !['rozvadzac', 'beckhoff'].includes(sub)) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')
+  const links = [['#/elektro', 'bolt', 'Elektro', ''], ['#/elektro/rozvadzac', 'briefcase', 'Rozvádzač', 'rozvadzac'], ['#/elektro/lis', 'cube', 'Lis', 'lis'], ['#/elektro/beckhoff', 'chip', 'Svorky', 'beckhoff']];
+  $nav.innerHTML = links.map(([href, ic, label, v]) => `<a href="${href}" class="${sub === v || (v === '' && !['rozvadzac', 'lis', 'beckhoff'].includes(sub)) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')
     + `<a href="#" id="theme-t" aria-label="Téma">${icon(document.documentElement.dataset.theme === 'light' ? 'moon' : 'sun')}</a>`;
   document.getElementById('theme-t').onclick = (e) => {
     e.preventDefault();
