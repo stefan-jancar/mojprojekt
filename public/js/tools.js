@@ -10,6 +10,7 @@ export const TOOLS = [
   { id: 'rezistor', name: 'Farebný kód rezistorov', sub: '4, 5 aj 6 prúžkov · aj naopak z hodnoty', icon: 'chip', color: '#10b981' },
   { id: 'prierez', name: 'Prierez vodiča', sub: 'Podľa prúdu, uloženia, ističa a úbytku napätia', icon: 'wrench', color: '#22d3ee' },
   { id: 'slucka', name: 'Impedancia slučky', sub: 'Zs max pre istič/poistku · kontrola merania · max. dĺžka', icon: 'link', color: '#f43f5e' },
+  { id: 'lis', name: 'Vulkanizačný lis', sub: 'Zapoj snímače a ventily lisu, spusti cyklus a sleduj, čo ktorý snímač robí', icon: 'cube', color: '#f97316' },
   { id: 'rozvadzac', name: 'Rozvádzač – zapojenie', sub: 'Postav skriňu z kariet, pripoj snímače ťahaním vodičov a simuluj', icon: 'briefcase', color: '#14b8a6' },
   { id: 'beckhoff', name: 'Beckhoff svorky', sub: 'EL a KL karty – ťukni na bod a uvidíš, čo znamená', icon: 'chip', color: '#e5484d' },
   { id: 'delic', name: 'Delič napätia', sub: 'Uout z R1, R2 · návrh rezistorov z radu E24', icon: 'code', color: '#3b82f6' },

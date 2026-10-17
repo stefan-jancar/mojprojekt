@@ -11,6 +11,7 @@ on:
       - 'public/js/tools.js'
       - 'public/js/beckhoff.js'
       - 'public/js/cabinet.js'
+      - 'public/js/press.js'
       - 'public/js/icons.js'
       - 'public/css/**'
       - 'public/data/**'

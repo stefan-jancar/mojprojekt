@@ -1033,3 +1033,77 @@ a.cbs-item { text-decoration: none; }
 .pcb-size input { width: 64px; text-align: center; padding: 8px 4px; }
 .circ-open { margin-bottom: 14px; }
 .pcb-sel .muted { white-space: normal; }
+
+/* ---------- Elektro – vulkanizačný lis ---------- */
+.cb-machine { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+.cb-machine b { display: block; }
+.cb-machine span { color: var(--muted); font-size: 13px; }
+.cb-machine-btns { display: flex; gap: 8px; }
+.cb-machine-btns .btn { height: 40px; }
+.ps-wire { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 16px; margin-bottom: 10px; }
+.ps-wire b { display: block; font-size: 14.5px; }
+.ps-wire span { color: var(--muted); font-size: 12.5px; }
+.ps-wire .btn { flex: none; height: 40px; }
+.ps-modes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.ps-modes #ps-zoom { margin-left: auto; }
+.ps-stage { border-radius: 18px; padding: 6px; overflow: hidden; background: linear-gradient(#1d2430, #121720); }
+.ps-stage svg { display: block; width: 100%; height: auto; }
+.ps-floor { fill: #2a2f38; }
+.ps-frame { fill: #3c4654; opacity: .75; }
+.ps-steel { fill: #5b6675; }
+.ps-cyl { fill: #9aa6b4; }
+.ps-platen { fill: #6f7c8c; stroke: #2b323c; }
+.ps-mold { fill: #b7c0ca; stroke: #6b7684; }
+.ps-membrane { fill: #2f80ed; opacity: .85; stroke: #9cc3ff; }
+.ps-lock { fill: #f5c518; stroke: #8a6d00; }
+.ps-heat { animation: psheat 1.4s ease-in-out infinite alternate; }
+@keyframes psheat { from { opacity: .45; } to { opacity: 1; } }
+.ps-carriage { fill: #7b8796; stroke: #2b323c; }
+.ps-arm { fill: #a3aebb; }
+.ps-chuck { fill: #e07b39; }
+.ps-finger { stroke: #e07b39; stroke-width: 4; stroke-linecap: round; fill: none; }
+.ps-rail { stroke: #4b5563; stroke-width: 3; }
+.ps-flag { fill: #d6dde5; }
+.ps-belt { fill: #2b2f36; stroke: #4b5563; }
+.ps-belt.run { stroke: #22c55e; stroke-dasharray: 8 6; animation: psbelt .6s linear infinite; }
+@keyframes psbelt { to { stroke-dashoffset: -14; } }
+.ps-roller { fill: #6b7280; }
+.ps-beam { stroke: #ef4444; stroke-width: 2; stroke-dasharray: 4 3; opacity: .9; }
+.ps-beam.cut { stroke: #ffd23f; }
+.ps-lever { stroke: #d6dde5; stroke-width: 3; stroke-linecap: round; }
+.ps-title { fill: #d6dde5; font: 800 13px var(--font); text-anchor: middle; letter-spacing: .2em; }
+.ps-cure { fill: #ffb366; font: 700 11px var(--font); text-anchor: middle; }
+.ps-sn { cursor: pointer; }
+.ps-sn-body { fill: #1f2937; stroke: #9ca3af; stroke-width: 1.2; }
+.ps-sn-body.bad { stroke: #ef4444; }
+.ps-sn.sel .ps-sn-body { stroke: #22d3ee; stroke-width: 2.5; }
+.ps-lbl { fill: #e5e7eb; font: 700 10px var(--font); }
+.ps-lbl.bad { fill: #f87171; }
+.ps-fault { fill: rgba(127, 29, 29, .92); stroke: #ef4444; stroke-width: 2; }
+.ps-fault-t { fill: #fff; font: 800 14px var(--font); text-anchor: middle; }
+.ps-fault-s { fill: #fecaca; font: 500 11px var(--font); text-anchor: middle; }
+.ps-status { border-radius: 16px; padding: 12px 14px; margin: 10px 0; font-size: 14px; line-height: 1.5; }
+.ps-status.bad { border-color: color-mix(in srgb, var(--danger) 60%, transparent); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+.ps-status.ok { border-color: color-mix(in srgb, var(--success) 60%, transparent); }
+.ps-status em { color: var(--danger); font-style: normal; }
+.ps-warn { color: var(--warning); }
+.ps-count { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+.ps-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.ps-btns .btn { flex: 1 1 140px; height: 44px; }
+.ps-manual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.ps-manual .btn { height: auto; min-height: 42px; padding: 8px 10px; font-size: 13px; line-height: 1.25; }
+.ps-io { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+.ps-row { display: grid; grid-template-columns: 40px 1fr 38px 38px; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13.5px; cursor: pointer; }
+.ps-row:last-child { border-bottom: 0; }
+.ps-row.head { cursor: default; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; padding: 6px 12px; }
+.ps-row.head i { font-style: normal; text-align: center; }
+.ps-row small { display: block; color: var(--muted); font-size: 11.5px; }
+.ps-row.bad small { color: var(--danger); }
+.ps-row.sel { background: var(--surface-2); }
+.ps-dot { width: 14px; height: 14px; border-radius: 50%; background: #3b3f46; justify-self: center; }
+.ps-dot.phys { background: #ffd23f; box-shadow: 0 0 8px #ffd23f; }
+.ps-dot.plc { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.ps-dot.out { background: #2f80ed; box-shadow: 0 0 8px #2f80ed; }
+.ps-stage.zoom { overflow-x: auto; }
+.ps-stage.zoom svg { width: 820px; max-width: none; }
+.ps-ctrl { margin-bottom: 18px; }
