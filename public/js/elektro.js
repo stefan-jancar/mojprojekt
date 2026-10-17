@@ -4,6 +4,7 @@
 import { TOOLS, renderTool } from './tools.js';
 import { renderBeckhoff } from './beckhoff.js';
 import { renderCabinet } from './cabinet.js';
+import { renderPress } from './press.js';
 
 let C; // kontext z app.js: { $app, $nav, api, icon, esc, toast, store, plural }
 const S = { catalog: null, quiz: {}, cards: {}, stats: null };
@@ -15,6 +16,7 @@ export function renderElektro(ctx, sub, arg) {
   C = ctx;
   if (sub === 'beckhoff') return renderBeckhoff(ctx, arg);
   if (sub === 'rozvadzac') return renderCabinet(ctx, arg);
+  if (sub === 'lis') return renderPress(ctx, arg);
   if (sub === 'karticky') return renderCards();
   if (TOOLS.some((t) => t.id === sub)) return renderTool(ctx, sub);
   return renderHub();

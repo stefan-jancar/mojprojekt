@@ -134,6 +134,71 @@ function save() {
   }, 900);
 }
 
+/* ---------- vulkanizačný lis: predpripravená skriňa ---------- */
+// sig = signál stroja, ktorý snímač/ventil v simulácii lisu predstavuje
+export const PRESS_IO = [
+  ['B1', 'ind_pnp', 'zl_dole', 'Zakladač dole'], ['B2', 'ind_pnp', 'zl_hore', 'Zakladač hore'],
+  ['B3', 'ind_pnp', 'zl_von', 'Zakladač vonku'], ['B4', 'ind_pnp', 'zl_dnu', 'Zakladač v lise'],
+  ['B5', 'opt_slot', 'zl_kl_roz', 'Klieština zakl. roztvorená'], ['B6', 'opt_slot', 'zl_kl_zat', 'Klieština zakl. zatvorená'],
+  ['B7', 'ind_pnp', 'vl_dole', 'Vykladač dole'], ['B8', 'ind_pnp', 'vl_hore', 'Vykladač hore'],
+  ['B9', 'ind_pnp', 'vl_von', 'Vykladač vonku'], ['B10', 'ind_pnp', 'vl_dnu', 'Vykladač v lise'],
+  ['B11', 'opt_slot', 'vl_kl_roz', 'Klieština vykl. roztvorená'], ['B12', 'opt_slot', 'vl_kl_zat', 'Klieština vykl. zatvorená'],
+  ['S1', 'limit', 'lis_otv', 'Lis otvorený'], ['S2', 'limit', 'lis_zat', 'Lis zatvorený'],
+  ['B13', 'ind_pnp', 'zam_hore', 'Zámok hore (odomknutý)'], ['B14', 'ind_pnp', 'zam_dole', 'Zámok dole (zamknutý)'],
+  ['B15', 'ind_pnp', 'mem_dole', 'Membrána dole'], ['B16', 'ind_pnp', 'mem_bomb', 'Membrána bombírovanie'],
+  ['B17', 'ind_pnp', 'mem_hore', 'Membrána hore'], ['B18', 'refl', 'dopr', 'Plášť na dopravníku'],
+  ['Y1', 'valve', 'y_zl_hore', 'Zakladač hore'], ['Y2', 'valve', 'y_zl_dnu', 'Zakladač do lisu'], ['Y3', 'valve', 'y_zl_kl', 'Klieština zakl. roztvoriť'],
+  ['Y4', 'valve', 'y_vl_hore', 'Vykladač hore'], ['Y5', 'valve', 'y_vl_dnu', 'Vykladač do lisu'], ['Y6', 'valve', 'y_vl_kl', 'Klieština vykl. roztvoriť'],
+  ['Y7', 'valve', 'y_lis_zat', 'Lis zatvoriť'], ['Y8', 'valve', 'y_zam', 'Zámok zamknúť'],
+  ['Y9', 'valve', 'y_mem_bomb', 'Membrána bombírovanie'], ['Y10', 'valve', 'y_mem_hore', 'Membrána hore (tlak)'],
+  ['K1', 'coil', 'y_dopr', 'Dopravník'],
+];
+const PRESS_CARDS = ['EK1100', 'EL1008', 'EL9186', 'EL9187', 'EL1008', 'EL9186', 'EL9187', 'EL1008', 'EL9186', 'EL9187', 'EL2008', 'EL9187', 'EL2008', 'EL9187'];
+
+function createPress(name) {
+  const cb = { id: uid(), name, machine: 'lis', cards: PRESS_CARDS.map((t) => ({ uid: uid(), type: t })),
+    sensors: PRESS_IO.map(([n, type, sig, desc]) => ({ uid: uid(), type, name: n, sig, desc, wires: {} })) };
+  CABS.push(cb); save();
+  return cb;
+}
+
+// zapojí všetko, čo ešte nie je zapojené správne; vráti počet zapojených
+function wireAll(cb) {
+  let ev = evaluate(cb, layout(cb)), n = 0;
+  for (const s of cb.sensors) if (!ev[s.uid]?.ok) s.wires = {};
+  for (const s of cb.sensors) {
+    if (Object.keys(s.wires || {}).length) continue;
+    const map = suggest(cb, s);
+    if (map) { s.wires = map; n++; }
+  }
+  save();
+  return n;
+}
+
+// rozhranie pre simuláciu lisu (press.js)
+export async function pressKit(ctx) {
+  C = ctx;
+  await loadAll();
+  return {
+    list: () => CABS.filter((x) => x.machine === 'lis'),
+    get: (id) => CABS.find((x) => x.id === id),
+    create: createPress,
+    wireAll,
+    save,
+    state(cb) {
+      const L = layout(cb), ev = evaluate(cb, L);
+      const io = {};
+      for (const s of cb.sensors) {
+        if (!s.sig) continue;
+        const st = ev[s.uid], g = st?.card && L.cards.find((x) => x.uid === st.card);
+        io[s.sig] = { s, ok: !!st?.ok, short: !!st?.short, complete: !!st?.complete,
+          where: st?.ok && g ? `${g.c.id} (${L.cards.indexOf(g) + 1}.) kanál ${st.channel}` : '' };
+      }
+      return io;
+    },
+  };
+}
+
 export async function renderCabinet(ctx, id) {
   C = ctx;
   C.$app.innerHTML = '<div class="spinner"></div>';
@@ -156,6 +221,7 @@ function list() {
         <div><b>${esc(cb.name)}</b><span>${C.plural(cb.cards.length, 'karta', 'karty', 'kariet')} · ${C.plural(cb.sensors.length, 'snímač', 'snímače', 'snímačov')}</span></div>${icon('chevron')}</a>`).join('')}
       <button class="btn block" id="cbn-new">${icon('plus')}Nová skriňa – EL (EtherCAT)</button>
       <button class="btn ghost block" id="cbn-new-kl">${icon('plus')}Nová skriňa – KL (K-bus)</button>
+      <a class="btn ghost block" href="#/elektro/lis">⚙️ Vulkanizačný lis – skriňa so snímačmi a simuláciou</a>
       ${CABS.length ? '' : '<button class="btn ghost block" id="cbn-demo">Vyskúšať ukážkový rozvádzač</button>'}
     </div>`;
   const create = (head) => {
@@ -417,7 +483,7 @@ function draw(cb, L, ev, sel) {
       <rect x="${sg.x}" y="${sg.y}" width="${sg.sw}" height="128" rx="12" class="sn-bg"/>
       ${sensorIcon(s, sg.x + (sg.sw - 84) / 2, sg.y + 12, st, on)}
       <text x="${sg.x + sg.sw / 2}" y="${sg.y + 112}" class="sn-name">${esc(s.name)}</text>
-      <text x="${sg.x + sg.sw / 2}" y="${sg.y + 123}" class="sn-type">${esc(SENSORS[s.type].name)}</text></g>`);
+      <text x="${sg.x + sg.sw / 2}" y="${sg.y + 123}" class="sn-type">${esc(s.desc || SENSORS[s.type].name)}</text></g>`);
     sg.ws.forEach((w, i) => {
       const hx = sg.x + 15 + (sg.sw - 30) * ((i + 0.5) / sg.ws.length), hy = sg.y - 10;
       const wst = st?.wires[w.k];
@@ -458,6 +524,7 @@ function editor(cb) {
       <button class="btn ghost" id="cb-zoom" aria-label="Priblížiť">${icon('search')}</button>
       <button class="btn ghost" id="cb-pdf" aria-label="Export do PDF">PDF</button>
     </div>
+    ${cb.machine === 'lis' ? '<div class="cb-machine glass" id="cb-machine"></div>' : ''}
     <div class="cb-canvas glass" id="cb-canvas"></div>
     <div class="cb-hint" id="cb-hint">Potiahni farebný koniec vodiča na svorku karty – alebo ťukni na vodič a potom na svorku.</div>
     <div class="cb-panel glass" id="cb-panel"></div>
@@ -476,7 +543,17 @@ function editor(cb) {
     [canvas.scrollLeft, canvas.scrollTop] = scroll;
     bind(svg, L, ev);
     panel(L, ev);
+    machineBar(ev);
   };
+
+  function machineBar(ev) {
+    const el = $('#cb-machine');
+    if (!el) return;
+    const ok = cb.sensors.filter((s) => s.sig && ev[s.uid]?.ok).length, all = cb.sensors.filter((s) => s.sig).length;
+    el.innerHTML = `<div><b>⚙️ Vulkanizačný lis</b><span>${ok} / ${all} snímačov a ventilov zapojených správne</span></div>
+      <div class="cb-machine-btns">${ok < all ? '<button class="btn ghost" id="cbm-all">🔌 Zapojiť všetko</button>' : ''}<a class="btn" href="#/elektro/lis/${encodeURIComponent(cb.id)}">▶ Lis</a></div>`;
+    $('#cbm-all', el)?.addEventListener('click', () => { const n = wireAll(cb); C.toast(`✓ Zapojených ${n}`); render(); });
+  }
 
   const hintsFor = (L, s, w) => {
     const set = new Set();
@@ -578,7 +655,7 @@ function editor(cb) {
               : `<button class="btn block cbp-sim ${cb.outs?.[st.card + ':' + st.channel] ? 'on' : ''}" id="cbp-out">${cb.outs?.[st.card + ':' + st.channel] ? 'Vypnúť výstup' : '⚡ ' + def.act}</button>`;
       const g = st.card && L.cards.find((x) => x.uid === st.card);
       P.innerHTML = `
-        <div class="cbp-head"><div><b>${esc(s.name)}</b><span>${esc(def.name)}</span></div>${status}</div>
+        <div class="cbp-head"><div><b>${esc(s.name)}${s.desc ? ` – ${esc(s.desc)}` : ''}</b><span>${esc(def.name)}</span></div>${status}</div>
         ${st.ok && g ? `<div class="cbp-ok">Signál ide na <b>${esc(g.c.id)}</b>, kanál <b>${st.channel}</b>.</div>` : ''}
         <div class="cbp-wires">${ws.map((w) => {
           const x = st.wires[w.k];

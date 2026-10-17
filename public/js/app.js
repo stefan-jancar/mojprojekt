@@ -1596,7 +1596,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.21</span></div>
+      <div class="r"><span>Verzia</span><span>1.22</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 
