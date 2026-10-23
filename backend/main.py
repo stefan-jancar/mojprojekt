@@ -277,7 +277,9 @@ def _ai(fn, *args):
             if code in (500, 502, 503, 504):
                 raise HTTPException(503, "Gemini je momentálne preťažený (výpadok na strane Google). Skús to o chvíľu znova.")
             if code in (400, 401, 403, 404):
-                raise HTTPException(502, f"Gemini odmietol požiadavku ({code}) – skontroluj GEMINI_API_KEY a GEMINI_MODEL.")
+                why = (getattr(e, "message", None) or str(e))[:240]
+                log.warning("Gemini %s: %s", code, e)
+                raise HTTPException(502, f"Gemini odmietol požiadavku ({code}): {why}")
             raise HTTPException(502, f"Chyba asistenta Gemini: {e}")
         raise
 
