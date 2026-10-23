@@ -8,6 +8,7 @@ Ak sú nastavené obe, použije sa Gemini (prípadne vynúť AI_PROVIDER=gemini 
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 import anthropic
@@ -23,6 +24,7 @@ MAX_TOOL_ROUNDS = 8
 # Vercel funkciu po časovom limite zruší (odpoveď 504) – asistent musí skončiť skôr
 DEADLINE_S = float(os.environ.get("ASSISTANT_DEADLINE_S") or 45)
 GEMINI_TIMEOUT_MS = int(os.environ.get("GEMINI_TIMEOUT_MS") or 25000)
+_POOL = ThreadPoolExecutor(max_workers=4)
 HISTORY_MAX = 20          # posledných N správ rozhovoru
 MESSAGE_MAX_CHARS = 4000  # dlhé správy sa skrátia
 
@@ -223,10 +225,10 @@ def _gemini_generate(client, contents, config, state):
             remaining = state.get("deadline", float("inf")) - time.monotonic() - 3
             if remaining < 4:
                 raise TimeoutError("Vypršal čas na odpoveď asistenta")
-            from google.genai import types
-            config.http_options = types.HttpOptions(timeout=int(min(GEMINI_TIMEOUT_MS, remaining * 1000)))
             try:
-                resp = client.models.generate_content(model=model, contents=contents, config=config)
+                # čas strážime len u nás (vlákno) – požiadavka do Gemini je bez hlavičky X-Server-Timeout
+                fut = _POOL.submit(client.models.generate_content, model=model, contents=contents, config=config)
+                resp = fut.result(timeout=min(GEMINI_TIMEOUT_MS / 1000, remaining))
                 state["model"] = model  # v tejto konverzácii už ostaň na modeli, ktorý odpovedal
                 return resp
             except genai.errors.ClientError as e:
@@ -265,8 +267,7 @@ def _chat_gemini(repo, messages):
     from google.genai import types
 
     started = time.monotonic()
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"),
-                          http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS))
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     config = types.GenerateContentConfig(
         system_instruction=_system(repo),
         thinking_config=_gemini_thinking(types),
