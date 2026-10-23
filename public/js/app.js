@@ -70,7 +70,9 @@ async function api(path, { method = 'GET', json, form, raw } = {}) {
   if (r.status === 401 && path !== '/login') { logout(); throw new Error('Prihlás sa znova'); }
   if (!r.ok) {
     const e = await r.json().catch(() => ({}));
-    throw new Error(typeof e.detail === 'string' ? e.detail : `Chyba ${r.status}`);
+    if (typeof e.detail === 'string') throw new Error(e.detail);
+    if (r.status === 504) throw new Error('Server nestihol odpovedať včas (časový limit). Skús to znova – ak si niečo ukladal, skontroluj, či sa to už neuložilo.');
+    throw new Error(`Chyba ${r.status}`);
   }
   return raw ? r.blob() : r.json();
 }
@@ -1596,7 +1598,7 @@ function renderSettings() {
     <div class="info-card glass">
       <div class="r"><span>Ukladanie</span><span>${st.storage === 'github' ? 'GitHub repozitár' : st.storage === 'missing' ? '⚠️ Nenastavené' : st.offline ? 'Offline' : 'Lokálne (.data/)'}</span></div>
       <div class="r"><span>AI asistent</span><span>${st.assistant ? (st.assistant_provider === 'gemini' ? 'Gemini' : 'Claude') : 'Vypnutý'}</span></div>
-      <div class="r"><span>Verzia</span><span>1.22</span></div>
+      <div class="r"><span>Verzia</span><span>1.23</span></div>
     </div>
     ${st.auth_required ? `<button class="btn danger block" id="lo">${icon('logout')}Odhlásiť</button>` : ''}`;
 

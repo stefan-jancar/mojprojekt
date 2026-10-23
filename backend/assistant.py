@@ -20,6 +20,11 @@ GEMINI_THINKING = (os.environ.get("GEMINI_THINKING") or "low").lower()
 GEMINI_FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-flash-lite-latest")
 GEMINI_RETRY_WAIT = (1.5, 3.0)  # sekundy medzi pokusmi pri preťažení
 MAX_TOOL_ROUNDS = 8
+# Vercel funkciu po časovom limite zruší (odpoveď 504) – asistent musí skončiť skôr
+DEADLINE_S = float(os.environ.get("ASSISTANT_DEADLINE_S") or 45)
+GEMINI_TIMEOUT_MS = int(os.environ.get("GEMINI_TIMEOUT_MS") or 25000)
+HISTORY_MAX = 20          # posledných N správ rozhovoru
+MESSAGE_MAX_CHARS = 4000  # dlhé správy sa skrátia
 
 SYSTEM = """Si osobný asistent v aplikácii „Môj priestor“, kde si používateľ ukladá \
 elektronické projekty, 3D projekty, tvorbu webov, dokumenty, pokroky, prácu, veci do školy pre deti, \
@@ -165,10 +170,14 @@ def _run_tool(repo, name, args):
     raise ValueError(f"Neznámy nástroj {name}")
 
 
+def _clip(text):
+    return text if len(text) <= MESSAGE_MAX_CHARS else text[:MESSAGE_MAX_CHARS] + " …(skrátené)"
+
+
 def _history(history):
     messages = [
-        {"role": m["role"], "content": str(m["content"])}
-        for m in history[-30:]
+        {"role": m["role"], "content": _clip(str(m["content"]))}
+        for m in history[-HISTORY_MAX:]
         if m.get("role") in ("user", "assistant") and m.get("content")
     ]
     while messages and messages[0]["role"] != "user":
@@ -211,6 +220,11 @@ def _gemini_generate(client, contents, config, state):
     for m_index, model in enumerate(models):
         waits = GEMINI_RETRY_WAIT if m_index == 0 else (2.0,)
         for attempt in range(len(waits) + 1):
+            remaining = state.get("deadline", float("inf")) - time.monotonic() - 3
+            if remaining < 4:
+                raise TimeoutError("Vypršal čas na odpoveď asistenta")
+            from google.genai import types
+            config.http_options = types.HttpOptions(timeout=int(min(GEMINI_TIMEOUT_MS, remaining * 1000)))
             try:
                 resp = client.models.generate_content(model=model, contents=contents, config=config)
                 state["model"] = model  # v tejto konverzácii už ostaň na modeli, ktorý odpovedal
@@ -226,9 +240,18 @@ def _gemini_generate(client, contents, config, state):
                 raise
             except genai.errors.ServerError as e:  # 500/503 – preťaženie, chvíľu počkaj
                 last = e
-                if attempt < len(waits):
+                if attempt < len(waits) and time.monotonic() + waits[attempt] < state.get("deadline", float("inf")) - 10:
                     time.sleep(waits[attempt])
+                else:
+                    break
     raise last
+
+
+def _late_reply(changed):
+    if changed:
+        return ("Zmeny som už uložil, ale Gemini odpovedal príliš pomaly a nestihol som to dopísať. "
+                "Pozri sa do sekcie, či je všetko správne.")
+    return "Gemini teraz odpovedá príliš pomaly (preťaženie u Google). Skús to o chvíľu znova, prípadne kratšou správou."
 
 
 def _gemini_thinking(types):
@@ -241,7 +264,9 @@ def _chat_gemini(repo, messages):
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    started = time.monotonic()
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"),
+                          http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS))
     config = types.GenerateContentConfig(
         system_instruction=_system(repo),
         thinking_config=_gemini_thinking(types),
@@ -257,10 +282,18 @@ def _chat_gemini(repo, messages):
         for m in messages
     ]
     changed = False
-    state = {"model": GEMINI_MODEL}
+    state = {"model": GEMINI_MODEL, "deadline": started + DEADLINE_S}
 
     for _ in range(MAX_TOOL_ROUNDS):
-        response = _gemini_generate(client, contents, config, state)
+        if time.monotonic() > state["deadline"] - 5:
+            return {"reply": _late_reply(changed), "changed": changed}
+        try:
+            response = _gemini_generate(client, contents, config, state)
+        except Exception as e:
+            # pomalá odpoveď Gemini (časový limit) – radšej zrozumiteľná správa ako 504
+            if changed or "timeout" in type(e).__name__.lower() or "timed out" in str(e).lower():
+                return {"reply": _late_reply(changed), "changed": changed}
+            raise
         calls = response.function_calls or []
         if not calls:
             text = (response.text or "").strip()
