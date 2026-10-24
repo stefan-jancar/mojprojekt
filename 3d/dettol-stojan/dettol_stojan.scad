@@ -6,8 +6,8 @@
 // a upravte parametre nižšie (ostatné sa prepočíta samo).
 
 /* [Fľaša] */
-flasa_sirka  = 82;   // šírka fľaše (zľava doprava)
-flasa_hlbka  = 50;   // hĺbka fľaše (spredu dozadu)
+flasa_sirka  = 85;   // šírka fľaše (zľava doprava)
+flasa_hlbka  = 40;   // hĺbka fľaše (spredu dozadu)
 flasa_radius = 18;   // zaoblenie rohov pôdorysu fľaše
 vola         = 1.5;  // vôľa na každú stranu
 

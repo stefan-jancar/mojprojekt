@@ -12,7 +12,7 @@ from manifold3d import CrossSection, Manifold, set_circular_segments
 
 set_circular_segments(64)
 
-flasa_sirka, flasa_hlbka, flasa_radius, vola = 82, 50, 18, 1.5
+flasa_sirka, flasa_hlbka, flasa_radius, vola = 85, 40, 18, 1.5
 stena, dno, vyska_kosik = 2.8, 3, 45
 vyrez_sirka, vyrez_od_dna, odtok_d = 44, 15, 6
 doska_hrubka, doska_vyska = 4, 100
