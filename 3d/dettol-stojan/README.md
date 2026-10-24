@@ -27,3 +27,6 @@ Fľašu odmerajte posuvkou v spodnej časti; ak sa líši, upravte `flasa_sirka`
 ## Hotový profil pre Curu
 `cura/Ender3Pro_Rychly_3h_PLA.curaprofile` – v Cure: **Preferences → Configure Cura → Profiles → Import**,
 vyber súbor a potom ho zvoľ v paneli Print Settings (tlačiareň musí byť pridaná ako *Creality Ender-3 Pro*).
+
+`cura/Ender3Pro_Bezpecny_PLA.curaprofile` – ak sa model odlepuje (špagety): vrstva 0,24 mm, 50 mm/s,
+prvá vrstva 15 mm/s a 220 °C, podložka 65 °C, brim 10 mm, Z hop, ventilátor od 4. vrstvy. Cca 3,5–4 h.
