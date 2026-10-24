@@ -26,9 +26,11 @@ Usporiadanie sa ukladá v telefóne (SharedPreferences).
 
 ## Zostavenie
 
-APK zostavuje workflow `.github/workflows/launcher-apk.yml` pri každej zmene v `launcher/`. Na vetve `main` ho
-zverejní ako vydanie `plocha-apk-<číslo>`. Podpisuje ho rovnakým kľúčom ako ostatné APK, takže aktualizácie
-sa dajú inštalovať cez starú verziu.
+APK zostavuje workflow `.github/workflows/launcher-apk.yml` pri každej zmene v `launcher/`. Je to súkromná
+aplikácia, preto sa APK nezverejňuje ako vydanie (release). Stiahneš ho ako artefakt **MojaPlocha-apk**
+z posledného behu workflow v záložke Actions. Musíš byť prihlásený na GitHube, artefakt sa drží 90 dní a
+stiahne sa ako zip, v ktorom je APK. Ďalší beh spustíš ručne cez *Run workflow*. APK je podpísané rovnakým
+kľúčom ako ostatné, takže aktualizácie sa dajú inštalovať cez starú verziu.
 
 Lokálne (Android Studio alebo príkazový riadok s Android SDK):
 

@@ -1,7 +1,8 @@
 name: Moja plocha APK
 
 # Vlastný launcher (domovská obrazovka) – dve plochy vedľa seba, sekcie a priečinky aplikácií.
-# Na vetve main sa APK zverejní ako vydanie (release), na ostatných vetvách sa len overí zostavenie.
+# Súkromná aplikácia: APK sa NEzverejňuje ako vydanie (release) – repozitár je verejný.
+# Stiahneš ho ako artefakt „MojaPlocha-apk“ z behu workflow (len prihlásený na GitHube).
 on:
   workflow_dispatch:
   push:
@@ -59,17 +60,4 @@ jobs:
         with:
           name: MojaPlocha-apk
           path: launcher/MojaPlocha.apk
-
-      - name: Vydanie (release) na stiahnutie
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: plocha-apk-${{ github.run_number }}
-          name: Moja plocha – APK ${{ github.run_number }}
-          make_latest: false
-          body: |
-            **Moja plocha** – vlastná domovská obrazovka: dve plochy vedľa seba, sekcie (priečinky) aplikácií v tvojom poradí, minimalizovanie plochy.
-
-            **Inštalácia:** stiahni `MojaPlocha.apk` nižšie v časti Assets, otvor ho a povoľ inštaláciu z neznámych zdrojov.
-            Potom v aplikácii ⋮ → *Nastaviť ako predvolenú plochu* (alebo Nastavenia → Aplikácie → Predvolené aplikácie → Domovská obrazovka).
-          files: launcher/MojaPlocha.apk
+          retention-days: 90
