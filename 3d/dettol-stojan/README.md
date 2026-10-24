@@ -23,3 +23,7 @@ Fľašu odmerajte posuvkou v spodnej časti; ak sa líši, upravte `flasa_sirka`
 - 2 skrutky Ø 4 mm so zápustnou hlavou + hmoždinky 6 mm (rozostup 56 mm).
 - Alebo bez vŕtania: obojstranná montážna páska (napr. 3M VHB) na celú zadnú dosku.
 - Otvory na dne odvádzajú vodu, predný výrez nechá vidieť etiketu a uľahčí vyberanie.
+
+## Hotový profil pre Curu
+`cura/Ender3Pro_Rychly_3h_PLA.curaprofile` – v Cure: **Preferences → Configure Cura → Profiles → Import**,
+vyber súbor a potom ho zvoľ v paneli Print Settings (tlačiareň musí byť pridaná ako *Creality Ender-3 Pro*).
