@@ -30,3 +30,12 @@ vyber súbor a potom ho zvoľ v paneli Print Settings (tlačiareň musí byť pr
 
 `cura/Ender3Pro_Bezpecny_PLA.curaprofile` – ak sa model odlepuje (špagety): vrstva 0,24 mm, 50 mm/s,
 prvá vrstva 15 mm/s a 220 °C, podložka 65 °C, brim 10 mm, Z hop, ventilátor od 4. vrstvy. Cca 3,5–4 h.
+
+## Odľahčená verzia do ~2 h – `dettol_stojan_lite.stl`
+
+![náhľad lite](nahlad_lite.png)
+
+92 × 48 × 75 mm, objem 38,7 cm³ (plná verzia 72,7 cm³). Košík 35 mm, steny 2 mm, doska 3 mm × 75 mm,
+fľaša stojí na 7 mm okraji – v dne je veľký otvor (lepší odtok, menej plastu). Tlačiť s profilom
+`Ender3Pro_Bezpecny_PLA` (brim 10 mm je kvôli menšej ploche dna dôležitý). Zdroj: `dettol_stojan_lite.scad`,
+alebo `python generate_stl.py --lite`.

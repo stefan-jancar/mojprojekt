@@ -1,12 +1,12 @@
 """Vygeneruje dettol_stojan.stl – rovnaká geometria ako dettol_stojan.scad.
 
-Použitie: pip install manifold3d trimesh && python generate_stl.py
+Použitie: pip install manifold3d trimesh && python generate_stl.py [--lite]
+--lite = odľahčená verzia (dettol_stojan_lite.stl), tlač do ~2 h.
 (Ak máte OpenSCAD, stačí otvoriť .scad a dať F6 / Export STL.)
 """
-import math
+import sys
 from pathlib import Path
 
-import numpy as np
 import trimesh
 from manifold3d import CrossSection, Manifold, set_circular_segments
 
@@ -17,6 +17,16 @@ stena, dno, vyska_kosik = 2.8, 3, 45
 vyrez_sirka, vyrez_od_dna, odtok_d = 44, 15, 6
 doska_hrubka, doska_vyska = 4, 100
 skrutka_d, hlava_d, skrutky_rozostup, skrutky_od_vrchu = 4.5, 9, 56, 15
+dno_okraj = 0  # 0 = odtokové otvory, > 0 = veľký otvor v dne, ostane okraj tejto šírky
+nazov = "dettol_stojan"
+
+LITE = "--lite" in sys.argv
+if LITE:  # rovnaké hodnoty ako dettol_stojan_lite.scad
+    stena, dno, vyska_kosik = 2.0, 2.0, 35
+    vyrez_sirka, vyrez_od_dna = 50, 10
+    doska_hrubka, doska_vyska, skrutky_od_vrchu = 3, 75, 12
+    dno_okraj = 7
+    nazov = "dettol_stojan_lite"
 
 in_w = flasa_sirka + 2 * vola
 in_d = flasa_hlbka + 2 * vola
@@ -50,10 +60,15 @@ def kosik():
     slot = slot.rotate([-90, 0, 0]).translate(
         [0, out_d - stena - 1, vyrez_od_dna + vyrez_sirka / 2])
     cut = cut + slot
-    for x in (-1, 0, 1):
-        for y in (-1, 1):
-            cut = cut + cyl(odtok_d / 2, dno + 2).translate(
-                [x * 22, doska_hrubka + in_d / 2 + y * 12, -1])
+    if dno_okraj > 0:
+        cut = cut + rrect(in_w - 2 * dno_okraj, in_d - 2 * dno_okraj,
+                          in_r - dno_okraj, dno + 2).translate(
+            [0, doska_hrubka + dno_okraj, -1])
+    else:
+        for x in (-1, 0, 1):
+            for y in (-1, 1):
+                cut = cut + cyl(odtok_d / 2, dno + 2).translate(
+                    [x * 22, doska_hrubka + in_d / 2 + y * 12, -1])
     return outer - cut
 
 
@@ -86,7 +101,7 @@ def vystuhy():
 model = kosik() + doska() + vystuhy()
 m = model.to_mesh()
 mesh = trimesh.Trimesh(vertices=m.vert_properties[:, :3], faces=m.tri_verts)
-out = Path(__file__).with_name("dettol_stojan.stl")
+out = Path(__file__).with_name(f"{nazov}.stl")
 mesh.export(out)
 print(f"{out.name}: {mesh.extents.round(1)} mm, watertight={mesh.is_watertight}, "
       f"objem={mesh.volume / 1000:.1f} cm3")

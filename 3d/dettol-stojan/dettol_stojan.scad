@@ -18,6 +18,7 @@ vyska_kosik = 45;    // výška košíka (vonkajšia)
 vyrez_sirka = 44;    // šírka predného výrezu (vidno etiketu)
 vyrez_od_dna = 15;   // od akej výšky začína predný výrez
 odtok_d     = 6;     // priemer odtokových otvorov v dne
+dno_okraj   = 0;     // 0 = odtokové otvory, > 0 = veľký otvor v dne, ostane okraj tejto šírky
 
 /* [Zadná doska] */
 doska_hrubka = 4;
@@ -56,10 +57,14 @@ module kosik() {
                 cylinder(d = vyrez_sirka, h = stena + 2);
                 translate([0, -vyska_kosik, 0]) cylinder(d = vyrez_sirka, h = stena + 2);
             }
-        // odtokové otvory 3 x 2
-        for (x = [-1, 0, 1], y = [-1, 1])
-            translate([x * 22, doska_hrubka + in_d/2 + y * 12, -1])
-                cylinder(d = odtok_d, h = dno + 2);
+        // odtok: veľký otvor v dne alebo 3 x 2 otvory
+        if (dno_okraj > 0)
+            translate([0, doska_hrubka + dno_okraj, -1])
+                rrect(in_w - 2*dno_okraj, in_d - 2*dno_okraj, in_r - dno_okraj, dno + 2);
+        else
+            for (x = [-1, 0, 1], y = [-1, 1])
+                translate([x * 22, doska_hrubka + in_d/2 + y * 12, -1])
+                    cylinder(d = odtok_d, h = dno + 2);
     }
 }
 
