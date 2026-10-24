@@ -7,3 +7,8 @@ __pycache__/
 node_modules/
 mobile/android/
 mobile/node_modules/
+launcher/.gradle/
+launcher/build/
+launcher/app/build/
+launcher/local.properties
+launcher/*.apk
